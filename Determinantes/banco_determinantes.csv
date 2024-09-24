@@ -1,4 +1,4 @@
-code_muni;name_muni;code_state;abbrev_state;tipo_regiao;bioma;altitude;koppen;pop22
+muni_code;muni_name;uf_code;uf_acr;tipo_regiao;bioma;altitude;koppen;pop22
 1100015;Alta Floresta D'oeste;11;RO;interior;amazonia;246,08;Am;21558
 1100023;Ariquemes;11;RO;interior;amazonia;165,9;Am;100896
 1100031;Cabixi;11;RO;interior;amazonia;224,18;Am;5107
@@ -223,7 +223,7 @@ code_muni;name_muni;code_state;abbrev_state;tipo_regiao;bioma;altitude;koppen;po
 1504505;Melgaço;15;PA;interior;amazonia;24,69;Af;26770
 1504604;Mocajuba;15;PA;interior;amazonia;22,41;Af;27265
 1504703;Moju;15;PA;interior;amazonia;45,17;Af;81364
-1504752;Mojuí Dos Campos;15;PA;interior;NA;NA;NA;22845
+1504752;Mojuí Dos Campos;15;PA;interior;amazonia;125;Af;22845
 1504802;Monte Alegre;15;PA;interior;amazonia;265,69;Am;59890
 1504901;Muaná;15;PA;interior;amazonia;10,98;Af;60117
 1504950;Nova Esperança Do Piriá;15;PA;interior;amazonia;97,34;Am;21132
@@ -802,7 +802,7 @@ code_muni;name_muni;code_state;abbrev_state;tipo_regiao;bioma;altitude;koppen;po
 2206670;Morro Do Chapéu Do Piauí;22;PI;interior;cerrado;79,5;Aw;6422
 2206696;Murici Dos Portelas;22;PI;interior;cerrado;46,31;As;9841
 2206704;Nazaré Do Piauí;22;PI;interior;cerrado;212,05;Aw;6660
-2206720;Nazária;22;PI;metropolitana;NA;NA;NA;10278
+2206720;Nazária;22;PI;metropolitana;cerrado;74;Aw;10278
 2206753;Nossa Senhora De Nazaré;22;PI;interior;cerrado;117,09;As;5195
 2206803;Nossa Senhora Dos Remédios;22;PI;interior;cerrado;87,41;Aw;8523
 2206902;Novo Oriente Do Piauí;22;PI;interior;cerrado;324,64;Aw;6081
@@ -4502,7 +4502,7 @@ code_muni;name_muni;code_state;abbrev_state;tipo_regiao;bioma;altitude;koppen;po
 4212403;Pedras Grandes;42;SC;interior;mata atlantica;241,01;Cfa;4233
 4212502;Penha;42;SC;interior;mata atlantica;48,91;Cfa;33400
 4212601;Peritiba;42;SC;interior;mata atlantica;588,23;Cfa;2993
-4212650;Pescaria Brava;42;SC;interior;NA;NA;NA;10224
+4212650;Pescaria Brava;42;SC;interior;mata atlantica;10;Cfa;10224
 4212700;Petrolândia;42;SC;interior;mata atlantica;684,21;Cfb;6718
 4212809;Balneário Piçarras;42;SC;interior;mata atlantica;28,21;Cfa;28177
 4212908;Pinhalzinho;42;SC;interior;mata atlantica;462,36;Cfa;21495
@@ -4604,7 +4604,7 @@ code_muni;name_muni;code_state;abbrev_state;tipo_regiao;bioma;altitude;koppen;po
 4219606;Xavantina;42;SC;interior;mata atlantica;724,42;Cfb;3654
 4219705;Xaxim;42;SC;interior;mata atlantica;657,94;Cfa;31625
 4219853;Zortéa;42;SC;interior;mata atlantica;715;Cfb;3925
-4220000;Balneário Rincão;42;SC;interior;NA;NA;NA;15880
+4220000;Balneário Rincão;42;SC;interior;mata atlantica;5;Cfa;15880
 4300034;Aceguá;43;RS;interior;pampa;150,86;Cfa;4156
 4300059;Água Santa;43;RS;interior;mata atlantica;731,53;Cfb;4345
 4300109;Agudo;43;RS;interior;mata atlantica;222,24;Cfa;16740
@@ -4922,7 +4922,7 @@ code_muni;name_muni;code_state;abbrev_state;tipo_regiao;bioma;altitude;koppen;po
 4314472;Pinhal Grande;43;RS;interior;pampa;364,9;Cfa;4049
 4314498;Pinheirinho Do Vale;43;RS;interior;mata atlantica;292,19;Cfa;4539
 4314506;Pinheiro Machado;43;RS;interior;pampa;284,54;Cfa;11380
-4314548;Pinto Bandeira;43;RS;interior;NA;NA;NA;2712
+4314548;Pinto Bandeira;43;RS;interior;mata atlantica;600;Cfa;2712
 4314555;Pirapó;43;RS;interior;pampa;131,94;Cfa;2250
 4314605;Piratini;43;RS;interior;pampa;235,76;Cfa;17434
 4314704;Planalto;43;RS;interior;mata atlantica;478,45;Cfa;10240
@@ -5159,7 +5159,7 @@ code_muni;name_muni;code_state;abbrev_state;tipo_regiao;bioma;altitude;koppen;po
 5006002;Nova Alvorada Do Sul;50;MS;interior;cerrado;382,41;Am;21476
 5006200;Nova Andradina;50;MS;interior;cerrado;348,79;Aw;52221
 5006259;Novo Horizonte Do Sul;50;MS;interior;mata atlantica;312,88;Aw;5278
-5006275;Paraíso Das Águas;50;MS;interior;NA;NA;NA;5360
+5006275;Paraíso Das Águas;50;MS;interior;cerrado;452;Aw;5360
 5006309;Paranaíba;50;MS;interior;cerrado;463,6;Aw;40713
 5006358;Paranhos;50;MS;interior;cerrado;382,51;Cfa;12926
 5006408;Pedro Gomes;50;MS;interior;cerrado;334,59;Aw;6842

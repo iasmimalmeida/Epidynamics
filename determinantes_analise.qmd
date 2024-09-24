@@ -1,0 +1,171 @@
+---
+title: "Determinantes"
+author: "Iasmim, Raquel, Eduardo e Claudia"
+format: html
+editor: visual
+editor_options: 
+  chunk_output_type: console
+---
+
+#Bibliotecas
+
+```{r}
+library(readr)
+library(dplyr)
+library(ggpubr)
+library(ggplot2)
+library(car)
+library(MASS)
+library(nnet) 
+```
+
+#Bancos
+
+```{r}
+d_10_19 <- read_csv2("Dengue/dengue_pattern_10_19.csv")
+d_20_22 <- read_csv2("Dengue/dengue_pattern_20_22.csv")
+det <- read_csv2("Determinantes/banco_determinantes.csv")
+d1 <- left_join(d_10_19, det, by = "muni_code" )
+d2 <- left_join(d_20_22, det,, by = "muni_code" )
+# NA
+#na_columns <- names(d1)[colSums(is.na(d1)) > 0]
+#print(na_columns)
+
+```
+
+# Análise estatística 2010-2019
+
+```{r}
+
+# Transformar variáveis em fatores
+factor_vars <- c("dengue_pattern", "tipo_regiao", "bioma", "koppen")
+
+# Aplicar transformação para todas as variáveis em fator de uma vez
+d1[factor_vars] <- lapply(d1[factor_vars], as.factor)
+
+# Definir intervalos numéricos para a variável 'pop22' 
+d1$pop22 <- cut(d1$pop22, 
+                breaks = c(800, 10000, 50000, 500000, 5000000, Inf), 
+                labels = c("801-10000", "10001-50000", "50001-500000", "500001-5000000", ">5000000"),
+                include.lowest = TRUE)
+
+
+# Verificar se a transformação foi aplicada corretamente
+#str(d1)
+
+```
+
+## Análise varivaies categoricas
+
+### Medidas resumo
+
+```{r}
+summary(d1$tipo_regiao)
+summary(d1$bioma)
+summary(d1$koppen)
+summary(d1$pop22)
+
+```
+
+## Analise descritiva por gráficos
+
+```{r}
+# Reordenar os níveis de dengue_pattern na ordem desejada
+d1$dengue_pattern <- factor(d1$dengue_pattern, 
+                            levels = c("Sem transmissão", "Episódico", "Episódico/Epidêmico", "Epidêmico", "Transmissão Persistente"))
+
+
+# Plot 1: Gráfico de barras com destaque para transmissão persistente
+ggplot(d1, aes(x = dengue_pattern, fill = pop22)) +
+  geom_bar(position = position_dodge(width = 0.9), width = 0.7) + # Aumenta o espaçamento entre as barras
+  scale_y_continuous(expand = expansion(mult = c(0, 0.1))) +  # Adiciona espaço no topo
+  geom_text(stat='count', aes(label=..count..), vjust=-0.5, position = position_dodge(0.9)) + # Adiciona labels nas barras
+  labs(title = "Distribuição do Padrão de Dengue por População", x = "Padrão de Dengue", fill = "População") +
+  theme_minimal()
+
+# Plot 2: Gráfico de barras com destaque para tipo_regiao
+ggplot(d1, aes(x = dengue_pattern, fill = tipo_regiao)) +
+  geom_bar(position = position_dodge(width = 0.9), width = 0.7) +
+  scale_y_continuous(expand = expansion(mult = c(0, 0.1))) + 
+  geom_text(stat='count', aes(label=..count..), vjust=-0.5, position = position_dodge(0.9)) +
+  labs(title = "Distribuição do Padrão de Dengue por Região", x = "Padrão de Dengue", fill = "Região") +
+  theme_minimal()
+
+# Plot 3: Gráfico de barras com destaque para bioma
+ggplot(d1, aes(x = dengue_pattern, fill = bioma)) +
+  geom_bar(position = position_dodge(width = 0.9), width = 0.7) +
+  scale_y_continuous(expand = expansion(mult = c(0, 0.1))) + 
+  geom_text(stat='count', aes(label=..count..), vjust=-0.5, position = position_dodge(0.9)) +
+  labs(title = "Distribuição do Padrão de Dengue por Bioma", x = "Padrão de Dengue", fill = "Bioma") +
+  theme_minimal()
+
+# Plot 4: Gráfico de barras com destaque para classificação Koppen
+ggplot(d1, aes(x = dengue_pattern, fill = koppen)) +
+  geom_bar(position = position_dodge(width = 0.9), width = 0.7) +
+  scale_y_continuous(expand = expansion(mult = c(0, 0.1))) + 
+  geom_text(stat='count', aes(label=..count..), vjust=-0.5, position = position_dodge(0.9)) +
+  labs(title = "Distribuição do Padrão de Dengue por Classificação Köppen", x = "Padrão de Dengue", fill = "Classificação Köppen") +
+  theme_minimal()
+
+```
+
+## Estatistica
+
+```{r}
+
+# Estatísticas descritivas e contagem para todas as variáveis, agrupadas por dengue_pattern
+
+# Tabelas de contingência para as variáveis categóricas
+tabela_pop22 <- table(d1$dengue_pattern, d1$pop22)
+tabela_tipo_regiao <- table(d1$dengue_pattern, d1$tipo_regiao)
+tabela_bioma <- table(d1$dengue_pattern, d1$bioma)
+tabela_koppen <- table(d1$dengue_pattern, d1$koppen)
+
+# Teste de Qui-Quadrado para cada variável categórica
+teste_pop22 <- chisq.test(tabela_pop22)
+teste_tipo_regiao <- chisq.test(tabela_tipo_regiao)
+teste_bioma <- chisq.test(tabela_bioma)
+teste_koppen <- chisq.test(tabela_koppen)
+
+# Criar uma tabela final que combina contagens e estatísticas para todas as variáveis
+tabela_final <- data.frame(
+  Variavel = c(rep("População", length(tabela_pop22)),
+               rep("Região", length(tabela_tipo_regiao)),
+               rep("Bioma", length(tabela_bioma)),
+               rep("Köppen", length(tabela_koppen))),
+  Categoria = c(rep(levels(d1$pop22), times=nlevels(d1$dengue_pattern)),
+                rep(levels(d1$tipo_regiao), times=nlevels(d1$dengue_pattern)),
+                rep(levels(d1$bioma), times=nlevels(d1$dengue_pattern)),
+                rep(levels(d1$koppen), times=nlevels(d1$dengue_pattern))),
+  Dengue_Pattern = rep(levels(d1$dengue_pattern), each=length(levels(d1$pop22)) + length(levels(d1$tipo_regiao)) + length(levels(d1$bioma)) + length(levels(d1$koppen))),
+  Contagem = c(as.numeric(t(tabela_pop22)),
+               as.numeric(t(tabela_tipo_regiao)),
+               as.numeric(t(tabela_bioma)),
+               as.numeric(t(tabela_koppen))),
+  P_Valor = c(rep(teste_pop22$p.value, length(tabela_pop22)),
+              rep(teste_tipo_regiao$p.value, length(tabela_tipo_regiao)),
+              rep(teste_bioma$p.value, length(tabela_bioma)),
+              rep(teste_koppen$p.value, length(tabela_koppen)))
+)
+
+# Exibir a tabela final
+print("Tabela Final com Contagens e Testes Estatísticos")
+print(tabela_final)
+
+```
+
+## Ajustar o modelo de Regressão Logística Multinomial
+
+```{r}
+# Usando 'dengue_pattern' como variável dependente e 'tipo_regiao', 'bioma' e 'koppen' como independentes
+modelo_multinom <- multinom(dengue_pattern ~ tipo_regiao + bioma + koppen + pop22, data = d1)
+
+# Resumo dos resultados
+summary(modelo_multinom)
+
+# Calcular p-valores
+z_values <- summary(modelo_multinom)$coefficients / summary(modelo_multinom)$standard.errors
+p_values <- (1 - pnorm(abs(z_values), 0, 1)) * 2
+p_values
+
+```
