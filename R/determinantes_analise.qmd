@@ -24,9 +24,9 @@ library(nnet)
 #Bancos
 
 ```{r}
-d_10_19 <- read.csv2("dengue_pattern_10_19.csv")
+d_10_19 <- read.csv2("Dengue/dengue_pattern_10_19.csv")
 #d_20_22 <- read_csv2("Dengue/dengue_pattern_20_22.csv")
-det <- read.csv2("banco_determinantes.csv")
+det <- read.csv2("Determinantes/banco_determinantes.csv")
 d1 <- left_join(d_10_19, det, by = "muni_code" )
 #d2 <- left_join(d_20_22, det,, by = "muni_code" )
 # NA
@@ -153,6 +153,7 @@ tabela_final <- data.frame(
 # Exibir a tabela final
 print("Tabela Final com Contagens e Testes Estatísticos")
 print(tabela_final)
+write.csv2(tabela_final, "tabela_final.csv")
 
 ```
 
