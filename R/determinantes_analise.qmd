@@ -19,19 +19,19 @@ library(ggplot2)
 library(car)
 library(MASS)
 library(nnet) 
+library(tidyr) # Para pivot_wider
 ```
 
 #Bancos
 
 ```{r}
 d_10_19 <- read.csv2("Dengue/dengue_pattern_10_19.csv")
-#d_20_22 <- read_csv2("Dengue/dengue_pattern_20_22.csv")
-det <- read.csv2("Determinantes/banco_determinantes.csv")
+det <- read.csv2("Determinantes/banco_determinantes_fim.csv", fileEncoding = "latin1")
+
 d1 <- left_join(d_10_19, det, by = "muni_code" )
-#d2 <- left_join(d_20_22, det,, by = "muni_code" )
 # NA
-#na_columns <- names(d1)[colSums(is.na(d1)) > 0]
-#print(na_columns)
+na_columns <- names(d1)[colSums(is.na(d1)) > 0]
+print(na_columns)
 
 ```
 
@@ -45,13 +45,6 @@ factor_vars <- c("dengue_pattern", "tipo_regiao", "bioma", "koppen")
 # Aplicar transformação para todas as variáveis em fator de uma vez
 d1[factor_vars] <- lapply(d1[factor_vars], as.factor)
 
-# Definir intervalos numéricos para a variável 'pop22' 
-d1$pop22 <- cut(d1$pop22, 
-                breaks = c(800, 10000, 50000, 500000, 5000000, Inf), 
-                labels = c("801-10000", "10001-50000", "50001-500000", "500001-5000000", ">5000000"),
-                include.lowest = TRUE)
-
-
 # Verificar se a transformação foi aplicada corretamente
 #str(d1)
 
@@ -62,28 +55,47 @@ d1$pop22 <- cut(d1$pop22,
 ### Medidas resumo
 
 ```{r}
-summary(d1$tipo_regiao)
-summary(d1$bioma)
-summary(d1$koppen)
-summary(d1$pop22)
+# Função para criar tabela com valores absolutos e proporções
+create_summary_table <- function(variable, dengue_pattern){
+  table_values <- table(variable, dengue_pattern)
+  proportions <- prop.table(table_values, margin = 2)
+  
+  # Combinando valores absolutos e proporções
+  summary_table <- paste(table_values, "(", round(proportions * 100, 1), "%)", sep = "")
+  summary_table <- matrix(summary_table, nrow = nrow(table_values), dimnames = dimnames(table_values))
+  
+  # Reformatando para a tabela final com categorias de dengue_pattern na coluna
+  summary_df <- as.data.frame(summary_table)
+  summary_df$Variable <- rownames(summary_df)
+  summary_df <- summary_df[, c("Variable", "Sem transmissão", "Episódico", "Episódico/Epidêmico", "Epidêmico", "Transmissão Persistente")]
+  
+  return(summary_df)
+}
 
+# Criando as tabelas para cada variável
+tipo_regiao_summary <- create_summary_table(d1$tipo_regiao, d1$dengue_pattern)
+bioma_summary <- create_summary_table(d1$bioma, d1$dengue_pattern)
+koppen_summary <- create_summary_table(d1$koppen, d1$dengue_pattern)
+
+# Exibindo as tabelas
+tipo_regiao_summary
+bioma_summary
+koppen_summary
+
+
+# Salvando as tabelas em arquivos CSV
+write.csv2(tipo_regiao_summary, "Determinantes/tipo_regiao_summary.csv", row.names = FALSE)
+write.csv2(bioma_summary, "Determinantes/bioma_summary.csv", row.names = FALSE)
+write.csv2(koppen_summary, "Determinantes/koppen_summary.csv", row.names = FALSE)
 ```
 
-## Analise descritiva por gráficos
+## Analise descritiva por gráficos Absoluto
 
 ```{r}
 # Reordenar os níveis de dengue_pattern na ordem desejada
 d1$dengue_pattern <- factor(d1$dengue_pattern, 
                             levels = c("Sem transmissão", "Episódico", "Episódico/Epidêmico", "Epidêmico", "Transmissão Persistente"))
 
-
-# Plot 1: Gráfico de barras com destaque para transmissão persistente
-ggplot(d1, aes(x = dengue_pattern, fill = pop22)) +
-  geom_bar(position = position_dodge(width = 0.9), width = 0.7) + # Aumenta o espaçamento entre as barras
-  scale_y_continuous(expand = expansion(mult = c(0, 0.1))) +  # Adiciona espaço no topo
-  geom_text(stat='count', aes(label=..count..), vjust=-0.5, position = position_dodge(0.9)) + # Adiciona labels nas barras
-  labs(title = "Distribuição do Padrão de Dengue por População", x = "Padrão de Dengue", fill = "População") +
-  theme_minimal()
 
 # Plot 2: Gráfico de barras com destaque para tipo_regiao
 ggplot(d1, aes(x = dengue_pattern, fill = tipo_regiao)) +
@@ -111,64 +123,139 @@ ggplot(d1, aes(x = dengue_pattern, fill = koppen)) +
 
 ```
 
-## Estatistica
-
+## Analise descritiva por gráficos proporção
 ```{r}
+# Função para calcular as proporções
+calculate_proportions <- function(variable, dengue_pattern){
+  table_values <- table(dengue_pattern, variable)
+  proportions <- prop.table(table_values, margin = 1)
+  df <- as.data.frame(as.table(proportions))
+  colnames(df) <- c("dengue_pattern", "variable", "proportion")
+  return(df)
+}
 
-# Estatísticas descritivas e contagem para todas as variáveis, agrupadas por dengue_pattern
+# Traduzindo os perfis de dengue_pattern para inglês
+d1$dengue_pattern <- dplyr::recode(d1$dengue_pattern,
+                                   "Sem transmissão" = "No transmission",
+                                   "Episódico" = "Episodic",
+                                   "Episódico/Epidêmico" = "Episodic/Epidemic",
+                                   "Epidêmico" = "Epidemic",
+                                   "Transmissão Persistente" = "Persistent transmission")
 
-# Tabelas de contingência para as variáveis categóricas
-tabela_pop22 <- table(d1$dengue_pattern, d1$pop22)
-tabela_tipo_regiao <- table(d1$dengue_pattern, d1$tipo_regiao)
-tabela_bioma <- table(d1$dengue_pattern, d1$bioma)
-tabela_koppen <- table(d1$dengue_pattern, d1$koppen)
+# Traduzindo a variável tipo_regiao para inglês
+d1$tipo_regiao <- dplyr::recode(d1$tipo_regiao,
+                                "metropolitana" = "Metropolitan",
+                                "não metropolitana" = "Non-Metropolitan")
 
-# Teste de Qui-Quadrado para cada variável categórica
-teste_pop22 <- chisq.test(tabela_pop22)
-teste_tipo_regiao <- chisq.test(tabela_tipo_regiao)
-teste_bioma <- chisq.test(tabela_bioma)
-teste_koppen <- chisq.test(tabela_koppen)
+# Ordenando os perfis de dengue_pattern conforme desejado
+dengue_order <- c("No transmission", "Episodic", "Episodic/Epidemic", "Epidemic", "Persistent transmission")
 
-# Criar uma tabela final que combina contagens e estatísticas para todas as variáveis
-tabela_final <- data.frame(
-  Variavel = c(rep("População", length(tabela_pop22)),
-               rep("Região", length(tabela_tipo_regiao)),
-               rep("Bioma", length(tabela_bioma)),
-               rep("Köppen", length(tabela_koppen))),
-  Categoria = c(rep(levels(d1$pop22), times=nlevels(d1$dengue_pattern)),
-                rep(levels(d1$tipo_regiao), times=nlevels(d1$dengue_pattern)),
-                rep(levels(d1$bioma), times=nlevels(d1$dengue_pattern)),
-                rep(levels(d1$koppen), times=nlevels(d1$dengue_pattern))),
-  Dengue_Pattern = rep(levels(d1$dengue_pattern), each=length(levels(d1$pop22)) + length(levels(d1$tipo_regiao)) + length(levels(d1$bioma)) + length(levels(d1$koppen))),
-  Contagem = c(as.numeric(t(tabela_pop22)),
-               as.numeric(t(tabela_tipo_regiao)),
-               as.numeric(t(tabela_bioma)),
-               as.numeric(t(tabela_koppen))),
-  P_Valor = c(rep(teste_pop22$p.value, length(tabela_pop22)),
-              rep(teste_tipo_regiao$p.value, length(tabela_tipo_regiao)),
-              rep(teste_bioma$p.value, length(tabela_bioma)),
-              rep(teste_koppen$p.value, length(tabela_koppen)))
-)
+# Calculando proporções para cada variável
+tipo_regiao_df <- calculate_proportions(d1$tipo_regiao, d1$dengue_pattern)
+bioma_df <- calculate_proportions(d1$bioma, d1$dengue_pattern)
+koppen_df <- calculate_proportions(d1$koppen, d1$dengue_pattern)
 
-# Exibir a tabela final
-print("Tabela Final com Contagens e Testes Estatísticos")
-print(tabela_final)
-write.csv2(tabela_final, "tabela_final.csv")
+# Ordenando a variável dengue_pattern
+tipo_regiao_df$dengue_pattern <- factor(tipo_regiao_df$dengue_pattern, levels = dengue_order)
+bioma_df$dengue_pattern <- factor(bioma_df$dengue_pattern, levels = dengue_order)
+koppen_df$dengue_pattern <- factor(koppen_df$dengue_pattern, levels = dengue_order)
+
+# Função para exibir o rótulo condicionalmente
+label_if_not_zero <- function(proportion) {
+  ifelse(proportion > 0, scales::percent(proportion, accuracy = 0.1), "")
+}
+
+# Gráfico de barras para tipo_regiao sem linha de fundo
+gg_tipo_regiao <- ggplot(tipo_regiao_df, aes(x = dengue_pattern, y = proportion, fill = variable)) +
+  geom_bar(stat = "identity", position = "dodge", width = 0.3) +  # Aumentando a largura da barra
+  geom_text(aes(label = label_if_not_zero(proportion)), 
+            position = position_dodge(width = 0.3), vjust = -0.5, size = 3) +  # Aumentando o tamanho do texto
+  scale_y_continuous(labels = scales::percent_format()) +
+  labs(title = "Proportional Distribution of Dengue Patterns by Region", 
+       x = "Dengue Pattern", y = "Proportion", fill = "Region") +
+  theme_minimal() +
+  theme(panel.grid = element_blank(),    # Remove todas as linhas de grade
+        panel.background = element_blank(),  # Remove o fundo do painel
+        axis.line = element_blank())         # Remove as linhas dos eixos
+
+# Salvando o gráfico
+ggsave("tipo_regiao_distribution.png", plot = gg_tipo_regiao, width = 10, height = 7)
+
+# Gráfico de barras para bioma sem linha de fundo
+gg_bioma <- ggplot(bioma_df, aes(x = dengue_pattern, y = proportion, fill = variable)) +
+  geom_bar(stat = "identity", position = "dodge", width = 0.9) +  # Aumentando a largura da barra
+  geom_text(aes(label = label_if_not_zero(proportion)), 
+            position = position_dodge(width = 0.9), vjust = -0.5, size = 3) +  # Aumentando o tamanho do texto
+  scale_y_continuous(labels = scales::percent_format()) +
+  labs(title = "Proportional Distribution of Dengue Patterns by Biome", 
+       x = "Dengue Pattern", y = "Proportion", fill = "Biome") +
+  theme_minimal() +
+  theme(panel.grid = element_blank(),    # Remove todas as linhas de grade
+        panel.background = element_blank(),  # Remove o fundo do painel
+        axis.line = element_blank())         # Remove as linhas dos eixos
+
+# Salvando o gráfico
+ggsave("bioma_distribution.png", plot = gg_bioma, width = 10, height = 7)
+
+# Gráfico de barras para koppen sem linha de fundo
+gg_koppen <- ggplot(koppen_df, aes(x = dengue_pattern, y = proportion, fill = variable)) +
+  geom_bar(stat = "identity", position = "dodge", width = 0.9) +  # Aumentando a largura da barra
+  geom_text(aes(label = label_if_not_zero(proportion)), 
+            position = position_dodge(width = 0.9), vjust = -0.5, size = 2) +  # Aumentando o tamanho do texto
+  scale_y_continuous(labels = scales::percent_format()) +
+  labs(title = "Proportional Distribution of Dengue Patterns by Köppen Classification", 
+       x = "Dengue Pattern", y = "Proportion", fill = "Köppen") +
+  theme_minimal() +
+  theme(panel.grid = element_blank(),    # Remove todas as linhas de grade
+        panel.background = element_blank(),  # Remove o fundo do painel
+        axis.line = element_blank())         # Remove as linhas dos eixos
+
+# Salvando o gráfico
+ggsave("koppen_distribution.png", plot = gg_koppen, width = 10, height = 7)
+
 
 ```
 
-## Ajustar o modelo de Regressão Logística Multinomial
+### medidas de resumo das numericas
 
 ```{r}
-# Usando 'dengue_pattern' como variável dependente e 'tipo_regiao', 'bioma' e 'koppen' como independentes
-modelo_multinom <- multinom(dengue_pattern ~ tipo_regiao + bioma + koppen + pop22, data = d1)
+# Função para calcular média e desvio padrão no formato desejado
+calc_summary <- function(x) {
+  paste0(round(mean(x, na.rm = TRUE), 2), " (", round(sd(x, na.rm = TRUE), 2), ")")
+}
 
-# Resumo dos resultados
-summary(modelo_multinom)
+# Definindo a ordem dos níveis de dengue_pattern
+d1 <- d1 %>%
+  mutate(dengue_pattern = factor(dengue_pattern, 
+                                 levels = c("Sem transmissão", 
+                                            "Episódico", 
+                                            "Episódico/Epidêmico", 
+                                            "Epidêmico", 
+                                            "Transmissão Persistente")))
 
-# Calcular p-valores
-z_values <- summary(modelo_multinom)$coefficients / summary(modelo_multinom)$standard.errors
-p_values <- (1 - pnorm(abs(z_values), 0, 1)) * 2
-p_values
+# Gerar a tabela de resumo para as variáveis por 'dengue_pattern'
+summary_table <- d1 %>%
+  group_by(dengue_pattern) %>%
+  summarise(
+    Altitude = calc_summary(altitude),
+    Prop_Esgot = calc_summary(prop_esgot),
+    Prop_Abast = calc_summary(prop_abast),
+    Prop_Residuo = calc_summary(prop_residuo),
+    Populacao = calc_summary(pop22)
+  ) %>%
+  pivot_longer(cols = c(Altitude, Prop_Esgot, Prop_Abast, Prop_Residuo, Populacao), 
+               names_to = "Variavel", 
+               values_to = "Resumo") %>%
+  pivot_wider(names_from = dengue_pattern, values_from = Resumo)
+
+# Exibir a tabela
+summary_table
+
+write.csv2(summary_table, "Determinantes/numericas_summary.csv", row.names = FALSE)
+
+
 
 ```
+
+
+
