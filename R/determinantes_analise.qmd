@@ -24,7 +24,12 @@ library(tidyr) # Para pivot_wider
 
 #Bancos
 
+
 ```{r}
+
+# 2010-2019
+
+
 d_10_19 <- read.csv2("Dengue/dengue_pattern_10_19.csv")
 det <- read.csv2("Determinantes/banco_determinantes_fim.csv", fileEncoding = "latin1")
 
@@ -32,12 +37,6 @@ d1 <- left_join(d_10_19, det, by = "muni_code" )
 # NA
 na_columns <- names(d1)[colSums(is.na(d1)) > 0]
 print(na_columns)
-
-```
-
-# Análise estatística 2010-2019
-
-```{r}
 
 # Transformar variáveis em fatores
 factor_vars <- c("dengue_pattern", "tipo_regiao", "bioma", "koppen")
@@ -48,12 +47,51 @@ d1[factor_vars] <- lapply(d1[factor_vars], as.factor)
 # Verificar se a transformação foi aplicada corretamente
 #str(d1)
 
+
 ```
+
+# Análise estatística 2010-2019 
 
 ## Análise varivaies categoricas
 
 ### Medidas resumo
 
+###Calculando bioma e Koppen somando 100% na linha
+```{r}
+
+# Função para criar tabela com valores absolutos e proporções na linha
+create_summary_table <- function(variable, dengue_pattern){
+  table_values <- table(variable, dengue_pattern)
+  proportions <- prop.table(table_values, margin = 1) # Alterando para somar por linha
+  
+  # Combinando valores absolutos e proporções
+  summary_table <- paste(table_values, "(", round(proportions * 100, 1), "%)", sep = "")
+  summary_table <- matrix(summary_table, nrow = nrow(table_values), dimnames = dimnames(table_values))
+  
+  # Reformatando para a tabela final com categorias de dengue_pattern nas colunas
+  summary_df <- as.data.frame(summary_table)
+  summary_df$Variable <- rownames(summary_df)
+  summary_df <- summary_df[, c("Variable", "Sem transmissão", "Episódico", "Episódico/Epidêmico", "Epidêmico", "Transmissão Persistente")]
+  
+  return(summary_df)
+}
+
+# Criando as tabelas para cada variável
+bioma_summary <- create_summary_table(d1$bioma, d1$dengue_pattern)
+koppen_summary <- create_summary_table(d1$koppen, d1$dengue_pattern)
+
+# Exibindo as tabelas
+bioma_summary
+koppen_summary
+
+# Salvando as tabelas em arquivos CSV
+write.csv2(bioma_summary, "Determinantes/bioma_summary_10_19.csv", row.names = FALSE)
+write.csv2(koppen_summary, "Determinantes/koppen_summary_10_19.csv", row.names = FALSE)
+
+```
+
+
+###Calculando Tipo de região somando 100% na coluna
 ```{r}
 # Função para criar tabela com valores absolutos e proporções
 create_summary_table <- function(variable, dengue_pattern){
@@ -74,22 +112,12 @@ create_summary_table <- function(variable, dengue_pattern){
 
 # Criando as tabelas para cada variável
 tipo_regiao_summary <- create_summary_table(d1$tipo_regiao, d1$dengue_pattern)
-bioma_summary <- create_summary_table(d1$bioma, d1$dengue_pattern)
-koppen_summary <- create_summary_table(d1$koppen, d1$dengue_pattern)
-
-# Exibindo as tabelas
-tipo_regiao_summary
-bioma_summary
-koppen_summary
-
 
 # Salvando as tabelas em arquivos CSV
-write.csv2(tipo_regiao_summary, "Determinantes/tipo_regiao_summary.csv", row.names = FALSE)
-write.csv2(bioma_summary, "Determinantes/bioma_summary.csv", row.names = FALSE)
-write.csv2(koppen_summary, "Determinantes/koppen_summary.csv", row.names = FALSE)
+write.csv2(tipo_regiao_summary, "Determinantes/tipo_regiao_summary_10_19.csv", row.names = FALSE)
 ```
 
-## Analise descritiva por gráficos Absoluto
+### Analise descritiva por gráficos Absoluto
 
 ```{r}
 # Reordenar os níveis de dengue_pattern na ordem desejada
@@ -124,6 +152,7 @@ ggplot(d1, aes(x = dengue_pattern, fill = koppen)) +
 ```
 
 ## Analise descritiva por gráficos proporção
+
 ```{r}
 # Função para calcular as proporções
 calculate_proportions <- function(variable, dengue_pattern){
@@ -171,7 +200,7 @@ gg_tipo_regiao <- ggplot(tipo_regiao_df, aes(x = dengue_pattern, y = proportion,
   geom_text(aes(label = label_if_not_zero(proportion)), 
             position = position_dodge(width = 0.3), vjust = -0.5, size = 3) +  # Aumentando o tamanho do texto
   scale_y_continuous(labels = scales::percent_format()) +
-  labs(title = "Proportional Distribution of Dengue Patterns by Region", 
+  labs(title = "Dengue Patterns by Region 2010-2019", 
        x = "Dengue Pattern", y = "Proportion", fill = "Region") +
   theme_minimal() +
   theme(panel.grid = element_blank(),    # Remove todas as linhas de grade
@@ -179,7 +208,7 @@ gg_tipo_regiao <- ggplot(tipo_regiao_df, aes(x = dengue_pattern, y = proportion,
         axis.line = element_blank())         # Remove as linhas dos eixos
 
 # Salvando o gráfico
-ggsave("tipo_regiao_distribution.png", plot = gg_tipo_regiao, width = 10, height = 7)
+ggsave("figures/tipo_regiao_distribution_10_19.png", plot = gg_tipo_regiao, width = 10, height = 7)
 
 # Gráfico de barras para bioma sem linha de fundo
 gg_bioma <- ggplot(bioma_df, aes(x = dengue_pattern, y = proportion, fill = variable)) +
@@ -187,7 +216,7 @@ gg_bioma <- ggplot(bioma_df, aes(x = dengue_pattern, y = proportion, fill = vari
   geom_text(aes(label = label_if_not_zero(proportion)), 
             position = position_dodge(width = 0.9), vjust = -0.5, size = 3) +  # Aumentando o tamanho do texto
   scale_y_continuous(labels = scales::percent_format()) +
-  labs(title = "Proportional Distribution of Dengue Patterns by Biome", 
+  labs(title = "Dengue Patterns by Biome 2010-2019", 
        x = "Dengue Pattern", y = "Proportion", fill = "Biome") +
   theme_minimal() +
   theme(panel.grid = element_blank(),    # Remove todas as linhas de grade
@@ -259,3 +288,4 @@ write.csv2(summary_table, "Determinantes/numericas_summary.csv", row.names = FAL
 
 
 
+# Análise 2020-2022

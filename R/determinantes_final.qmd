@@ -1,0 +1,301 @@
+---
+title: "Análise determinantes_categorico"
+format: html
+editor: visual
+editor_options: 
+  chunk_output_type: console
+---
+
+#Bibliotecas
+
+```{r}
+#chooseCRANmirror()
+#install.packages('tinytex')
+library(tinytex)
+library(dplyr)
+library(ggpubr)
+library(ggplot2)
+library(car)
+library(MASS)
+library(nnet) 
+library(tidyr) 
+```
+
+#Bancos
+
+```{r}
+
+# 2010-2019
+
+# Carregar os dados
+d1 <- left_join(read.csv2("Dengue/dengue_pattern_10_19.csv"), 
+                read.csv2("Determinantes/banco_determinantes_fim.csv", fileEncoding = "latin1"), 
+                by = "muni_code")
+
+# Identificar colunas com valores NA
+print(names(d1)[colSums(is.na(d1)) > 0])
+
+# Transformar variáveis selecionadas em fatores
+factor_vars <- c("dengue_pattern", "tipo_regiao", "bioma", "koppen")
+d1[factor_vars] <- lapply(d1[factor_vars], factor)
+
+# Verificar a estrutura
+#str(d1)
+
+# 2020-2022
+
+# Carregar os dados
+d2 <- left_join(read.csv2("Dengue/dengue_pattern_20_22.csv"), 
+                read.csv2("Determinantes/banco_determinantes_fim.csv", fileEncoding = "latin1"), 
+                by = "muni_code")
+
+# Identificar colunas com valores NA
+print(names(d2)[colSums(is.na(d2)) > 0])
+
+# Transformar variáveis selecionadas em fatores
+factor_vars <- c("dengue_pattern", "tipo_regiao", "bioma", "koppen")
+d2[factor_vars] <- lapply(d2[factor_vars], factor)
+
+# Verificar a estrutura
+#str(d2)
+
+```
+
+## Medidas de resumo
+
+##Função
+
+```{r}
+# Função para criar tabela com valores absolutos e proporções
+create_summary_table <- function(variable, dengue_pattern, margin){
+  table_values <- table(variable, dengue_pattern)
+  proportions <- prop.table(table_values, margin = margin)
+  
+  # Combinando valores absolutos e proporções
+  summary_table <- paste(table_values, "(", round(proportions * 100, 1), "%)", sep = "")
+  summary_table <- matrix(summary_table, nrow = nrow(table_values), dimnames = dimnames(table_values))
+  
+  # Reformatando para a tabela final com categorias de dengue_pattern nas colunas
+  summary_df <- as.data.frame(summary_table)
+  summary_df$Variable <- rownames(summary_df)
+  summary_df <- summary_df[, c("Variable", "Sem transmissão", "Episódico", "Episódico/Epidêmico", "Epidêmico", "Transmissão Persistente")]
+  
+  return(summary_df)
+}
+
+
+```
+
+### As medidas
+
+```{r}
+
+# 2010-2019
+
+# Criando as tabelas para cada variável, ajustando o margin (1 para linha, 2 para coluna)
+bioma_summary <- create_summary_table(d1$bioma, d1$dengue_pattern, margin = 1)
+koppen_summary <- create_summary_table(d1$koppen, d1$dengue_pattern, margin = 1)
+tipo_regiao_summary <- create_summary_table(d1$tipo_regiao, d1$dengue_pattern, margin = 2)
+
+# Exibindo as tabelas
+bioma_summary
+koppen_summary
+tipo_regiao_summary
+
+#2020-2022
+
+# Criando as tabelas para cada variável no d2, ajustando o margin (1 para linha, 2 para coluna)
+bioma_summary_2 <- create_summary_table(d2$bioma, d2$dengue_pattern, margin = 1)
+koppen_summary_2 <- create_summary_table(d2$koppen, d2$dengue_pattern, margin = 1)
+tipo_regiao_summary_2 <- create_summary_table(d2$tipo_regiao, d2$dengue_pattern, margin = 2)
+
+# Exibindo as tabelas
+bioma_summary_2
+koppen_summary_2
+tipo_regiao_summary_2
+
+
+# Salvando as tabelas em arquivos CSV
+
+write.csv2(bioma_summary, "Determinantes/tabelas/koppen_summary_10_19.csv", row.names = FALSE)
+write.csv2(koppen_summary, "Determinantes/tabelas/koppen_summary_10_19.csv", row.names = FALSE)
+write.csv2(tipo_regiao_summary, "Determinantes/tabelas/tipo_regiao_summary_10_19.csv", row.names = FALSE)
+write.csv2(bioma_summary_2, "Determinantes/tabelas/bioma_summary_20_22.csv", row.names = FALSE)
+write.csv2(koppen_summary_2, "Determinantes/tabelas/koppen_summary_20_22.csv", row.names = FALSE)
+write.csv2(tipo_regiao_summary_2, "Determinantes/tabelas/tipo_regiao_summary_20_22.csv", row.names = FALSE)
+
+
+```
+## Freq absoluta e relativa GERAL
+
+```{r}
+
+# Função para calcular frequências e formatar os resultados
+calculate_frequencies <- function(df, column, muni_code_column = 'muni_code') {
+  df %>%
+    group_by(!!sym(column)) %>%
+    summarise(Absolute_Frequency = n()) %>%
+    mutate(Relative_Frequency = (Absolute_Frequency / sum(Absolute_Frequency)) * 100) %>%
+    mutate(Result = paste0(Absolute_Frequency, " (", round(Relative_Frequency, 2), "%)"))
+}
+
+# Calcular as frequências para cada variável
+bioma_freq <- calculate_frequencies(d1, 'bioma')
+koppen_freq <- calculate_frequencies(d1, 'koppen')
+tipo_regiao_freq <- calculate_frequencies(d1, 'tipo_regiao')
+
+# Exibir os resultados
+print(bioma_freq)
+write.csv2(bioma_freq, "bio.csv")
+print(koppen_freq)
+write.csv2(koppen_freq, "kop.csv")
+print(tipo_regiao_freq)
+
+
+```
+
+
+
+GRÁFICOS 2010-2020
+
+
+## Bioma
+
+```{r}
+# Função para Bioma
+create_bioma_relative_frequency <- function(variable, dengue_pattern) {
+  # Criar a tabela de contingência
+  table_values <- table(variable, dengue_pattern)
+  
+  # Calcular as proporções (frequências relativas)
+  proportions <- prop.table(table_values, margin = 1)
+  
+  # Transformar a tabela de proporções em um dataframe
+  summary_df <- as.data.frame(proportions)
+  
+  # Verificar se as colunas estão corretamente nomeadas
+  colnames(summary_df) <- c("Bioma", "Dengue_Pattern", "Frequency")
+  
+  # Gerar o gráfico de barras com ggplot
+  plot <- ggplot(summary_df, aes(x = Bioma, y = Frequency, fill = Dengue_Pattern)) +
+    geom_bar(stat = "identity", position = "dodge") +
+    labs(title = "Relative Frequency of Bioma by Dengue Pattern",
+         x = "Bioma", y = "Relative Frequency") +
+    scale_y_continuous(labels = scales::percent) +
+    theme_minimal()
+  
+  # Imprimir o gráfico
+  print(plot)
+}
+
+# Aplicar a função para os dados
+create_bioma_relative_frequency(d1$bioma, d1$dengue_pattern)
+
+
+#### Na linha os padõres
+
+# Função para Bioma com dengue_pattern no eixo X
+create_bioma_relative_frequency <- function(variable, dengue_pattern) {
+  # Criar a tabela de contingência
+  table_values <- table(variable, dengue_pattern)
+  
+  # Calcular as proporções (frequências relativas por bioma)
+  proportions <- prop.table(table_values, margin = 1)
+  
+  # Transformar a tabela de proporções em um dataframe
+  summary_df <- as.data.frame(proportions)
+  
+  # Verificar se as colunas estão corretamente nomeadas
+  colnames(summary_df) <- c("Bioma", "Dengue_Pattern", "Frequency")
+  
+  # Gerar o gráfico de barras com ggplot (dengue_pattern no eixo X)
+  plot <- ggplot(summary_df, aes(x = Dengue_Pattern, y = Frequency, fill = Bioma)) +
+    geom_bar(stat = "identity", position = "dodge") +
+    labs(title = "Relative Frequency of Dengue Pattern by Bioma",
+         x = "Dengue Pattern", y = "Relative Frequency") +
+    scale_y_continuous(labels = scales::percent) +
+    theme_minimal()
+  
+  # Imprimir o gráfico
+  print(plot)
+}
+
+# Aplicar a função para os dados
+create_bioma_relative_frequency(d1$bioma, d1$dengue_pattern)
+
+
+
+
+
+
+```
+
+##Koppen
+
+```{r}
+
+# Função para Koppen
+create_koppen_relative_frequency <- function(variable, dengue_pattern) {
+  # Criar a tabela de contingência
+  table_values <- table(variable, dengue_pattern)
+  
+  # Calcular as proporções (frequências relativas)
+  proportions <- prop.table(table_values, margin = 1)
+  
+  # Transformar a tabela de proporções em um dataframe
+  summary_df <- as.data.frame(proportions)
+  
+  # Verificar se as colunas estão corretamente nomeadas
+  colnames(summary_df) <- c("Koppen", "Dengue_Pattern", "Frequency")
+  
+  # Gerar o gráfico de barras com ggplot
+  plot <- ggplot(summary_df, aes(x = Koppen, y = Frequency, fill = Dengue_Pattern)) +
+    geom_bar(stat = "identity", position = "dodge") +
+    labs(title = "Relative Frequency of Koppen by Dengue Pattern",
+         x = "Koppen", y = "Relative Frequency") +
+    scale_y_continuous(labels = scales::percent) +
+    theme_minimal()
+  
+  # Imprimir o gráfico
+  print(plot)
+}
+
+# Aplicar a função para os dados
+create_koppen_relative_frequency(d1$koppen, d1$dengue_pattern)
+
+```
+
+#Tipo de região
+
+```{r}
+
+# Função para Tipo de Região com dengue_pattern no eixo X
+create_tipo_regiao_relative_frequency <- function(variable, dengue_pattern) {
+  # Criar a tabela de contingência
+  table_values <- table(variable, dengue_pattern)
+  
+  # Calcular as proporções (frequências relativas por coluna)
+  proportions <- prop.table(table_values, margin = 2)
+  
+  # Transformar a tabela de proporções em um dataframe
+  summary_df <- as.data.frame(proportions)
+  
+  # Verificar se as colunas estão corretamente nomeadas
+  colnames(summary_df) <- c("Tipo_Regiao", "Dengue_Pattern", "Frequency")
+  
+  # Gerar o gráfico de barras com ggplot (dengue_pattern no eixo X)
+  plot <- ggplot(summary_df, aes(x = Dengue_Pattern, y = Frequency, fill = Tipo_Regiao)) +
+    geom_bar(stat = "identity", position = "dodge") +
+    labs(title = "Relative Frequency of Tipo de Região by Dengue Pattern",
+         x = "Dengue Pattern", y = "Relative Frequency") +
+    scale_y_continuous(labels = scales::percent) +
+    theme_minimal()
+  
+  # Imprimir o gráfico
+  print(plot)
+}
+
+# Aplicar a função para os dados
+create_tipo_regiao_relative_frequency(d1$tipo_regiao, d1$dengue_pattern)
+
+```
