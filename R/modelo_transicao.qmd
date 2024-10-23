@@ -1,0 +1,125 @@
+---
+title: "Modelo_multinomial"
+author: "Iasmim"
+format: html
+editor: visual
+editor_options: 
+  chunk_output_type: console
+---
+
+## Carregando pacotes
+
+```{r, message = FALSE, warning = FALSE,results =  FALSE, eval= FALSE }
+library(readr)
+library(dplyr)
+library(nnet)
+library(car)
+library(corrplot)
+library(ggplot2)
+library(GGally)
+library(ggcorrplot)
+
+
+
+library(DescTools)
+library(tableone)
+library(broom)
+library(Rcmdr)
+library(jmv)
+library(generalhoslem)
+library(hnp)
+library(finalfit)
+library(tidyr)
+library(mlogit)
+library(lmtest)
+library(gt)
+
+```
+
+
+## Importando os dados
+
+```{r, message = FALSE, warning = FALSE,results =  FALSE, eval= FALSE }
+
+d1 <- read_csv2("Dengue/transicao.csv")
+d2 <- read_csv("Determinantes/clima/clima_agg_20_22.csv")
+d3 <-  read_csv2("Determinantes/Tabelas/banco_determinantes_fim.csv")
+
+
+## fazendo a média das variáveis numericas para os 3 anos
+  
+d2 <- d2[, -1] # Excluindo a primeira coluna
+
+d2_mean <- d2 %>%
+  group_by(geocodigo) %>%
+  summarise(across(c(temp_med, umid_med, precip_tot, thr_temp, thr_umid, thr_prec, thr_temp_umid), 
+                   ~ round(mean(.x, na.rm = TRUE), 1)))
+
+
+
+
+# Renomeando a variável 'geocodigo' para 'muni_code' e convertendo para numérica
+
+d2_mean  <- d2_mean  %>%
+  rename(muni_code = geocodigo) %>%
+  mutate(muni_code = as.numeric(muni_code))
+
+# Juntando os três dataframes por 'muni_code'
+merged_data <- d1 %>%
+  full_join(d2_mean , by = "muni_code") %>%
+  full_join(d3, by = "muni_code")
+
+# Visualizando o resultado
+print(merged_data)
+
+write.csv2(merged_data,"Determinantes/Tabelas/det_transicao.csv")
+
+
+```
+## Lendo banco (começa aqui)
+
+```{r}
+data <- read_csv2("Determinantes/Tabelas/det_transicao.csv", locale = locale(encoding = "Latin1"))
+
+data <- data %>%
+  select(-c("...1", "muni_code", "muni_name", "dengue_pattern_10_19", "dengue_pattern_20_22", "prop_abast","uf_acr","uf_code"))
+
+# Transformar a variável Transition em fator
+data$Transition <- as.factor(data$Transition)
+
+
+```
+## Teste de Correlação
+Correlação entre Variáveis Numéricas
+Avaliar as correlações entre as variáveis independentes numéricas:
+```{r}
+# Selecionar apenas as variáveis numéricas para correlação
+numerical_vars <- select_if(data, is.numeric)
+
+# Criar o gráfico de correlação usando ggcorrplot
+ggcorrplot(cor(numerical_vars), 
+           method = "circle", 
+           title = "Correlação entre Variáveis Numéricas", 
+           lab = TRUE, digits = 2)
+
+
+
+```
+
+## Retirando variaveis correlacionadas
+```{r}
+
+data <- data %>% select(-5,-6)
+
+```
+
+## 4. Ajuste do Modelo Logístico Multinomial
+
+```{r}
+# Ajustar o modelo logístico multinomial
+modelo_multinom <- multinom(Transition ~ temp_med + umid_med + precip_tot + thr_prec + thr_temp_umid + bioma + altitude + koppen + pop22 + prop_esgot + prop_residuo, data = data)
+
+# Resumo do modelo
+summary(modelo_multinom)
+```
+
