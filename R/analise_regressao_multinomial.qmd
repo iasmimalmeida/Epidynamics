@@ -1,0 +1,460 @@
+---
+title: "Análise de Regressão Logística Multinomial"
+format: html
+editor: visual
+editor_options: 
+  chunk_output_type: console
+---
+
+## Carregar bibliotecas necessárias
+
+```{r setup, include=FALSE}
+library(tidyverse)
+library(nnet)
+library(caret)
+library(pscl)
+library(DescTools)
+library(car)
+library(broom)
+library(boot)
+library(dplyr)
+library(caret) # Para criar variáveis dummy
+library(lmtest)
+```
+
+# ANÁLISE 1
+
+Análise com todas as variáveis do banco sem nenhuma combinação.
+
+## 1.Carregando os dados
+
+```{r}
+data <- read.csv("det_transicao.csv", sep = ";")
+
+## Selecionando variáveis
+variaveis <- c("Transition", "temp_med", "umid_med", "precip_tot",
+               "thr_temp", "thr_umid", "thr_prec", "thr_temp_umid", 
+               "tipo_regiao","altitude","bioma", "koppen", "pop22",
+               "prop_esgot", "prop_residuo")
+
+data <- data[, variaveis]
+
+# Identificar e remover colunas completamente vazias ou com alta quantidade de NA
+data <- data %>% select_if(~ sum(!is.na(.)) > 0) ## nenhuma foi
+
+# Converter variáveis numéricas com vírgula decimal e categorizar as variáveis de texto
+data <- data %>%
+  mutate(
+    across(where(~ all(grepl("^[0-9,.]+$", .))), ~ as.numeric(gsub(",", ".", .))),
+    across(where(is.character), as.factor))
+    
+    
+# Visão geral dos dados
+glimpse(data)
+summary(data)
+  
+```
+
+## 2. Verificação dos pressupostos
+
+### 2.1 Multicolinearidade
+
+1.  **Cálculo do VIF (Variance Inflation Factor):** O VIF foi calculado para cada variável preditora no modelo. Isso foi feito após a remoção de colinearidade redundante e tratamento das variáveis para garantir que todas estejam no formato correto (numérico ou categórico).
+2.  **Variável dependente:** Transition foi temporariamente convertida para numérica apenas para calcular o VIF. Esse ajuste é feito para facilitar a análise de multicolinearidade.
+3.  **Detecção e remoção de colinearidade:** Usamos o *findLinearCombos* para remover variáveis redundantes, evitando o problema de “aliasing” no modelo, o que ocorre quando variáveis altamente correlacionadas criam dependência linear.
+
+***Intrepretação:***
+
+-   **Valores de VIF \< 5:** São considerados aceitáveis, indicando baixa multicolinearidade. Nas variáveis como altitude, pop22, prop_esgot, e prop_residuo têm VIFs baixos, sugerindo pouca ou nenhuma colinearidade problemática com outras variáveis.
+
+-   **Valores de VIF entre 5 e 10:** Indicariam alguma multicolinearidade, mas ainda podem ser aceitáveis dependendo do contexto. No entanto, nenhuma variável nesse modelo tem VIF entre 5 e 10.
+
+-   **Valores de VIF \> 10:** Sugerem multicolinearidade. Variáveis como temp_med, umid_med, thr_temp, thr_umid, e thr_temp_umid apresentam VIFs extremamente altos, indicando que estão fortemente colineares com outras variáveis.
+
+Como temp_med, umid_med foram mais próximo de 10 retirei as thr_temp, thr_umid rodei o vif novamente, equilibrou ate 10.
+
+```{r}
+# Remover linhas com valores ausentes nas variáveis numéricas e manter 'Transition'
+data_clean <- data %>% select(Transition, where(is.numeric)) %>% drop_na()
+
+# Identificar e remover variáveis altamente colineares
+combo_info <- findLinearCombos(data_clean %>% select(-Transition))
+if (length(combo_info$remove) > 0) {
+  data_clean <- data_clean[, -combo_info$remove]
+}
+
+# Calcular o VIF para as variáveis 
+vif_values <- vif(lm(as.numeric(Transition) ~ ., data = data_clean))
+vif_values
+
+
+# Remover as variáveis thr_temp, thr_umid, e thr_temp_umid do data_clean
+data_vif <- data_clean %>% select(-thr_temp, -thr_umid)  
+
+# Calcular o VIF para as variáveis restantes
+vif_values <- vif(lm(as.numeric(Transition) ~ ., data = data_vif))
+
+# Exibir os valores de VIF
+vif_values
+```
+
+### 2.2 Independência das observações
+
+Intrepretação:
+
+O valor 0 indica que não foram encontradas linhas duplicadas em data_clean.
+
+```{r}
+# Remover linhas com valores ausentes nas variáveis numéricas e manter 'Transition'
+data_clean <- data %>% select(Transition, where(is.numeric)) %>% drop_na()
+
+# Remover as variáveis thr_temp, thr_umid, e thr_temp_umid do banco original (data)
+data <- data %>% select(-thr_temp, -thr_umid)  
+
+# Verificar se há identificadores duplicados
+duplicated_rows <- sum(duplicated(data))
+duplicated_rows
+```
+
+### 2.3 Tamanho amostral adequado
+
+Interpretação:
+
+Em regressão logística multinomial, cada categoria da variável dependente precisa de um número suficiente de observações para garantir que o modelo possa estimar os parâmetros de forma confiável. Geralmente, recomenda-se pelo menos 10 a 20 observações por parâmetro estimado em cada categoria. Com 759 (Melhorou), 1.163 (Piorou) e 3.648 (Se manteve). **ACHO QUE O PROBLEMA É AQUI!!!!**
+
+```{r}
+# Contagem de observações por categoria da variável dependente
+table(data$Transition)
+```
+
+### 2.4 Outliers influentes
+
+Interpretação:
+
+O código retornou valor 0 nas observações, indicando que não foram encontrados outliers com resíduos padronizados maiores que 2 ou menores que -2. Isso sugere que o modelo se ajustou bem aos dados e não há observações que se desviem significativamente do padrão previsto pelo modelo.
+
+```{r}
+# Ajustar o modelo multinomial
+multinom_model <- multinom(Transition ~ ., data = data)
+
+# Calcular resíduos padronizados
+residuals <- residuals(multinom_model, type = "pearson")
+
+# Identificar outliers com resíduos padronizados acima de 2 ou abaixo de -2
+outliers <- which(abs(residuals) > 2)
+length(outliers)
+
+
+##OUTRO
+
+# Obter os resíduos deviance para cada observação
+deviance_residuals <- residuals(multinom_model, type = "deviance")
+
+# Ponto de corte padrão da literatura
+cutoff <- 2.0
+influential_points <- which(abs(deviance_residuals) > cutoff)
+print(data[influential_points, ])
+```
+
+## 3. Ajuste do modelo de regressão logística multinomial
+
+Interpretação:
+
+Para cada categoria (em relação à referência "Se manteve"), o modelo estima coeficientes (Coefficients) para cada variável preditora. Esses coeficientes representam o efeito de cada variável sobre a probabilidade de estar na categoria Melhorou ou Piorou, em comparação com Se manteve.
+
+```{r}
+# Definir a categoria de referência
+data$Transition <- relevel(data$Transition, ref = "Se manteve")
+
+# Ajustar o modelo
+multinom_model <- multinom(Transition ~ ., data = data)
+summary(multinom_model)
+```
+
+## 4. Avaliação do ajuste do modelo
+
+Interpretação do Pseudo R²:
+
+Pseudo R² Modestos: Os valores de pseudo R² estão em torno de 6.3% a 12.6%. Isso indica que o modelo explica uma porção limitada da variabilidade dos dados, sugerindo que: As variáveis preditoras oferecem uma melhoria sobre o modelo nulo, mas podem não capturar toda a complexidade dos dados. O modelo tem algum poder explicativo, mas ainda pode ser aprimorado adicionando variáveis preditoras relevantes ou ajustando o modelo de outra maneira. Essas métricas mostram que o modelo tem um ajuste razoável, mas há espaço para melhorias se o objetivo for aumentar a explicação da variabilidade na variável Transition.
+
+Interpretação do Teste de razão de verossimilhança:
+
+O teste de razão de verossimilhança sugere que o modelo completo é significativamente melhor que o modelo nulo para explicar a variável Transition. Em outras palavras, as variáveis preditoras do modelo contribuem de maneira significativa para prever a categoria de Transition, justificando a inclusão delas no modelo.
+
+```{r}
+# Pseudo R²
+pR2(multinom_model)
+
+# Teste de razão de verossimilhança
+lrtest(multinom_model)
+```
+
+## 5. Seleção de variáveis
+
+Interpretação:
+
+Após realizar a seleção stepwise, hove redução de variáveis como thr_temp_umid, tipo_regiao, prop_esgot, e prop_residuo foram removidas, pois o processo de seleção considerou que elas não contribuem significativamente para o modelo. O modelo agora utiliza apenas as variáveis que mostraram uma contribuição estatisticamente relevante para explicar a variável Transition.
+
+Residual Deviance: A deviance residual passou de 9144.135 para 9150.353. Isso representa um aumento leve, indicando que, ao reduzir variáveis, houve uma pequena perda no ajuste do modelo aos dados.
+
+Já o AIC reduziu de 9240.135 para 9230.353, o que indica que o novo modelo com menos variáveis é preferível ao anterior. A redução no AIC sugere que o novo modelo oferece um bom equilíbrio entre ajuste e simplicidade.
+
+```{r}
+# Seleção stepwise
+step_model <- step(multinom_model, direction = "both")
+summary(step_model)
+```
+
+### 5.1 Matriz de confusão do stepwise
+
+```{r}
+
+# previsoes
+previsoes <- predict(step_model, newdata = data)
+
+# matriz de confusão comparando as previsões com os valores reais
+matriz_confusao <- confusionMatrix(previsoes, data$Transition)
+print(matriz_confusao)
+
+```
+
+## 6. Análise de resíduos
+
+PESSÍMA
+
+```{r}
+# Resíduos deviance
+residuals_deviance <- residuals(step_model, type = "deviance")
+plot(residuals_deviance, main = "Resíduos Deviance", ylab = "Resíduos", xlab = "Observações")
+abline(h = 0, col = "red")
+
+### OUTRO
+
+# Calcular os resíduos deviance
+residuals_deviance <- residuals(step_model, type = "deviance")
+
+# Função para gerar um QQ plot com envelope
+qqPlot(residuals_deviance, 
+       main = "QQ Plot dos Resíduos com Envelope de Confiança",
+       xlab = "Quantis Teóricos",
+       ylab = "Resíduos",
+       id = FALSE, # Desativar a identificação de pontos
+       envelope = 0.95) # Adicionar envelope de confiança de 95%
+```
+
+## 7. Interpretação dos resultados
+
+```{r}
+# Coeficientes e intervalos de confiança
+tidy_model <- tidy(step_model, conf.int = TRUE)
+tidy_model
+```
+
+# ANÁLISE 2
+
+Análise com combinações de variáveis.
+
+## 1. Carregando os dados
+
+```{r}
+# Carregar os dados
+data <- read.csv("det_transicao.csv", sep = ";")
+
+## Selecionando variáveis
+names(data)
+# Lista de variáveis para selecionar
+variaveis <- c("Transition", "temp_med", "umid_med", "precip_tot",
+               "thr_temp", "thr_umid", "thr_prec", "thr_temp_umid",
+               "tipo_regiao", "altitude","bioma", "koppen", "pop22",
+               "prop_esgot", "prop_residuo")
+
+# Criando o novo banco de dados apenas com as variáveis selecionadas
+data <- data[, variaveis]
+
+
+# Visão geral dos dados
+glimpse(data)
+summary(data)
+
+
+# Identificar e remover colunas completamente vazias ou com alta quantidade de NA
+data <- data %>% select_if(~ sum(!is.na(.)) > 0) ## nenhuma foi
+
+# Converter variáveis numéricas com vírgula decimal e categorizar as variáveis de texto
+data <- data %>%
+  mutate(
+    across(where(~ all(grepl("^[0-9,.]+$", .))), ~ as.numeric(gsub(",", ".", .))),
+    across(where(is.character), as.factor)
+  )
+```
+
+## 2. Variáveis combinadas
+
+Variáveis combinadas pensando na literatura:
+
+1.  ***Determinantes ecológicos :***
+
+-   temp_med \* umid_med
+
+-   temp_med \* precip_tot: Relação entre temperatura e precipitação total, que pode refletir em áreas mais propensas a surtos em climas quentes e chuvosos.
+
+2.  ***Determinantes eco-sociais :***
+
+-   pop22 \* prop_esgot: População combinada com a proporção de saneamento pode influenciar diretamente o ambiente, tornando-o mais ou menos favorável ao mosquito.
+
+-   pop22 \* prop_residuo: Avalia o impacto do manejo de resíduos sólidos em áreas de alta densidade populacional.
+
+-   Logaritmo da População : O log pode normalizar a escala populacional.
+
+***3.Variáveis: Dummies para Categorias :***
+
+Transformei variáveis como bioma e koppen em dummies para capturar efeitos fixos das categorias.
+
+```{r}
+
+data <- data %>%
+  # determinantes ecológicos
+  mutate(temp_umid_interaction = temp_med * umid_med,
+         temp_precip_interaction = temp_med * precip_tot,
+         
+         # determinantes eco_sociais
+         pop_esgot_interaction = pop22 * prop_esgot,
+         pop_residuo_interaction = pop22 * prop_residuo,
+    
+         # Transformações individuais
+         log_pop22 = log(pop22))
+
+# Criando variáveis dummies para categorias
+dummy_vars <- dummyVars(" ~ bioma + koppen", data = data)
+dados_dummies <- predict(dummy_vars, newdata = data)
+
+# Combinando as variáveis dummies ao dataset original
+data_comb <- cbind(data, dados_dummies)
+
+# Verificando as primeiras linhas para confirmar as transformações
+head(data_comb)
+
+
+# Converter variáveis numéricas com vírgula decimal e categorizar as variáveis de texto
+data_comb <- data_comb %>%
+  mutate(
+    across(where(~ all(grepl("^[0-9,.]+$", .))), ~ as.numeric(gsub(",", ".", .))),
+    across(where(is.character), as.factor)
+  )
+
+
+```
+
+## 3. Verificação dos pressupostos
+
+### 3.1 Independência das observações
+
+```{r}
+
+# Verificar se há identificadores duplicados
+duplicated_rows <- sum(duplicated(data))
+duplicated_rows
+```
+
+### 3.2 Tamanho amostral adequado
+
+```{r}
+# Contagem de observações por categoria da variável dependente
+table(data$Transition)
+```
+
+### 3.3 Outliers influentes
+
+```{r}
+
+# Ajustar o modelo multinomial
+multinom_model <- multinom(Transition ~ ., data = data)
+
+# Calcular resíduos padronizados
+residuals <- residuals(multinom_model, type = "pearson")
+
+# Identificar outliers com resíduos padronizados acima de 2 ou abaixo de -2
+outliers <- which(abs(residuals) > 2)
+length(outliers)
+
+
+##OUTRO
+
+# Obter os resíduos deviance para cada observação
+deviance_residuals <- residuals(multinom_model, type = "deviance")
+
+cutoff <- 2.0
+influential_points <- which(abs(deviance_residuals) > cutoff)
+
+# Exibir as observações influentes
+print(data[influential_points, ])
+
+
+```
+
+## 4. Ajuste do modelo de regressão logística multinomial
+
+```{r}
+# Definir a categoria de referência
+data$Transition <- relevel(data$Transition, ref = "Se manteve")
+
+# Ajustar o modelo
+multinom_model <- multinom(Transition ~ ., data = data)
+summary(multinom_model)
+```
+
+## 5. Avaliação do ajuste do modelo
+
+```{r}
+# Pseudo R²
+pR2(multinom_model)
+
+# Teste de razão de verossimilhança
+lrtest(multinom_model)
+```
+
+## 6. Seleção de variáveis
+
+```{r}
+# Seleção stepwise
+step_model <- step(multinom_model, direction = "both")
+summary(step_model)
+```
+
+### 6.1 Matriz de confusão do stepwise
+
+```{r}
+
+# previsões
+previsoes <- predict(step_model, newdata = data)
+
+# matriz de confusão 
+matriz_confusao <- confusionMatrix(previsoes, data$Transition)
+print(matriz_confusao)
+
+```
+
+## 7. Análise de resíduos
+
+```{r}
+# Resíduos deviance
+residuals_deviance <- residuals(step_model, type = "deviance")
+plot(residuals_deviance, main = "Resíduos Deviance", ylab = "Resíduos", xlab = "Observações")
+abline(h = 0, col = "red")
+
+### OUTRO
+
+# Calcular os resíduos deviance
+residuals_deviance <- residuals(step_model, type = "deviance")
+
+# Função para gerar um QQ plot com envelope
+qqPlot(residuals_deviance, 
+       main = "QQ Plot dos Resíduos com Envelope de Confiança",
+       xlab = "Quantis Teóricos",
+       ylab = "Resíduos",
+       id = FALSE, # Desativar a identificação de pontos
+       envelope = 0.95) # Adicionar envelope de confiança de 95%
+
+```
+
+REAMOSTRAGEM?

@@ -22,6 +22,7 @@ library(tidyr)
 ```
 
 ## 1. Calculando os padrões e as categoricas
+
 #Bancos
 
 ```{r}
@@ -156,7 +157,7 @@ print(tipo_regiao_freq)
 
 ```
 
-GRÁFICOS 
+GRÁFICOS
 
 ## Bioma
 
@@ -216,6 +217,7 @@ create_bioma_relative_frequency <- function(variable, dengue_pattern, period, fi
 create_bioma_relative_frequency(d1$bioma, d1$dengue_pattern, "2010-2019", "figures/bioma_dengue_pattern_plot")
 create_bioma_relative_frequency(d2$bioma, d2$dengue_pattern, "2020-2022", "figures/bioma_dengue_pattern_plot")
 ```
+
 ### Graficos juntos biomas
 
 ```{r}
@@ -352,7 +354,9 @@ create_koppen_relative_frequency(d2$koppen, d2$dengue_pattern, "2020-2022", "fig
 
 
 ```
+
 ### Graficos juntos koppen
+
 ```{r}
 # Carregar os pacotes necessários
 library(patchwork)
@@ -487,7 +491,9 @@ create_tipo_regiao_relative_frequency(d2$tipo_regiao, d2$dengue_pattern, "2020-2
 
 
 ```
+
 ## Juntando graficos tipo regiao
+
 ```{r}
 # Função para criar gráficos combinados de frequência relativa para a variável tipo_regiao
 create_combined_tipo_regiao_relative_frequency <- function(variable1, dengue_pattern1, variable2, dengue_pattern2, period1, period2, file_name_prefix = "tipo_regiao_dengue_pattern_combined_plot") {
@@ -555,7 +561,6 @@ create_combined_tipo_regiao_relative_frequency(d1$tipo_regiao, d1$dengue_pattern
 ```
 
 ## 2. Calculando para o banco de mudanças de padrões
-
 
 #Bancos
 
@@ -652,10 +657,10 @@ print(tipo_regiao_freq)
 
 ```
 
-
 ## graficos transição
 
 Bioma
+
 ```{r}
 # Função para criar gráficos de frequência relativa para a variável Bioma
 create_bioma_relative_frequency <- function(variable, transition, file_name_prefix = "bioma_transition_plot") {
@@ -711,6 +716,7 @@ create_bioma_relative_frequency(d3$bioma, d3$Transition, "figures/bioma_transiti
 ```
 
 Koppen
+
 ```{r}
 # Função para criar gráficos de frequência relativa para a variável Koppen
 create_koppen_relative_frequency <- function(variable, transition, file_name_prefix = "koppen_transition_plot") {
@@ -765,8 +771,8 @@ create_koppen_relative_frequency(d3$koppen, d3$Transition, "figures/koppen_trans
 
 ```
 
-
 Tipo de região
+
 ```{r}
 # Função para criar gráficos de frequência relativa para a variável tipo_regiao, somando 100% por transição
 create_tipo_regiao_relative_frequency <- function(variable, transition, file_name_prefix = "tipo_regiao_transition_plot") {
@@ -821,20 +827,6 @@ create_tipo_regiao_relative_frequency(d3$tipo_regiao, d3$Transition, "figures/ti
 
 ```
 
-
-
-
-
-
-
-
-
-
-
-
-
-
-
 #### outro
 
 ```{r}
@@ -871,6 +863,3 @@ create_bioma_relative_frequency <- function(variable, dengue_pattern) {
 create_bioma_relative_frequency(d1$bioma, d1$dengue_pattern)
 
 ```
-
-
-
