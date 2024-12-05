@@ -396,6 +396,8 @@ coef_df <- as.data.frame(coef_table)
 coef_df %>%
   kable(caption = "Tabela de Coeficientes do Modelo de Regressão Logística") %>%
   kable_styling(full_width = FALSE, bootstrap_options = c("striped", "hover"))
+
+
 ```
 
 ### 9.2 Gráfico de Coeficientes (Forest Plot)
@@ -460,6 +462,49 @@ plot(roc_curve, main = "Curva ROC do Modelo de Regressão Logística")
 auc_value <- auc(roc_curve)
 print(paste("Área Sob a Curva (AUC):", auc_value))
 ```
+
+# Comparação de OR (Odds Ratio) bruta e ajustada para o modelo stepwise
+
+```{r}
+# Calcular o Odds Ratio bruto (sem ajuste)
+bruta <- exp(coef(logit_model))
+bruta_confint <- exp(confint(logit_model))
+
+# Calcular o Odds Ratio ajustado (modelo stepwise)
+ajustada <- exp(coef(logit_model_step))
+ajustada_confint <- exp(confint(logit_model_step))
+
+# Garantir que o número de variáveis e intervalos de confiança seja compatível
+common_variables <- intersect(names(bruta), names(ajustada))
+bruta <- bruta[common_variables]
+bruta_confint <- bruta_confint[common_variables, ]
+ajustada <- ajustada[common_variables]
+ajustada_confint <- ajustada_confint[common_variables, ]
+
+# Criar um data frame com os resultados
+or_df <- data.frame(
+  Variavel = common_variables,
+  OR_Bruta = bruta,
+  IC_Bruto_Inf = bruta_confint[, 1],
+  IC_Bruto_Sup = bruta_confint[, 2],
+  OR_Ajustada = ajustada,
+  IC_Ajustado_Inf = ajustada_confint[, 1],
+  IC_Ajustado_Sup = ajustada_confint[, 2]
+)
+
+# Criar a tabela com os Odds Ratios
+if (!require("knitr")) install.packages("knitr")
+library(knitr)
+
+or_df %>%
+  kable(caption = "Tabela Comparativa de Odds Ratio Bruto e Ajustado")
+# Salvar a tabela em um arquivo CSV
+write.csv2(or_df, file = "tabela_or_comparativa.csv", row.names = FALSE)
+
+
+```
+
+
 
 # ANÁLISE 5
 
