@@ -5564,8 +5564,8 @@ muni_code;muni_name;uf_code;uf_acr;tipo_regiao;bioma;altitude;koppen;pop22;prop_
 5221809;Urutaí;52;GO;n�o metropolitana;cerrado;770,7;Aw;3119;77,83;25,66
 5221858;Valparaíso De Goiás;52;GO;metropolitana;cerrado;1013,54;Aw;196967;51,68;6,95
 5221908;Varjão;52;GO;n�o metropolitana;cerrado;675,38;Aw;3720;97,84;88,92
-5222005;Vianópolis;52;GO;n�o metropolitana;cerrado;910,37;Aw;14046;;
-5222054;Vicentinópolis;52;GO;n�o metropolitana;cerrado;566,74;Aw;8776;;
-5222203;Vila Boa;52;GO;metropolitana;cerrado;569,38;Aw;3686;;
-5222302;Vila Propício;52;GO;n�o metropolitana;cerrado;674,25;Aw;5646;;
-5300108;Brasília;53;DF;metropolitana;cerrado;1034,79;Aw;2923369;;
+5222005;Vianópolis;52;GO;n�o metropolitana;cerrado;910,37;Aw;14046;0;16,9
+5222054;Vicentinópolis;52;GO;n�o metropolitana;cerrado;566,74;Aw;8776;0;3,3
+5222203;Vila Boa;52;GO;metropolitana;cerrado;569,38;Aw;3686;0;25,3
+5222302;Vila Propício;52;GO;n�o metropolitana;cerrado;674,25;Aw;5646;0;7,1
+5300108;Brasília;53;DF;metropolitana;cerrado;1034,79;Aw;2923369;87,9;87,9

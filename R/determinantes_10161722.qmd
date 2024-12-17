@@ -1,0 +1,832 @@
+---
+title: "Análise determinantes_categorico"
+format: html
+editor: visual
+editor_options: 
+  chunk_output_type: console
+---
+
+#Bibliotecas
+
+```{r}
+#chooseCRANmirror()
+#install.packages('tinytex')
+library(tinytex)
+library(dplyr)
+library(ggpubr)
+library(ggplot2)
+library(car)
+library(MASS)
+library(nnet) 
+library(tidyr) 
+```
+
+## 1. Calculando os padrões e as categoricas
+
+#Bancos
+
+```{r}
+
+# 2010-2016
+
+# Carregar os dados
+d1 <- left_join(read.csv2("Dengue/dengue_pattern_10_16.csv"), 
+                read.csv2("Determinantes/Tabelas/banco_determinantes.csv", fileEncoding = "latin1"), 
+                by = "muni_code")
+
+# Identificar colunas com valores NA
+print(names(d1)[colSums(is.na(d1)) > 0])
+
+# Transformar variáveis selecionadas em fatores
+factor_vars <- c("dengue_pattern", "tipo_regiao", "bioma", "koppen")
+d1[factor_vars] <- lapply(d1[factor_vars], factor)
+
+# Verificar a estrutura
+#str(d1)
+
+# 2017-2022
+
+# Carregar os dados
+d2 <- left_join(read.csv2("Dengue/dengue_pattern_17_22.csv"), 
+                read.csv2("Determinantes/Tabelas/banco_determinantes.csv", fileEncoding = "latin1"), 
+                by = "muni_code")
+
+# Identificar colunas com valores NA
+print(names(d2)[colSums(is.na(d2)) > 0])
+
+# Transformar variáveis selecionadas em fatores
+factor_vars <- c("dengue_pattern", "tipo_regiao", "bioma", "koppen")
+d2[factor_vars] <- lapply(d2[factor_vars], factor)
+
+# Verificar a estrutura
+#str(d2)
+
+```
+
+## Medidas de resumo
+
+##Função
+
+```{r}
+# Função para criar tabela com valores absolutos e proporções
+create_summary_table <- function(variable, dengue_pattern, margin){
+  table_values <- table(variable, dengue_pattern)
+  proportions <- prop.table(table_values, margin = margin)
+  
+  # Combinando valores absolutos e proporções
+  summary_table <- paste(table_values, "(", round(proportions * 100, 1), "%)", sep = "")
+  summary_table <- matrix(summary_table, nrow = nrow(table_values), dimnames = dimnames(table_values))
+  
+  # Reformatando para a tabela final com categorias de dengue_pattern nas colunas
+  summary_df <- as.data.frame(summary_table)
+  summary_df$Variable <- rownames(summary_df)
+  summary_df <- summary_df[, c("Variable", "Sem transmissão", "Episódico", "Episódico/Epidêmico", "Epidêmico", "Transmissão Persistente")]
+  
+  return(summary_df)
+}
+
+
+```
+
+### As medidas
+
+```{r}
+
+# 2010-2016
+
+# Criando as tabelas para cada variável, ajustando o margin (1 para linha, 2 para coluna)
+bioma_summary <- create_summary_table(d1$bioma, d1$dengue_pattern, margin = 1)
+koppen_summary <- create_summary_table(d1$koppen, d1$dengue_pattern, margin = 1)
+tipo_regiao_summary <- create_summary_table(d1$tipo_regiao, d1$dengue_pattern, margin = 2)
+
+# Exibindo as tabelas
+bioma_summary
+koppen_summary
+tipo_regiao_summary
+
+# 2017-2022
+
+# Criando as tabelas para cada variável no d2, ajustando o margin (1 para linha, 2 para coluna)
+bioma_summary_2 <- create_summary_table(d2$bioma, d2$dengue_pattern, margin = 1)
+koppen_summary_2 <- create_summary_table(d2$koppen, d2$dengue_pattern, margin = 1)
+tipo_regiao_summary_2 <- create_summary_table(d2$tipo_regiao, d2$dengue_pattern, margin = 2)
+
+# Exibindo as tabelas
+bioma_summary_2
+koppen_summary_2
+tipo_regiao_summary_2
+
+
+# Salvando as tabelas em arquivos CSV
+
+write.csv2(bioma_summary, "Determinantes/tabelas/10-16/bioma_summary_10_16.csv", row.names = FALSE)
+write.csv2(koppen_summary, "Determinantes/tabelas/10-16/koppen_summary_10_16.csv", row.names = FALSE)
+write.csv2(tipo_regiao_summary, "Determinantes/tabelas/10-16/tipo_regiao_summary_10_16.csv", row.names = FALSE)
+write.csv2(bioma_summary_2, "Determinantes/tabelas/17-22/bioma_summary_17_22.csv", row.names = FALSE)
+write.csv2(koppen_summary_2, "Determinantes/tabelas/17-22/koppen_summary_17_22.csv", row.names = FALSE)
+write.csv2(tipo_regiao_summary_2, "Determinantes/tabelas/17-22/tipo_regiao_summary_17_22.csv", row.names = FALSE)
+
+
+```
+
+## Freq absoluta e relativa Brasil
+
+```{r}
+
+# Função para calcular frequências e formatar os resultados
+calculate_frequencies <- function(df, column, muni_code_column = 'muni_code') {
+  df %>%
+    group_by(!!sym(column)) %>%
+    summarise(Absolute_Frequency = n()) %>%
+    mutate(Relative_Frequency = (Absolute_Frequency / sum(Absolute_Frequency)) * 100) %>%
+    mutate(Result = paste0(Absolute_Frequency, " (", round(Relative_Frequency, 2), "%)"))
+}
+
+# Calcular as frequências para cada variável
+bioma_freq <- calculate_frequencies(d1, 'bioma')
+koppen_freq <- calculate_frequencies(d1, 'koppen')
+tipo_regiao_freq <- calculate_frequencies(d1, 'tipo_regiao')
+
+# Exibir os resultados
+print(bioma_freq)
+write.csv2(bioma_freq, "bio.csv")
+print(koppen_freq)
+write.csv2(koppen_freq, "kop.csv")
+print(tipo_regiao_freq)
+
+
+```
+
+GRÁFICOS
+
+## Bioma
+
+```{r}
+# Graficos separados
+create_bioma_relative_frequency <- function(variable, dengue_pattern, period, file_name_prefix = "bioma_dengue_pattern_plot") {
+  # Criar a tabela de contingência
+  table_values <- table(variable, dengue_pattern)
+  
+  # Calcular as proporções (frequências relativas)
+  proportions <- prop.table(table_values, margin = 1)
+  
+  # Transformar a tabela de proporções em um dataframe
+  summary_df <- as.data.frame(proportions)
+  
+  # Verificar se as colunas estão corretamente nomeadas
+  colnames(summary_df) <- c("Bioma", "Dengue_Pattern", "Frequency")
+  
+  # Traduzir os nomes dos padrões de dengue para o inglês
+  summary_df$Dengue_Pattern <- factor(summary_df$Dengue_Pattern, 
+                                      levels = c("Sem transmissão", "Episódico", "Episódico/Epidêmico", "Epidêmico", "Transmissão Persistente"),
+                                      labels = c("No transmission", "Episodic", "Episodic/Epidemic", "Epidemic", "Persistent Transmission"))
+  
+  # Definir as cores para cada perfil de dengue_pattern
+  dengue_colors <- c(
+    "No transmission" = "grey39",         
+    "Episodic" = "#80CDC1",               
+    "Episodic/Epidemic" = "#3288BD",     
+    "Epidemic" = "khaki",              
+    "Persistent Transmission" = "gold2"  
+  )
+  
+  # Gerar o gráfico de barras com ggplot
+  plot <- ggplot(summary_df, aes(x = Bioma, y = Frequency, fill = Dengue_Pattern)) +
+    geom_bar(stat = "identity", position = "dodge", width = 0.8) +  # Aumentar a largura das barras
+    geom_text(aes(label = ifelse(Frequency > 0, round(Frequency * 100, 1), "")),  # Mostrar os valores em porcentagem sem o símbolo
+              position = position_dodge(width = 0.8), 
+              vjust = -0.5, 
+              size = 3) +  # Ajustar o tamanho da fonte dos números
+    labs(title = paste("Bioma by Dengue Pattern", period),
+         x = "Bioma", y = "Relative Frequency", fill = "Patterns") +  # Ajustar a legenda para "Patterns"
+    scale_y_continuous(labels = scales::percent, breaks = seq(0.05, 1, by = 0.05)) +  # Eixo Y de 5 em 5%, sem o 0%
+    scale_fill_manual(values = dengue_colors) +  # Aplicar as cores personalizadas
+    theme_minimal() +
+    theme(panel.grid.major = element_blank(),  # Remover as linhas de fundo maiores
+          panel.grid.minor = element_blank())  # Remover as linhas de fundo menores
+  
+  # Imprimir o gráfico
+  print(plot)
+  
+  # Salvar o gráfico com ggsave, incluindo o período no nome do arquivo
+  file_name <- paste0(file_name_prefix, "_", period, ".png")
+  ggsave(file_name, plot = plot, width = 10, height = 6, dpi = 300)
+}
+
+# Aplicar a função para os dois períodos e salvar os gráficos
+create_bioma_relative_frequency(d1$bioma, d1$dengue_pattern, "2010-2016", "figures/bioma_dengue_pattern_plot")
+create_bioma_relative_frequency(d2$bioma, d2$dengue_pattern, "2017-2022", "figures/bioma_dengue_pattern_plot")
+```
+
+### Graficos juntos biomas
+
+```{r}
+
+# Carregar os pacotes necessários
+library(patchwork)
+library(ggplot2)
+
+# Função para gerar os gráficos (ajustada para fundo transparente e legenda única)
+create_bioma_relative_frequency_plot <- function(variable, dengue_pattern, period) {
+  # Criar a tabela de contingência
+  table_values <- table(variable, dengue_pattern)
+  
+  # Calcular as proporções (frequências relativas)
+  proportions <- prop.table(table_values, margin = 1)
+  
+  # Transformar a tabela de proporções em um dataframe
+  summary_df <- as.data.frame(proportions)
+  
+  # Verificar se as colunas estão corretamente nomeadas
+  colnames(summary_df) <- c("Bioma", "Dengue_Pattern", "Frequency")
+  
+  # Traduzir os nomes dos padrões de dengue para o inglês
+  summary_df$Dengue_Pattern <- factor(summary_df$Dengue_Pattern, 
+                                      levels = c("Sem transmissão", "Episódico", "Episódico/Epidêmico", "Epidêmico", "Transmissão Persistente"),
+                                      labels = c("No transmission", "Episodic", "Episodic/Epidemic", "Epidemic", "Persistent Transmission"))
+  
+  # Definir as cores para cada perfil de dengue_pattern
+  dengue_colors <- c(
+    "No transmission" = "grey39",         
+    "Episodic" = "#80CDC1",               
+    "Episodic/Epidemic" = "#3288BD",     
+    "Epidemic" = "khaki",              
+    "Persistent Transmission" = "gold2"  
+  )
+  
+  # Gerar o gráfico de barras com ggplot
+  plot <- ggplot(summary_df, aes(x = Bioma, y = Frequency, fill = Dengue_Pattern)) +
+    geom_bar(stat = "identity", position = "dodge", width = 0.8) +  # Aumentar a largura das barras
+    geom_text(aes(label = ifelse(Frequency > 0, round(Frequency * 100, 1), "")),  # Mostrar os valores em porcentagem sem o símbolo
+              position = position_dodge(width = 0.8), 
+              vjust = -0.5, 
+              size = 2) +  # Ajustar o tamanho da fonte dos números
+    labs(title = paste("Bioma by Dengue Pattern", period),
+         x = "Bioma", y = "Relative Frequency") +
+    scale_y_continuous(labels = scales::percent, breaks = seq(0.05, 1, by = 0.05)) +  # Eixo Y de 5 em 5%, sem o 0%
+    scale_fill_manual(values = dengue_colors, name = "Dengue Pattern") +  # Definir as cores e a legenda
+    theme_minimal() +
+    theme(
+      panel.grid.major = element_blank(),  # Remover as linhas de fundo maiores
+      panel.grid.minor = element_blank(),  # Remover as linhas de fundo menores
+      plot.background = element_rect(fill = "transparent", color = NA),  # Fundo transparente
+      legend.position = "bottom"  # Legenda posicionada abaixo
+    )
+  
+  # Retornar o gráfico gerado
+  return(plot)
+}
+
+# Gerar os gráficos para os dois períodos
+plot_2010_2016 <- create_bioma_relative_frequency_plot(d1$bioma, d1$dengue_pattern, "2010-2016")
+plot_2017_2022 <- create_bioma_relative_frequency_plot(d2$bioma, d2$dengue_pattern, "2017-2022")
+
+# Juntar os dois gráficos lado a lado para comparação, com uma única legenda na parte inferior
+combined_plot <- plot_2010_2016 + plot_2017_2022 + plot_layout(guides = "collect") & theme(legend.position = "bottom")
+
+# Exibir o gráfico combinado
+print(combined_plot)
+
+# Opcionalmente, salvar o gráfico combinado com fundo transparente
+ggsave("figures/combined_bioma_dengue_pattern_plot.png", plot = combined_plot, width = 14, height = 6, dpi = 300, bg = "transparent")
+
+
+
+```
+
+##Koppen
+
+```{r}
+# Função para criar gráficos de frequência relativa para a variável Koppen
+create_koppen_relative_frequency <- function(variable, dengue_pattern, period, file_name_prefix = "koppen_dengue_pattern_plot") {
+  # Criar a tabela de contingência
+  table_values <- table(variable, dengue_pattern)
+  
+  # Calcular as proporções (frequências relativas)
+  proportions <- prop.table(table_values, margin = 1)
+  
+  # Transformar a tabela de proporções em um dataframe
+  summary_df <- as.data.frame(proportions)
+  
+  # Verificar se as colunas estão corretamente nomeadas
+  colnames(summary_df) <- c("Koppen", "Dengue_Pattern", "Frequency")
+  
+  # Traduzir os nomes dos padrões de dengue para o inglês
+  summary_df$Dengue_Pattern <- factor(summary_df$Dengue_Pattern, 
+                                      levels = c("Sem transmissão", "Episódico", "Episódico/Epidêmico", "Epidêmico", "Transmissão Persistente"),
+                                      labels = c("No transmission", "Episodic", "Episodic/Epidemic", "Epidemic", "Persistent Transmission"))
+  
+  # Definir as cores para cada perfil de dengue_pattern
+  dengue_colors <- c(
+    "No transmission" = "grey39",         
+    "Episodic" = "#80CDC1",               
+    "Episodic/Epidemic" = "#3288BD",     
+    "Epidemic" = "khaki",              
+    "Persistent Transmission" = "gold2"  
+  )
+  
+  # Gerar o gráfico de barras com ggplot
+  plot <- ggplot(summary_df, aes(x = Koppen, y = Frequency, fill = Dengue_Pattern)) +
+    geom_bar(stat = "identity", position = "dodge", width = 0.8) +  # Aumentar a largura das barras
+    geom_text(aes(label = ifelse(Frequency > 0, round(Frequency * 100, 1), "")),  # Mostrar os valores em porcentagem sem o símbolo
+              position = position_dodge(width = 0.8), 
+              vjust = -0.5, 
+              size = 3) +  # Ajustar o tamanho da fonte dos números
+    labs(title = paste("Koppen by Dengue Pattern", period),
+         x = "Koppen", y = "Relative Frequency", fill = "Patterns") +  # Ajustar a legenda para "Patterns"
+    scale_y_continuous(labels = scales::percent, breaks = seq(0.05, 1, by = 0.05)) +  # Eixo Y de 5 em 5%, sem o 0%
+    scale_fill_manual(values = dengue_colors) +  # Aplicar as cores personalizadas
+    theme_minimal() +
+    theme(panel.grid.major = element_blank(),  # Remover as linhas de fundo maiores
+          panel.grid.minor = element_blank())  # Remover as linhas de fundo menores
+  
+  # Imprimir o gráfico
+  print(plot)
+  
+  # Salvar o gráfico com ggsave, incluindo o período no nome do arquivo
+  file_name <- paste0(file_name_prefix, "_", period, ".png")
+  ggsave(file_name, plot = plot, width = 10, height = 6, dpi = 300)
+}
+
+# Aplicar a função para os dois períodos e salvar os gráficos
+create_koppen_relative_frequency(d1$koppen, d1$dengue_pattern, "2010-2016", "figures/koppen_dengue_pattern_plot")
+create_koppen_relative_frequency(d2$koppen, d2$dengue_pattern, "2017-2022", "figures/koppen_dengue_pattern_plot")
+
+
+```
+
+### Graficos juntos koppen
+
+```{r}
+# Carregar os pacotes necessários
+library(patchwork)
+library(ggplot2)
+
+# Função para gerar os gráficos (ajustada para fundo transparente e legenda única)
+create_koppen_relative_frequency_plot <- function(variable, dengue_pattern, period) {
+  # Criar a tabela de contingência
+  table_values <- table(variable, dengue_pattern)
+  
+  # Calcular as proporções (frequências relativas)
+  proportions <- prop.table(table_values, margin = 1)
+  
+  # Transformar a tabela de proporções em um dataframe
+  summary_df <- as.data.frame(proportions)
+  
+  # Verificar se as colunas estão corretamente nomeadas
+  colnames(summary_df) <- c("Koppen", "Dengue_Pattern", "Frequency")
+  
+  # Traduzir os nomes dos padrões de dengue para o inglês
+  summary_df$Dengue_Pattern <- factor(summary_df$Dengue_Pattern, 
+                                      levels = c("Sem transmissão", "Episódico", "Episódico/Epidêmico", "Epidêmico", "Transmissão Persistente"),
+                                      labels = c("No transmission", "Episodic", "Episodic/Epidemic", "Epidemic", "Persistent Transmission"))
+  
+  # Definir as cores para cada perfil de dengue_pattern
+  dengue_colors <- c(
+    "No transmission" = "grey39",         
+    "Episodic" = "#80CDC1",               
+    "Episodic/Epidemic" = "#3288BD",     
+    "Epidemic" = "khaki",              
+    "Persistent Transmission" = "gold2"  
+  )
+  
+  # Gerar o gráfico de barras com ggplot
+  plot <- ggplot(summary_df, aes(x = Koppen, y = Frequency, fill = Dengue_Pattern)) +
+    geom_bar(stat = "identity", position = "dodge", width = 0.8) +  # Aumentar a largura das barras
+    geom_text(aes(label = ifelse(Frequency > 0, round(Frequency * 100, 1), "")),  # Mostrar os valores em porcentagem sem o símbolo
+              position = position_dodge(width = 0.8), 
+              vjust = -0.5, 
+              size = 2) +  # Ajustar o tamanho da fonte dos números
+    labs(title = paste("Koppen by Dengue Pattern", period),
+         x = "Koppen", y = "Relative Frequency") +
+    scale_y_continuous(labels = scales::percent, breaks = seq(0.05, 1, by = 0.05)) +  # Eixo Y de 5 em 5%, sem o 0%
+    scale_fill_manual(values = dengue_colors, name = "Dengue Pattern") +  # Definir as cores e a legenda
+    theme_minimal() +
+    theme(
+      panel.grid.major = element_blank(),  # Remover as linhas de fundo maiores
+      panel.grid.minor = element_blank(),  # Remover as linhas de fundo menores
+      plot.background = element_rect(fill = "transparent", color = NA),  # Fundo transparente
+      legend.position = "bottom"  # Legenda posicionada abaixo
+    )
+  
+  # Retornar o gráfico gerado
+  return(plot)
+}
+
+# Gerar os gráficos para os dois períodos
+plot_2010_2016 <- create_koppen_relative_frequency_plot(d1$koppen, d1$dengue_pattern, "2010-2016")
+plot_2017_2022 <- create_koppen_relative_frequency_plot(d2$koppen, d2$dengue_pattern, "2017-2022")
+
+# Juntar os dois gráficos lado a lado para comparação, com uma única legenda na parte inferior
+combined_plot <- plot_2010_2016 + plot_2017_2022 + plot_layout(guides = "collect") & theme(legend.position = "bottom")
+
+# Exibir o gráfico combinado
+print(combined_plot)
+
+# Opcionalmente, salvar o gráfico combinado com fundo transparente
+ggsave("figures/combined_koppen_dengue_pattern_plot.png", plot = combined_plot, width = 14, height = 6, dpi = 300, bg = "transparent")
+
+
+```
+
+#Tipo de região
+
+```{r}
+# Função para criar gráficos de frequência relativa para a variável tipo_regiao
+create_tipo_regiao_relative_frequency <- function(variable, dengue_pattern, period, file_name_prefix = "tipo_regiao_dengue_pattern_plot") {
+  # Criar a tabela de contingência
+  table_values <- table(dengue_pattern, variable)
+  
+  # Calcular as proporções (frequências relativas)
+  proportions <- prop.table(table_values, margin = 1)
+  
+  # Transformar a tabela de proporções em um dataframe
+  summary_df <- as.data.frame(proportions)
+  
+  # Verificar se as colunas estão corretamente nomeadas
+  colnames(summary_df) <- c("Dengue_Pattern", "tipo_regiao", "Frequency")
+  
+  # Traduzir os nomes dos padrões de dengue para o inglês
+  summary_df$Dengue_Pattern <- factor(summary_df$Dengue_Pattern, 
+                                      levels = c("Sem transmissão", "Episódico", "Episódico/Epidêmico", "Epidêmico", "Transmissão Persistente"),
+                                      labels = c("No transmission", "Episodic", "Episodic/Epidemic", "Epidemic", "Persistent Transmission"))
+  
+  # Traduzir as categorias de tipo_regiao para o inglês
+  summary_df$tipo_regiao <- factor(summary_df$tipo_regiao, 
+                                   levels = c("não metropolitana", "metropolitana"),
+                                   labels = c("Non-metropolitan", "Metropolitan"))
+  
+  # Definir as cores para cada tipo_regiao
+  tipo_regiao_colors <- c(
+    "Non-metropolitan" = "forestgreen",         
+    "Metropolitan" =    "darkslateblue"           
+  )
+  
+  # Gerar o gráfico de barras com ggplot
+  plot <- ggplot(summary_df, aes(x = Dengue_Pattern, y = Frequency, fill = tipo_regiao)) +
+    geom_bar(stat = "identity", position = "dodge", width = 0.8) +  # Aumentar a largura das barras
+    geom_text(aes(label = ifelse(Frequency > 0, round(Frequency * 100, 1), "")),  # Mostrar os valores em porcentagem sem o símbolo
+              position = position_dodge(width = 0.8), 
+              vjust = -0.5, 
+              size = 3) +  # Ajustar o tamanho da fonte dos números
+    labs(title = paste("Region Type by Dengue Pattern", period),
+         x = "Dengue Pattern", y = "Relative Frequency", fill = "Region") +  # Ajustar a legenda para "Tipo de Região"
+    scale_y_continuous(labels = scales::percent, breaks = seq(0.05, 1, by = 0.05)) +  # Eixo Y de 5 em 5%, sem o 0%
+    scale_fill_manual(values = tipo_regiao_colors) +  # Aplicar as cores personalizadas
+    theme_minimal() +
+    theme(panel.grid.major = element_blank(),  # Remover as linhas de fundo maiores
+          panel.grid.minor = element_blank())  # Remover as linhas de fundo menores
+  
+  # Imprimir o gráfico
+  print(plot)
+  
+  # Salvar o gráfico com ggsave, incluindo o período no nome do arquivo
+  file_name <- paste0(file_name_prefix, "_", period, ".png")
+  ggsave(file_name, plot = plot, width = 10, height = 6, dpi = 300)
+}
+
+# Aplicar a função para os dois períodos e salvar os gráficos
+create_tipo_regiao_relative_frequency(d1$tipo_regiao, d1$dengue_pattern, "2010-2016", "figures/tipo_regiao_dengue_pattern_plot")
+create_tipo_regiao_relative_frequency(d2$tipo_regiao, d2$dengue_pattern, "2017-2022", "figures/tipo_regiao_dengue_pattern_plot")
+
+
+```
+
+## Juntando graficos tipo regiao
+
+```{r}
+# Função para criar gráficos combinados de frequência relativa para a variável tipo_regiao
+create_combined_tipo_regiao_relative_frequency <- function(variable1, dengue_pattern1, variable2, dengue_pattern2, period1, period2, file_name_prefix = "tipo_regiao_dengue_pattern_combined_plot") {
+  
+  # Criar a tabela de contingência para o primeiro período
+  table_values1 <- table(dengue_pattern1, variable1)
+  proportions1 <- prop.table(table_values1, margin = 1)
+  summary_df1 <- as.data.frame(proportions1)
+  colnames(summary_df1) <- c("Dengue_Pattern", "tipo_regiao", "Frequency")
+  summary_df1$Period <- period1  # Adicionar coluna do período
+  
+  # Criar a tabela de contingência para o segundo período
+  table_values2 <- table(dengue_pattern2, variable2)
+  proportions2 <- prop.table(table_values2, margin = 1)
+  summary_df2 <- as.data.frame(proportions2)
+  colnames(summary_df2) <- c("Dengue_Pattern", "tipo_regiao", "Frequency")
+  summary_df2$Period <- period2  # Adicionar coluna do período
+  
+  # Combinar os dois dataframes
+  combined_df <- rbind(summary_df1, summary_df2)
+  
+  # Traduzir os nomes dos padrões de dengue para o inglês
+  combined_df$Dengue_Pattern <- factor(combined_df$Dengue_Pattern, 
+                                       levels = c("Sem transmissão", "Episódico", "Episódico/Epidêmico", "Epidêmico", "Transmissão Persistente"),
+                                       labels = c("No transmission", "Episodic", "Episodic/Epidemic", "Epidemic", "Persistent Transmission"))
+  
+  # Traduzir as categorias de tipo_regiao para o inglês
+  combined_df$tipo_regiao <- factor(combined_df$tipo_regiao, 
+                                    levels = c("não metropolitana", "metropolitana"),
+                                    labels = c("Non-metropolitan", "Metropolitan"))
+  
+  # Definir as cores para cada tipo_regiao
+  tipo_regiao_colors <- c(
+    "Non-metropolitan" = "forestgreen",         
+    "Metropolitan" =    "darkslateblue"           
+  )
+  
+  # Gerar o gráfico de barras com ggplot
+  plot <- ggplot(combined_df, aes(x = Dengue_Pattern, y = Frequency, fill = tipo_regiao)) +
+    geom_bar(stat = "identity", position = "dodge", width = 0.8) +  # Aumentar a largura das barras
+    facet_wrap(~Period) +  # Separar os gráficos por período
+    geom_text(aes(label = ifelse(Frequency > 0, round(Frequency * 100, 1), "")),  # Mostrar os valores em porcentagem sem o símbolo
+              position = position_dodge(width = 0.8), 
+              vjust = -0.5, 
+              size = 3) +  # Ajustar o tamanho da fonte dos números
+    labs(title = "Region Type by Dengue Pattern for Two Periods",
+         x = "Dengue Pattern", y = "Relative Frequency", fill = "Region Type") +  # Ajustar a legenda para "Tipo de Região"
+    scale_y_continuous(labels = scales::percent, breaks = seq(0.05, 1, by = 0.05)) +  # Eixo Y de 5 em 5%, sem o 0%
+    scale_fill_manual(values = tipo_regiao_colors) +  # Aplicar as cores personalizadas
+    theme_minimal() +
+    theme(panel.grid.major = element_blank(),  # Remover as linhas de fundo maiores
+          panel.grid.minor = element_blank())  # Remover as linhas de fundo menores
+  
+  # Imprimir o gráfico
+  print(plot)
+  
+  # Salvar o gráfico com ggsave, incluindo a combinação dos períodos no nome do arquivo
+  file_name <- paste0(file_name_prefix, ".png")
+  ggsave(file_name, plot = plot, width = 12, height = 6, dpi = 300)
+}
+
+# Aplicar a função para os dois períodos combinados e salvar o gráfico
+create_combined_tipo_regiao_relative_frequency(d1$tipo_regiao, d1$dengue_pattern, d2$tipo_regiao, d2$dengue_pattern, "2010-2016", "2017-2022", "figures/tipo_regiao_dengue_pattern_combined_plot")
+
+```
+
+## 2. Calculando para o banco de mudanças de padrões
+
+#Bancos
+
+```{r}
+
+# Carregar os dados
+d3 <- left_join(read.csv2("Dengue/transicao10161722.csv"), 
+                read.csv2("Determinantes/Tabelas/banco_determinantes.csv", fileEncoding = "latin1"), 
+                by = "muni_code")
+
+# Identificar colunas com valores NA
+print(names(d3)[colSums(is.na(d3)) > 0])
+
+# Transformar variáveis selecionadas em fatores
+factor_vars <- c("transition","tipo_regiao", "bioma", "koppen")
+d3[factor_vars] <- lapply(d3[factor_vars], factor)
+
+```
+
+## Medidas de resumo transição
+
+##Função
+
+```{r}
+# Função para criar tabela com valores absolutos e proporções
+create_summary_table <- function(variable, Transition, margin){
+  table_values <- table(variable, Transition)
+  proportions <- prop.table(table_values, margin = margin)
+  
+  # Combinando valores absolutos e proporções
+  summary_table <- paste(table_values, "(", round(proportions * 100, 1), "%)", sep = "")
+  summary_table <- matrix(summary_table, nrow = nrow(table_values), dimnames = dimnames(table_values))
+  
+  # Reformatando para a tabela final com categorias de dengue_pattern nas colunas
+  summary_df <- as.data.frame(summary_table)
+  summary_df$Variable <- rownames(summary_df)
+  summary_df <- summary_df[, c("Variable", "Piorou", "Melhorou", "Se manteve")]
+  
+  return(summary_df)
+}
+
+
+```
+
+### As medidas da transição
+
+```{r}
+
+# Criando as tabelas para cada variável, ajustando o margin (1 para linha, 2 para coluna)
+bioma_summary <- create_summary_table(d3$bioma, d3$transition, margin = 1)
+koppen_summary <- create_summary_table(d3$koppen, d3$transition, margin = 1)
+tipo_regiao_summary <- create_summary_table(d3$tipo_regiao, d3$transition, margin = 2)
+
+# Exibindo as tabelas
+bioma_summary
+koppen_summary
+tipo_regiao_summary
+
+
+# Salvando as tabelas em arquivos CSV
+
+write.csv2(bioma_summary, "Determinantes/Tabelas/transition10161722/bioma_summary_transition.csv", row.names = FALSE)
+write.csv2(koppen_summary, "Determinantes/Tabelas/transition10161722/koppen_summary_transition.csv", row.names = FALSE)
+write.csv2(tipo_regiao_summary, "Determinantes/Tabelas/transition10161722/tipo_regiao_summary_transition.csv", row.names = FALSE)
+
+
+```
+
+## Freq absoluta e relativa Brasil
+
+```{r}
+
+# Função para calcular frequências e formatar os resultados
+calculate_frequencies <- function(df, column, muni_code_column = 'muni_code') {
+  df %>%
+    group_by(!!sym(column)) %>%
+    summarise(Absolute_Frequency = n()) %>%
+    mutate(Relative_Frequency = (Absolute_Frequency / sum(Absolute_Frequency)) * 100) %>%
+    mutate(Result = paste0(Absolute_Frequency, " (", round(Relative_Frequency, 2), "%)"))
+}
+
+# Calcular as frequências para cada variável
+bioma_freq <- calculate_frequencies(d3, 'bioma')
+koppen_freq <- calculate_frequencies(d3, 'koppen')
+tipo_regiao_freq <- calculate_frequencies(d3, 'tipo_regiao')
+
+# Exibir os resultados
+print(bioma_freq)
+write.csv2(bioma_freq, "bio_transition.csv")
+print(koppen_freq)
+write.csv2(koppen_freq, "kop_transition.csv")
+print(tipo_regiao_freq)
+
+
+```
+
+## graficos transição
+
+Bioma
+
+```{r}
+# Função para criar gráficos de frequência relativa para a variável Bioma
+create_bioma_relative_frequency <- function(variable, transition, file_name_prefix = "bioma_transition_plot") {
+  # Criar a tabela de contingência
+  table_values <- table(variable, transition)
+  
+  # Calcular as proporções (frequências relativas)
+  proportions <- prop.table(table_values, margin = 1)
+  
+  # Transformar a tabela de proporções em um dataframe
+  summary_df <- as.data.frame(proportions)
+  
+  # Verificar se as colunas estão corretamente nomeadas
+  colnames(summary_df) <- c("bioma", "transition", "Frequency")
+  
+  # Traduzir e manter a ordem das categorias de transition em inglês
+  summary_df$Transition <- factor(summary_df$transition, 
+                                  levels = c("Melhorou", "Se manteve", "Piorou"),
+                                  labels = c("Enhanced", "No change", "Worsened"))
+  
+  # Definir as cores para cada categoria de transition
+  transition_colors <- c(
+    "Enhanced" = "blue",         
+    "No change" = "cornsilk4",                
+    "Worsened" = "red"
+  )
+
+  # Gerar o gráfico de barras com ggplot
+  plot <- ggplot(summary_df, aes(x = bioma, y = Frequency, fill = Transition)) +
+    geom_bar(stat = "identity", position = "dodge", width = 0.8) +  # Aumentar a largura das barras
+    geom_text(aes(label = ifelse(Frequency > 0, round(Frequency * 100, 1), "")),  # Mostrar os valores em porcentagem
+              position = position_dodge(width = 0.8), 
+              vjust = -0.5, 
+              size = 3) +  # Ajustar o tamanho da fonte dos números
+    labs(title = "Biome by Transition (2010-2016 to 2017-2022)",
+         x = "Biome", y = "Relative Frequency", fill = "Transition") +  # Ajustar a legenda para "Transition"
+    scale_y_continuous(labels = scales::percent, breaks = seq(0.05, 1, by = 0.05)) +  # Eixo Y de 5 em 5%
+    scale_fill_manual(values = transition_colors) +  # Aplicar as cores personalizadas
+    theme_minimal() +
+    theme(panel.grid.major = element_blank(),  # Remover as linhas de fundo maiores
+          panel.grid.minor = element_blank())  # Remover as linhas de fundo menores
+  
+  # Imprimir o gráfico
+  print(plot)
+  
+  # Salvar o gráfico com ggsave
+  file_name <- paste0(file_name_prefix, "_transition.png")
+  ggsave(file_name, plot = plot, width = 10, height = 6, dpi = 300)
+}
+
+# Aplicar a função para o banco de dados d3
+create_bioma_relative_frequency(d3$bioma, d3$transition, "figures/bioma_transition_plot")
+
+```
+
+Climatic Types (Köppen)
+
+```{r}
+# Função para criar gráficos de frequência relativa para a variável Koppen
+create_koppen_relative_frequency <- function(variable, transition, file_name_prefix = "koppen_transition_plot") {
+  # Criar a tabela de contingência
+  table_values <- table(variable, transition)
+  
+  # Calcular as proporções (frequências relativas)
+  proportions <- prop.table(table_values, margin = 1)
+  
+  # Transformar a tabela de proporções em um dataframe
+  summary_df <- as.data.frame(proportions)
+  
+  # Verificar se as colunas estão corretamente nomeadas
+  colnames(summary_df) <- c("koppen", "transition", "Frequency")
+  
+  # Traduzir e manter a ordem das categorias de transition em inglês
+  summary_df$transition <- factor(summary_df$transition, 
+                                  levels = c("Melhorou", "Se manteve", "Piorou"),
+                                  labels = c("Enhanced", "No change", "Worsened"))
+  
+  # Definir as cores para cada categoria de transition
+  transition_colors <- c(
+    "Enhanced" = "blue",         
+    "No change" = "cornsilk4",                
+    "Worsened" = "red"
+  )
+
+  # Gerar o gráfico de barras com ggplot
+  plot <- ggplot(summary_df, aes(x = koppen, y = Frequency, fill = transition)) +
+    geom_bar(stat = "identity", position = "dodge", width = 0.8) +  # Aumentar a largura das barras
+    geom_text(aes(label = ifelse(Frequency > 0, round(Frequency * 100, 1), "")),  # Mostrar os valores em porcentagem sem o símbolo
+              position = position_dodge(width = 0.8), 
+              vjust = -0.5, 
+              size = 3) +  # Ajustar o tamanho da fonte dos números
+    labs(title = "Climatic Types (Köppen) by Transition (2010-2016 to 2017-2022)",
+         x = "Climatic Types (Köppen)", y = "Relative Frequency", fill = "Transition") +  # Ajustar a legenda para "Transition"
+    scale_y_continuous(labels = scales::percent, breaks = seq(0.05, 1, by = 0.05)) +  # Eixo Y de 5 em 5%, sem o 0%
+    scale_fill_manual(values = transition_colors) +  # Aplicar as cores personalizadas
+    theme_minimal() +
+    theme(panel.grid.major = element_blank(),  # Remover as linhas de fundo maiores
+          panel.grid.minor = element_blank())  # Remover as linhas de fundo menores
+  
+  # Imprimir o gráfico
+  print(plot)
+  
+  # Salvar o gráfico com ggsave
+  file_name <- paste0(file_name_prefix, "_transition.png")
+  ggsave(file_name, plot = plot, width = 10, height = 6, dpi = 300)
+}
+
+# Aplicar a função para o banco de dados d3
+create_koppen_relative_frequency(d3$koppen, d3$transition, "figures/koppen_transition_plot")
+
+```
+
+Tipo de região
+
+```{r}
+# Função para criar gráficos de frequência relativa para a variável tipo_regiao, somando 100% por transição
+create_tipo_regiao_relative_frequency <- function(variable, transition, file_name_prefix = "tipo_regiao_transition_plot") {
+  # Criar a tabela de contingência
+  table_values <- table(variable, transition)
+  
+  # Calcular as proporções (frequências relativas) somando por transição (coluna)
+  proportions <- prop.table(table_values, margin = 2)  # A soma será 100% por transição
+  
+  # Transformar a tabela de proporções em um dataframe
+  summary_df <- as.data.frame(proportions)
+  
+  # Verificar se as colunas estão corretamente nomeadas
+  colnames(summary_df) <- c("tipo_regiao", "transition", "Frequency")
+  
+  # Traduzir e manter a ordem das categorias de transition em inglês
+  summary_df$transition <- factor(summary_df$transition, 
+                                  levels = c("Melhorou", "Se manteve", "Piorou"),
+                                  labels = c("Enhanced", "No change", "Worsened"))
+  
+  # Definir as cores para cada categoria de transition
+  transition_colors <- c(
+    "Enhanced" = "blue",         
+    "No change" = "cornsilk4",                
+    "Worsened" = "red"
+  )
+
+  
+  # Gerar o gráfico de barras com ggplot
+  plot <- ggplot(summary_df, aes(x = tipo_regiao, y = Frequency, fill = transition)) +
+    geom_bar(stat = "identity", position = "dodge", width = 0.8) +  # Aumentar a largura das barras
+    geom_text(aes(label = ifelse(Frequency > 0, round(Frequency * 100, 1), "")),  # Mostrar os valores em porcentagem sem o símbolo
+              position = position_dodge(width = 0.8), 
+              vjust = -0.5, 
+              size = 3) +  # Ajustar o tamanho da fonte dos números
+    labs(title = "Region Type by Transition (2010-2016 to 2017-2022)",
+         x = "Type of Region", y = "Relative Frequency", fill = "Transition") +  # Ajustar a legenda para "Transição"
+    scale_y_continuous(labels = scales::percent, breaks = seq(0.05, 1, by = 0.05)) +  # Eixo Y de 5 em 5%, sem o 0%
+    scale_fill_manual(values = transition_colors) +  # Aplicar as cores personalizadas
+    theme_minimal() +
+    theme(panel.grid.major = element_blank(),  # Remover as linhas de fundo maiores
+          panel.grid.minor = element_blank())  # Remover as linhas de fundo menores
+  
+  # Imprimir o gráfico
+  print(plot)
+  
+  # Salvar o gráfico com ggsave
+  file_name <- paste0(file_name_prefix, "_transition.png")
+  ggsave(file_name, plot = plot, width = 10, height = 6, dpi = 300)
+}
+
+# Aplicar a função para o banco de dados d3
+create_tipo_regiao_relative_frequency(d3$tipo_regiao, d3$transition, "figures/tipo_regiao_transition_plot")
+
+```

@@ -24,7 +24,6 @@ library(tidyr) # Para pivot_wider
 
 #Bancos
 
-
 ```{r}
 
 # 2010-2019
@@ -50,13 +49,14 @@ d1[factor_vars] <- lapply(d1[factor_vars], as.factor)
 
 ```
 
-# Análise estatística 2010-2019 
+# Análise estatística 2010-2019
 
 ## Análise varivaies categoricas
 
 ### Medidas resumo
 
 ###Calculando bioma e Koppen somando 100% na linha
+
 ```{r}
 
 # Função para criar tabela com valores absolutos e proporções na linha
@@ -90,8 +90,8 @@ write.csv2(koppen_summary, "Determinantes/koppen_summary_10_19.csv", row.names =
 
 ```
 
-
 ###Calculando Tipo de região somando 100% na coluna
+
 ```{r}
 # Função para criar tabela com valores absolutos e proporções
 create_summary_table <- function(variable, dengue_pattern){
@@ -285,7 +285,5 @@ write.csv2(summary_table, "Determinantes/numericas_summary.csv", row.names = FAL
 
 
 ```
-
-
 
 # Análise 2020-2022
