@@ -6,7 +6,7 @@ editor_options:
   chunk_output_type: console
 ---
 
-## Carregar bibliotecas necessárias
+## Bibliotecas
 
 ```{r setup, include=FALSE}
 library(tidyverse)
@@ -20,6 +20,7 @@ library(boot)
 library(dplyr)
 library(caret) # Para criar variáveis dummy
 library(lmtest)
+library(gt)
 ```
 
 ## Bancos
@@ -282,23 +283,203 @@ qqPlot(residuals_deviance,
 
 ```
 
-## 7. Interpretação dos resultados
+## Reanalizando modelo final
 
+Nessa parte vamos olhar para o modelo final e rodar manualmente cada  colocando variaveis em grupo e criar uma tabela de AIC e Acurácia, para ve se o modelo se enxuga. Depois gerar o gráfico de ODDS. Ratio.
+
+#### modelo final
 ```{r}
-# Coeficientes e intervalos de confiança
-tidy_model <- tidy(step_model, conf.int = TRUE)
-tidy_model
+model_final <- multinom(formula = dengue_pattern ~ region + pop10 + thr_temp_Spring + 
+                   bioma + koppen + umid_med_Summer + thr_prec_Spring + thr_temp_Summer + 
+                   umid_med_Spring + thr_umid_Spring + precip_tot_Summer + altitude + 
+                   temp_med_Winter + tipo_regiao, data = det_10_16)
+model_final
+
+
+model_final <- na.omit(model_final)
+
+# previsoes
+previsoes <- predict(model_final, newdata = det_10_16)
+
+# matriz de confusão comparando as previsões com os valores reais
+matriz_confusao <- confusionMatrix(previsoes, det_10_16$dengue_pattern)
+print(matriz_confusao)
+
+# Resíduos deviance
+residuals_deviance <- residuals(model_final, type = "deviance")
+plot(residuals_deviance, main = "Resíduos Deviance", ylab = "Resíduos", xlab = "Observações")
+abline(h = 0, col = "red")
+```
+
+#### Modelo nulo
+```{r}
+## Modelo nulo
+m1 <- multinom(formula = dengue_pattern ~ region + pop10 , data = det_10_16)
+m1
+m1 <- na.omit(m1)
+
+# previsoes
+previsoes_m1 <- predict(m1, newdata = det_10_16)
+
+# matriz de confusão comparando as previsões com os valores reais
+matriz_confusao_m1 <- confusionMatrix(previsoes_m1, det_10_16$dengue_pattern)
+print(matriz_confusao_m1)
+
+# Resíduos deviance
+residuals_deviance_m1 <- residuals(m1, type = "deviance")
+plot(residuals_deviance_m1, main = "Resíduos Deviance", ylab = "Resíduos", xlab = "Observações")
+abline(h = 0, col = "red")
+
 
 ```
 
-### Modelo Edu
+#### Modelo nulo + regiao
+
+coloca uma a uma
+```{r}
+m2 <- multinom(formula = dengue_pattern ~ region + pop10 + 
+                   bioma + koppen + altitude + tipo_regiao, data = det_10_16)
+m2
+m2 <- na.omit(m2)
+# previsoes
+previsoes_m2 <- predict(m2, newdata = det_10_16)
+
+# matriz de confusão comparando as previsões com os valores reais
+matriz_confusao_m2 <- confusionMatrix(previsoes_m2, det_10_16$dengue_pattern)
+print(matriz_confusao_m2)
+
+# Resíduos deviance
+residuals_deviance_m2 <- residuals(m2, type = "deviance")
+plot(residuals_deviance_m2, main = "Resíduos Deviance", ylab = "Resíduos", xlab = "Observações")
+abline(h = 0, col = "red")
+
+
+```
+
+##### Modelo nulo + clima
+```{r}
+
+
+m3 <- multinom(formula = dengue_pattern ~ region + pop10 + thr_temp_Spring + 
+                   + umid_med_Summer + thr_prec_Spring + thr_temp_Summer + 
+                   umid_med_Spring + thr_umid_Spring + precip_tot_Summer +  
+                   temp_med_Winter , data = det_10_16)
+
+m3
+m3 <- na.omit(m3)
+# previsoes
+previsoes_m3 <- predict(m3, newdata = det_10_16)
+
+# matriz de confusão comparando as previsões com os valores reais
+matriz_confusao_m3 <- confusionMatrix(previsoes_m3, det_10_16$dengue_pattern)
+print(matriz_confusao_m3)
+
+# Resíduos deviance
+residuals_deviance_m3 <- residuals(m3, type = "deviance")
+plot(residuals_deviance_m3, main = "Resíduos Deviance", ylab = "Resíduos", xlab = "Observações")
+abline(h = 0, col = "red")
+
+```
+
+### Gerando gráfico Odds Ratio
+ Agora com modelo com melhor AIC e acurácia
 
 ```{r}
-model_edu <- multinom(formula = dengue_pattern ~ pop10 + 
-   region+ koppen + bioma + 
-    thr_temp_umid_Autumn + thr_temp_umid_Summer + thr_temp_umid_Spring +  
-    temp_med_Winter + temp_med_Summer + temp_med_Spring + temp_med_Autumn, 
-    data = det_10_16)
 
-model_edu 
+## geral
+# Extraindo os coeficientes do modelo multinomial com intervalo de confiança
+tidy_model <- broom::tidy(model_final, conf.int = TRUE)
+
+# Filtrando apenas os coeficientes das variáveis preditoras (removendo a categoria base)
+tidy_model <- tidy_model %>%
+  filter(term != "(Intercept)")
+
+# Convertendo os coeficientes log-OR para OR
+tidy_model <- tidy_model %>%
+  mutate(estimate = exp(estimate), conf.low = exp(conf.low), conf.high = exp(conf.high))
+
+# Encontrando os valores mínimo e máximo das ORs corretamente
+min_or <- min(tidy_model$conf.low, na.rm = TRUE)
+max_or <- max(tidy_model$conf.high, na.rm = TRUE)
+
+# Exibir os valores corrigidos para conferência
+print(paste("Min OR:", min_or))
+print(paste("Max OR:", max_or))
+
+
+# Criando a escala do eixo X incluindo "0" como rótulo
+x_breaks <- c(0.01, 0.1, 1, max_or)  # Não é possível colocar 0 matematicamente na escala log
+x_labels <- c("0", "0.1", "1", format(round(max_or, 1), nsmall = 1))  # Adicionando "0" no rótulo
+
+# Criando o gráfico de forest plot
+ggplot(tidy_model, aes(x = estimate, y = term)) +
+  geom_point(color = "darkgreen", size = 3) +  # Pontos dos ORs
+  geom_errorbarh(aes(xmin = conf.low, xmax = conf.high), height = 0.2, color = "darkgreen") +  # Barras de erro
+  geom_vline(xintercept = 1, linetype = "dashed", color = "gray") +  # Linha vertical em OR = 1
+  scale_x_log10(
+    breaks = x_breaks,
+    labels = x_labels
+  ) +
+  labs(x = "Odds Ratio (OR)", y = "", title = "Forest Plot - Modelo Multinomial") +
+  theme_minimal()
+
+
 ```
+
+## Tabela 1 - Final
+
+```{r}
+
+# Extrair coeficientes e intervalos de confiança (IC 95%)
+results <- broom::tidy(model_final, exponentiate = TRUE, conf.int = TRUE) %>%
+  rename(Variável = term, Categoria = y.level, OR = estimate, Lower_CI = conf.low, Upper_CI = conf.high) %>%
+  filter(Variável != "(Intercept)")  # Remover intercepto para melhor visualização
+
+# Criar a coluna de intervalo de confiança (IC95%)
+results <- results %>%
+  mutate(
+    IC95 = paste0("[", round(Lower_CI, 2), " - ", round(Upper_CI, 2), "]"),  # Formatar IC95%
+    OR = round(OR, 2)
+  ) %>%
+  select(Variável, Categoria, OR, IC95)  # Selecionar apenas colunas relevantes
+
+# Calcular p-valores manualmente a partir dos z-scores
+z_scores <- summary(model_final)$coefficients / summary(model_final)$standard.errors
+p_values <- 2 * (1 - pnorm(abs(z_scores)))
+
+# Converter p-values em um dataframe formatado corretamente
+p_values_df <- as.data.frame(p_values) %>%
+  tibble::rownames_to_column(var = "Variável") %>%
+  pivot_longer(cols = -Variável, names_to = "Categoria", values_to = "p_valor")
+
+# Juntar ORs, IC95% e p-valores
+final_results <- results %>%
+  left_join(p_values_df, by = c("Variável", "Categoria")) %>%
+  mutate(p_valor = ifelse(p_valor < 0.001, "<0.001", round(p_valor, 3)))
+
+# **Reformatar os dados para que `dengue_pattern` fique como colunas**
+tabela_larga <- final_results %>%
+  pivot_wider(
+    names_from = Categoria,  # Transformar as categorias de dengue em colunas
+    values_from = c(OR, IC95, p_valor),  # Usar OR, IC95% e p-valor como valores
+    names_glue = "{Categoria}_{.value}"  # Nome das colunas formatado corretamente
+  )
+
+write.csv2(tabela_larga,"table1_10_16.csv")
+
+# Criar tabela formatada com gt()
+tabela_larga %>%
+  gt() %>%
+  tab_header(title = "Tabela 1: Modelo de Regressão Logística Multinomial",
+             subtitle = "Odds Ratio, Intervalo de Confiança 95% e p-valor para dengue_pattern") %>%
+  cols_label(Variável = "Variável") %>%
+  tab_spanner(label = "Epidêmico", columns = starts_with("Epidêmico_")) %>%
+  tab_spanner(label = "Episódico", columns = starts_with("Episódico_")) %>%
+  tab_spanner(label = "Sem transmissão", columns = starts_with("Sem transmissão_")) %>%
+  tab_spanner(label = "Transmissão Persistente", columns = starts_with("Transmissão Persistente_")) %>%
+  fmt_missing(columns = everything(), missing_text = "—")  # Substituir valores ausentes por traço
+
+
+
+```
+
