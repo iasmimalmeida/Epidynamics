@@ -411,6 +411,7 @@ tabela_resultado <- round(tabela_resultado, 2)
 # Exibir a tabela
 tabela_resultado
 
+
 ```
 
 ## Figura
@@ -450,63 +451,102 @@ ggplot(tidy_model, aes(x = estimate, y = term)) +
   theme_minimal()
 
 
+
 ```
 
 ## Tabela 1 - Final
 
 ```{r}
 
-# Extrair coeficientes e intervalos de confiança (IC 95%)
-results <- broom::tidy(model_final, exponentiate = TRUE, conf.int = TRUE) %>%
-  rename(Variável = term, Categoria = y.level, OR = estimate, Lower_CI = conf.low, Upper_CI = conf.high) %>%
-  filter(Variável != "(Intercept)")  # Remover intercepto para melhor visualização
+# Extrair coeficientes e calcular OR manualmente
+coeficientes <- coef(model_final)
 
-# Criar a coluna de intervalo de confiança (IC95%)
-results <- results %>%
-  mutate(
-    IC95 = sprintf("[%.2f - %.2f]", Lower_CI, Upper_CI),  # Formatar IC95% com 2 casas decimais
-    OR = sprintf("%.2f", OR)  # Formatar OR com 2 casas decimais
+# Verificar coeficientes extremos antes de exponenciar
+coeficientes[coeficientes > 10] <- 10  # Limite superior para evitar valores muito grandes
+coeficientes[coeficientes < -10] <- -10  # Limite inferior
+
+exp_coef <- exp(coeficientes)  # Exponenciar coeficientes para obter OR
+
+# Extrair IC95%
+se <- summary(model_final)$standard.errors
+lower_ci <- exp(coeficientes - 1.96 * se)
+upper_ci <- exp(coeficientes + 1.96 * se)
+
+# Criar dataframe dos resultados
+results <- as.data.frame(exp_coef)
+colnames(results) <- paste0("OR_", colnames(results))
+results$Variável <- rownames(results)
+rownames(results) <- NULL
+
+# Criar dataframe de IC95%
+ic_results <- as.data.frame(lower_ci)
+colnames(ic_results) <- paste0("Lower_CI_", colnames(ic_results))
+ic_results$Variável <- rownames(ic_results)
+rownames(ic_results) <- NULL
+
+ic_results_upper <- as.data.frame(upper_ci)
+colnames(ic_results_upper) <- paste0("Upper_CI_", colnames(ic_results_upper))
+ic_results_upper$Variável <- rownames(ic_results_upper)
+rownames(ic_results_upper) <- NULL
+
+# Juntar os dataframes
+final_results <- results %>%
+  left_join(ic_results, by = "Variável") %>%
+  left_join(ic_results_upper, by = "Variável") %>%
+  filter(Variável != "(Intercept)")
+
+# Criar colunas formatadas
+final_results <- final_results %>%
+  mutate(across(starts_with("OR_"), ~ sprintf("%.2f", .x))) %>%
+  mutate(across(starts_with("Lower_CI_"), ~ sprintf("%.2f", .x))) %>%
+  mutate(across(starts_with("Upper_CI_"), ~ sprintf("%.2f", .x))) %>%
+  pivot_longer(cols = starts_with("OR_"), names_to = "Categoria", values_to = "OR") %>%
+  mutate(Categoria = sub("OR_", "", Categoria)) %>%
+  left_join(
+    final_results %>% pivot_longer(cols = starts_with("Lower_CI_"), names_to = "Categoria", values_to = "Lower_CI") %>% mutate(Categoria = sub("Lower_CI_", "", Categoria)),
+    by = c("Variável", "Categoria")
   ) %>%
-  select(Variável, Categoria, OR, IC95)  # Selecionar apenas colunas relevantes
+  left_join(
+    final_results %>% pivot_longer(cols = starts_with("Upper_CI_"), names_to = "Categoria", values_to = "Upper_CI") %>% mutate(Categoria = sub("Upper_CI_", "", Categoria)),
+    by = c("Variável", "Categoria")
+  ) %>%
+  mutate(IC95 = sprintf("[%.2f - %.2f]", as.numeric(Lower_CI), as.numeric(Upper_CI))) %>%
+  select(Variável, Categoria, OR, IC95)
 
-# Calcular p-valores manualmente a partir dos z-scores
-z_scores <- summary(model_final)$coefficients / summary(model_final)$standard.errors
+# Calcular p-valores manualmente
+z_scores <- coeficientes / se
 p_values <- 2 * (1 - pnorm(abs(z_scores)))
-
-# Converter p-values em um dataframe formatado corretamente
 p_values_df <- as.data.frame(p_values) %>%
   tibble::rownames_to_column(var = "Variável") %>%
   pivot_longer(cols = -Variável, names_to = "Categoria", values_to = "p_valor") %>%
-  mutate(
-    p_valor = ifelse(p_valor < 0.001, "<0.001", sprintf("%.3f", p_valor))  # Arredondar p-valor para 3 casas decimais sem notação científica
-  )
+  mutate(p_valor = ifelse(p_valor < 0.001, "<0.001", sprintf("%.3f", p_valor)))
 
-# Juntar ORs, IC95% e p-valores
-final_results <- results %>%
+# Juntar OR, IC95% e p-valores
+final_results <- final_results %>%
   left_join(p_values_df, by = c("Variável", "Categoria"))
 
-# **Reformatar os dados para que `dengue_pattern` fique como colunas**
+# Reformatação para formato largo
 tabela_larga <- final_results %>%
-  pivot_wider(
-    names_from = Categoria,  # Transformar as categorias de dengue em colunas
-    values_from = c(OR, IC95, p_valor),  # Usar OR, IC95% e p-valor como valores
-    names_glue = "{Categoria}_{.value}"  # Nome das colunas formatado corretamente
-  )
+  pivot_wider(names_from = Categoria, values_from = c(OR, IC95, p_valor), names_glue = "{Categoria}_{.value}")
 
-# Exportar a tabela para CSV
+# Exportar tabela
 write.csv2(tabela_larga, "table1_17_22.csv", row.names = FALSE)
 
-# Criar tabela formatada com gt()
+# Criar tabela formatada com gt
 tabela_larga %>%
   gt() %>%
-  tab_header(title = "Tabela 1: Modelo de Regressão Logística Multinomial",
-             subtitle = "Odds Ratio, Intervalo de Confiança 95% e p-valor para dengue_pattern") %>%
+  tab_header(
+    title = "Tabela 1: Modelo de Regressão Logística Multinomial",
+    subtitle = "Odds Ratio, Intervalo de Confiança 95% e p-valor para dengue_pattern"
+  ) %>%
   cols_label(Variável = "Variável") %>%
   tab_spanner(label = "Epidêmico", columns = starts_with("Epidêmico_")) %>%
   tab_spanner(label = "Episódico", columns = starts_with("Episódico_")) %>%
   tab_spanner(label = "Sem transmissão", columns = starts_with("Sem transmissão_")) %>%
   tab_spanner(label = "Transmissão Persistente", columns = starts_with("Transmissão Persistente_")) %>%
-  fmt_missing(columns = everything(), missing_text = "—")  # Substituir valores ausentes por traço
+  fmt_missing(columns = everything(), missing_text = "—")
+
+
 
 
 ```

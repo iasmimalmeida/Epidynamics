@@ -1535,8 +1535,8 @@ Transmissão Persistente               0                        0</code></pre>
 </div>
 </div>
 </section>
-<section id="imagem" class="level2">
-<h2 class="anchored" data-anchor-id="imagem">Imagem</h2>
+<section id="figura" class="level2">
+<h2 class="anchored" data-anchor-id="figura">Figura</h2>
 <div class="cell">
 <div class="sourceCode cell-code" id="cb58"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb58-1"><a href="#cb58-1" aria-hidden="true" tabindex="-1"></a><span class="co"># geral</span></span>
 <span id="cb58-2"><a href="#cb58-2" aria-hidden="true" tabindex="-1"></a><span class="co"># Extraindo os coeficientes do modelo multinomial com intervalo de confiança</span></span>
@@ -1586,54 +1586,93 @@ Transmissão Persistente               0                        0</code></pre>
 <section id="tabela-1---final" class="level2">
 <h2 class="anchored" data-anchor-id="tabela-1---final">Tabela 1 - Final</h2>
 <div class="cell">
-<div class="sourceCode cell-code" id="cb60"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb60-1"><a href="#cb60-1" aria-hidden="true" tabindex="-1"></a><span class="co"># Extrair coeficientes e intervalos de confiança (IC 95%)</span></span>
-<span id="cb60-2"><a href="#cb60-2" aria-hidden="true" tabindex="-1"></a>results <span class="ot">&lt;-</span> broom<span class="sc">::</span><span class="fu">tidy</span>(model_final, <span class="at">exponentiate =</span> <span class="cn">TRUE</span>, <span class="at">conf.int =</span> <span class="cn">TRUE</span>) <span class="sc">%&gt;%</span></span>
-<span id="cb60-3"><a href="#cb60-3" aria-hidden="true" tabindex="-1"></a>  <span class="fu">rename</span>(Variável <span class="ot">=</span> term, <span class="at">Categoria =</span> y.level, <span class="at">OR =</span> estimate, <span class="at">Lower_CI =</span> conf.low, <span class="at">Upper_CI =</span> conf.high) <span class="sc">%&gt;%</span></span>
-<span id="cb60-4"><a href="#cb60-4" aria-hidden="true" tabindex="-1"></a>  <span class="fu">filter</span>(Variável <span class="sc">!=</span> <span class="st">"(Intercept)"</span>)  <span class="co"># Remover intercepto para melhor visualização</span></span>
-<span id="cb60-5"><a href="#cb60-5" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb60-6"><a href="#cb60-6" aria-hidden="true" tabindex="-1"></a><span class="co"># Criar a coluna de intervalo de confiança (IC95%)</span></span>
-<span id="cb60-7"><a href="#cb60-7" aria-hidden="true" tabindex="-1"></a>results <span class="ot">&lt;-</span> results <span class="sc">%&gt;%</span></span>
-<span id="cb60-8"><a href="#cb60-8" aria-hidden="true" tabindex="-1"></a>  <span class="fu">mutate</span>(</span>
-<span id="cb60-9"><a href="#cb60-9" aria-hidden="true" tabindex="-1"></a>    <span class="at">IC95 =</span> <span class="fu">paste0</span>(<span class="st">"["</span>, <span class="fu">round</span>(Lower_CI, <span class="dv">2</span>), <span class="st">" - "</span>, <span class="fu">round</span>(Upper_CI, <span class="dv">2</span>), <span class="st">"]"</span>),  <span class="co"># Formatar IC95%</span></span>
-<span id="cb60-10"><a href="#cb60-10" aria-hidden="true" tabindex="-1"></a>    <span class="at">OR =</span> <span class="fu">round</span>(OR, <span class="dv">2</span>)</span>
-<span id="cb60-11"><a href="#cb60-11" aria-hidden="true" tabindex="-1"></a>  ) <span class="sc">%&gt;%</span></span>
-<span id="cb60-12"><a href="#cb60-12" aria-hidden="true" tabindex="-1"></a>  <span class="fu">select</span>(Variável, Categoria, OR, IC95)  <span class="co"># Selecionar apenas colunas relevantes</span></span>
-<span id="cb60-13"><a href="#cb60-13" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb60-14"><a href="#cb60-14" aria-hidden="true" tabindex="-1"></a><span class="co"># Calcular p-valores manualmente a partir dos z-scores</span></span>
-<span id="cb60-15"><a href="#cb60-15" aria-hidden="true" tabindex="-1"></a>z_scores <span class="ot">&lt;-</span> <span class="fu">summary</span>(model_final)<span class="sc">$</span>coefficients <span class="sc">/</span> <span class="fu">summary</span>(model_final)<span class="sc">$</span>standard.errors</span>
-<span id="cb60-16"><a href="#cb60-16" aria-hidden="true" tabindex="-1"></a>p_values <span class="ot">&lt;-</span> <span class="dv">2</span> <span class="sc">*</span> (<span class="dv">1</span> <span class="sc">-</span> <span class="fu">pnorm</span>(<span class="fu">abs</span>(z_scores)))</span>
-<span id="cb60-17"><a href="#cb60-17" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb60-18"><a href="#cb60-18" aria-hidden="true" tabindex="-1"></a><span class="co"># Converter p-values em um dataframe formatado corretamente</span></span>
-<span id="cb60-19"><a href="#cb60-19" aria-hidden="true" tabindex="-1"></a>p_values_df <span class="ot">&lt;-</span> <span class="fu">as.data.frame</span>(p_values) <span class="sc">%&gt;%</span></span>
-<span id="cb60-20"><a href="#cb60-20" aria-hidden="true" tabindex="-1"></a>  tibble<span class="sc">::</span><span class="fu">rownames_to_column</span>(<span class="at">var =</span> <span class="st">"Variável"</span>) <span class="sc">%&gt;%</span></span>
-<span id="cb60-21"><a href="#cb60-21" aria-hidden="true" tabindex="-1"></a>  <span class="fu">pivot_longer</span>(<span class="at">cols =</span> <span class="sc">-</span>Variável, <span class="at">names_to =</span> <span class="st">"Categoria"</span>, <span class="at">values_to =</span> <span class="st">"p_valor"</span>)</span>
-<span id="cb60-22"><a href="#cb60-22" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb60-23"><a href="#cb60-23" aria-hidden="true" tabindex="-1"></a><span class="co"># Juntar ORs, IC95% e p-valores</span></span>
-<span id="cb60-24"><a href="#cb60-24" aria-hidden="true" tabindex="-1"></a>final_results <span class="ot">&lt;-</span> results <span class="sc">%&gt;%</span></span>
-<span id="cb60-25"><a href="#cb60-25" aria-hidden="true" tabindex="-1"></a>  <span class="fu">left_join</span>(p_values_df, <span class="at">by =</span> <span class="fu">c</span>(<span class="st">"Variável"</span>, <span class="st">"Categoria"</span>)) <span class="sc">%&gt;%</span></span>
-<span id="cb60-26"><a href="#cb60-26" aria-hidden="true" tabindex="-1"></a>  <span class="fu">mutate</span>(<span class="at">p_valor =</span> <span class="fu">ifelse</span>(p_valor <span class="sc">&lt;</span> <span class="fl">0.001</span>, <span class="st">"&lt;0.001"</span>, <span class="fu">round</span>(p_valor, <span class="dv">3</span>)))</span>
-<span id="cb60-27"><a href="#cb60-27" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb60-28"><a href="#cb60-28" aria-hidden="true" tabindex="-1"></a><span class="co"># **Reformatar os dados para que `dengue_pattern` fique como colunas**</span></span>
-<span id="cb60-29"><a href="#cb60-29" aria-hidden="true" tabindex="-1"></a>tabela_larga <span class="ot">&lt;-</span> final_results <span class="sc">%&gt;%</span></span>
-<span id="cb60-30"><a href="#cb60-30" aria-hidden="true" tabindex="-1"></a>  <span class="fu">pivot_wider</span>(</span>
-<span id="cb60-31"><a href="#cb60-31" aria-hidden="true" tabindex="-1"></a>    <span class="at">names_from =</span> Categoria,  <span class="co"># Transformar as categorias de dengue em colunas</span></span>
-<span id="cb60-32"><a href="#cb60-32" aria-hidden="true" tabindex="-1"></a>    <span class="at">values_from =</span> <span class="fu">c</span>(OR, IC95, p_valor),  <span class="co"># Usar OR, IC95% e p-valor como valores</span></span>
-<span id="cb60-33"><a href="#cb60-33" aria-hidden="true" tabindex="-1"></a>    <span class="at">names_glue =</span> <span class="st">"{Categoria}_{.value}"</span>  <span class="co"># Nome das colunas formatado corretamente</span></span>
-<span id="cb60-34"><a href="#cb60-34" aria-hidden="true" tabindex="-1"></a>  )</span>
-<span id="cb60-35"><a href="#cb60-35" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb60-36"><a href="#cb60-36" aria-hidden="true" tabindex="-1"></a><span class="fu">write.csv2</span>(tabela_larga,<span class="st">"table1_10_16.csv"</span>)</span>
+<div class="sourceCode cell-code" id="cb60"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb60-1"><a href="#cb60-1" aria-hidden="true" tabindex="-1"></a><span class="co"># Extrair coeficientes e calcular OR manualmente</span></span>
+<span id="cb60-2"><a href="#cb60-2" aria-hidden="true" tabindex="-1"></a>coeficientes <span class="ot">&lt;-</span> <span class="fu">coef</span>(model_final)</span>
+<span id="cb60-3"><a href="#cb60-3" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb60-4"><a href="#cb60-4" aria-hidden="true" tabindex="-1"></a><span class="co"># Verificar coeficientes extremos antes de exponenciar</span></span>
+<span id="cb60-5"><a href="#cb60-5" aria-hidden="true" tabindex="-1"></a>coeficientes[coeficientes <span class="sc">&gt;</span> <span class="dv">10</span>] <span class="ot">&lt;-</span> <span class="dv">10</span>  <span class="co"># Limite superior para evitar valores muito grandes</span></span>
+<span id="cb60-6"><a href="#cb60-6" aria-hidden="true" tabindex="-1"></a>coeficientes[coeficientes <span class="sc">&lt;</span> <span class="sc">-</span><span class="dv">10</span>] <span class="ot">&lt;-</span> <span class="sc">-</span><span class="dv">10</span>  <span class="co"># Limite inferior</span></span>
+<span id="cb60-7"><a href="#cb60-7" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb60-8"><a href="#cb60-8" aria-hidden="true" tabindex="-1"></a>exp_coef <span class="ot">&lt;-</span> <span class="fu">exp</span>(coeficientes)  <span class="co"># Exponenciar coeficientes para obter OR</span></span>
+<span id="cb60-9"><a href="#cb60-9" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb60-10"><a href="#cb60-10" aria-hidden="true" tabindex="-1"></a><span class="co"># Extrair IC95%</span></span>
+<span id="cb60-11"><a href="#cb60-11" aria-hidden="true" tabindex="-1"></a>se <span class="ot">&lt;-</span> <span class="fu">summary</span>(model_final)<span class="sc">$</span>standard.errors</span>
+<span id="cb60-12"><a href="#cb60-12" aria-hidden="true" tabindex="-1"></a>lower_ci <span class="ot">&lt;-</span> <span class="fu">exp</span>(coeficientes <span class="sc">-</span> <span class="fl">1.96</span> <span class="sc">*</span> se)</span>
+<span id="cb60-13"><a href="#cb60-13" aria-hidden="true" tabindex="-1"></a>upper_ci <span class="ot">&lt;-</span> <span class="fu">exp</span>(coeficientes <span class="sc">+</span> <span class="fl">1.96</span> <span class="sc">*</span> se)</span>
+<span id="cb60-14"><a href="#cb60-14" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb60-15"><a href="#cb60-15" aria-hidden="true" tabindex="-1"></a><span class="co"># Criar dataframe dos resultados</span></span>
+<span id="cb60-16"><a href="#cb60-16" aria-hidden="true" tabindex="-1"></a>results <span class="ot">&lt;-</span> <span class="fu">as.data.frame</span>(exp_coef)</span>
+<span id="cb60-17"><a href="#cb60-17" aria-hidden="true" tabindex="-1"></a><span class="fu">colnames</span>(results) <span class="ot">&lt;-</span> <span class="fu">paste0</span>(<span class="st">"OR_"</span>, <span class="fu">colnames</span>(results))</span>
+<span id="cb60-18"><a href="#cb60-18" aria-hidden="true" tabindex="-1"></a>results<span class="sc">$</span>Variável <span class="ot">&lt;-</span> <span class="fu">rownames</span>(results)</span>
+<span id="cb60-19"><a href="#cb60-19" aria-hidden="true" tabindex="-1"></a><span class="fu">rownames</span>(results) <span class="ot">&lt;-</span> <span class="cn">NULL</span></span>
+<span id="cb60-20"><a href="#cb60-20" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb60-21"><a href="#cb60-21" aria-hidden="true" tabindex="-1"></a><span class="co"># Criar dataframe de IC95%</span></span>
+<span id="cb60-22"><a href="#cb60-22" aria-hidden="true" tabindex="-1"></a>ic_results <span class="ot">&lt;-</span> <span class="fu">as.data.frame</span>(lower_ci)</span>
+<span id="cb60-23"><a href="#cb60-23" aria-hidden="true" tabindex="-1"></a><span class="fu">colnames</span>(ic_results) <span class="ot">&lt;-</span> <span class="fu">paste0</span>(<span class="st">"Lower_CI_"</span>, <span class="fu">colnames</span>(ic_results))</span>
+<span id="cb60-24"><a href="#cb60-24" aria-hidden="true" tabindex="-1"></a>ic_results<span class="sc">$</span>Variável <span class="ot">&lt;-</span> <span class="fu">rownames</span>(ic_results)</span>
+<span id="cb60-25"><a href="#cb60-25" aria-hidden="true" tabindex="-1"></a><span class="fu">rownames</span>(ic_results) <span class="ot">&lt;-</span> <span class="cn">NULL</span></span>
+<span id="cb60-26"><a href="#cb60-26" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb60-27"><a href="#cb60-27" aria-hidden="true" tabindex="-1"></a>ic_results_upper <span class="ot">&lt;-</span> <span class="fu">as.data.frame</span>(upper_ci)</span>
+<span id="cb60-28"><a href="#cb60-28" aria-hidden="true" tabindex="-1"></a><span class="fu">colnames</span>(ic_results_upper) <span class="ot">&lt;-</span> <span class="fu">paste0</span>(<span class="st">"Upper_CI_"</span>, <span class="fu">colnames</span>(ic_results_upper))</span>
+<span id="cb60-29"><a href="#cb60-29" aria-hidden="true" tabindex="-1"></a>ic_results_upper<span class="sc">$</span>Variável <span class="ot">&lt;-</span> <span class="fu">rownames</span>(ic_results_upper)</span>
+<span id="cb60-30"><a href="#cb60-30" aria-hidden="true" tabindex="-1"></a><span class="fu">rownames</span>(ic_results_upper) <span class="ot">&lt;-</span> <span class="cn">NULL</span></span>
+<span id="cb60-31"><a href="#cb60-31" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb60-32"><a href="#cb60-32" aria-hidden="true" tabindex="-1"></a><span class="co"># Juntar os dataframes</span></span>
+<span id="cb60-33"><a href="#cb60-33" aria-hidden="true" tabindex="-1"></a>final_results <span class="ot">&lt;-</span> results <span class="sc">%&gt;%</span></span>
+<span id="cb60-34"><a href="#cb60-34" aria-hidden="true" tabindex="-1"></a>  <span class="fu">left_join</span>(ic_results, <span class="at">by =</span> <span class="st">"Variável"</span>) <span class="sc">%&gt;%</span></span>
+<span id="cb60-35"><a href="#cb60-35" aria-hidden="true" tabindex="-1"></a>  <span class="fu">left_join</span>(ic_results_upper, <span class="at">by =</span> <span class="st">"Variável"</span>) <span class="sc">%&gt;%</span></span>
+<span id="cb60-36"><a href="#cb60-36" aria-hidden="true" tabindex="-1"></a>  <span class="fu">filter</span>(Variável <span class="sc">!=</span> <span class="st">"(Intercept)"</span>)</span>
 <span id="cb60-37"><a href="#cb60-37" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb60-38"><a href="#cb60-38" aria-hidden="true" tabindex="-1"></a><span class="co"># Criar tabela formatada com gt()</span></span>
-<span id="cb60-39"><a href="#cb60-39" aria-hidden="true" tabindex="-1"></a>tabela_larga <span class="sc">%&gt;%</span></span>
-<span id="cb60-40"><a href="#cb60-40" aria-hidden="true" tabindex="-1"></a>  <span class="fu">gt</span>() <span class="sc">%&gt;%</span></span>
-<span id="cb60-41"><a href="#cb60-41" aria-hidden="true" tabindex="-1"></a>  <span class="fu">tab_header</span>(<span class="at">title =</span> <span class="st">"Tabela 1: Modelo de Regressão Logística Multinomial"</span>,</span>
-<span id="cb60-42"><a href="#cb60-42" aria-hidden="true" tabindex="-1"></a>             <span class="at">subtitle =</span> <span class="st">"Odds Ratio, Intervalo de Confiança 95% e p-valor para dengue_pattern"</span>) <span class="sc">%&gt;%</span></span>
-<span id="cb60-43"><a href="#cb60-43" aria-hidden="true" tabindex="-1"></a>  <span class="fu">cols_label</span>(Variável <span class="ot">=</span> <span class="st">"Variável"</span>) <span class="sc">%&gt;%</span></span>
-<span id="cb60-44"><a href="#cb60-44" aria-hidden="true" tabindex="-1"></a>  <span class="fu">tab_spanner</span>(<span class="at">label =</span> <span class="st">"Epidêmico"</span>, <span class="at">columns =</span> <span class="fu">starts_with</span>(<span class="st">"Epidêmico_"</span>)) <span class="sc">%&gt;%</span></span>
-<span id="cb60-45"><a href="#cb60-45" aria-hidden="true" tabindex="-1"></a>  <span class="fu">tab_spanner</span>(<span class="at">label =</span> <span class="st">"Episódico"</span>, <span class="at">columns =</span> <span class="fu">starts_with</span>(<span class="st">"Episódico_"</span>)) <span class="sc">%&gt;%</span></span>
-<span id="cb60-46"><a href="#cb60-46" aria-hidden="true" tabindex="-1"></a>  <span class="fu">tab_spanner</span>(<span class="at">label =</span> <span class="st">"Sem transmissão"</span>, <span class="at">columns =</span> <span class="fu">starts_with</span>(<span class="st">"Sem transmissão_"</span>)) <span class="sc">%&gt;%</span></span>
-<span id="cb60-47"><a href="#cb60-47" aria-hidden="true" tabindex="-1"></a>  <span class="fu">tab_spanner</span>(<span class="at">label =</span> <span class="st">"Transmissão Persistente"</span>, <span class="at">columns =</span> <span class="fu">starts_with</span>(<span class="st">"Transmissão Persistente_"</span>)) <span class="sc">%&gt;%</span></span>
-<span id="cb60-48"><a href="#cb60-48" aria-hidden="true" tabindex="-1"></a>  <span class="fu">fmt_missing</span>(<span class="at">columns =</span> <span class="fu">everything</span>(), <span class="at">missing_text =</span> <span class="st">"—"</span>)  <span class="co"># Substituir valores ausentes por traço</span></span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<span id="cb60-38"><a href="#cb60-38" aria-hidden="true" tabindex="-1"></a><span class="co"># Criar colunas formatadas</span></span>
+<span id="cb60-39"><a href="#cb60-39" aria-hidden="true" tabindex="-1"></a>final_results <span class="ot">&lt;-</span> final_results <span class="sc">%&gt;%</span></span>
+<span id="cb60-40"><a href="#cb60-40" aria-hidden="true" tabindex="-1"></a>  <span class="fu">mutate</span>(<span class="fu">across</span>(<span class="fu">starts_with</span>(<span class="st">"OR_"</span>), <span class="sc">~</span> <span class="fu">sprintf</span>(<span class="st">"%.2f"</span>, .x))) <span class="sc">%&gt;%</span></span>
+<span id="cb60-41"><a href="#cb60-41" aria-hidden="true" tabindex="-1"></a>  <span class="fu">mutate</span>(<span class="fu">across</span>(<span class="fu">starts_with</span>(<span class="st">"Lower_CI_"</span>), <span class="sc">~</span> <span class="fu">sprintf</span>(<span class="st">"%.2f"</span>, .x))) <span class="sc">%&gt;%</span></span>
+<span id="cb60-42"><a href="#cb60-42" aria-hidden="true" tabindex="-1"></a>  <span class="fu">mutate</span>(<span class="fu">across</span>(<span class="fu">starts_with</span>(<span class="st">"Upper_CI_"</span>), <span class="sc">~</span> <span class="fu">sprintf</span>(<span class="st">"%.2f"</span>, .x))) <span class="sc">%&gt;%</span></span>
+<span id="cb60-43"><a href="#cb60-43" aria-hidden="true" tabindex="-1"></a>  <span class="fu">pivot_longer</span>(<span class="at">cols =</span> <span class="fu">starts_with</span>(<span class="st">"OR_"</span>), <span class="at">names_to =</span> <span class="st">"Categoria"</span>, <span class="at">values_to =</span> <span class="st">"OR"</span>) <span class="sc">%&gt;%</span></span>
+<span id="cb60-44"><a href="#cb60-44" aria-hidden="true" tabindex="-1"></a>  <span class="fu">mutate</span>(<span class="at">Categoria =</span> <span class="fu">sub</span>(<span class="st">"OR_"</span>, <span class="st">""</span>, Categoria)) <span class="sc">%&gt;%</span></span>
+<span id="cb60-45"><a href="#cb60-45" aria-hidden="true" tabindex="-1"></a>  <span class="fu">left_join</span>(</span>
+<span id="cb60-46"><a href="#cb60-46" aria-hidden="true" tabindex="-1"></a>    final_results <span class="sc">%&gt;%</span> <span class="fu">pivot_longer</span>(<span class="at">cols =</span> <span class="fu">starts_with</span>(<span class="st">"Lower_CI_"</span>), <span class="at">names_to =</span> <span class="st">"Categoria"</span>, <span class="at">values_to =</span> <span class="st">"Lower_CI"</span>) <span class="sc">%&gt;%</span> <span class="fu">mutate</span>(<span class="at">Categoria =</span> <span class="fu">sub</span>(<span class="st">"Lower_CI_"</span>, <span class="st">""</span>, Categoria)),</span>
+<span id="cb60-47"><a href="#cb60-47" aria-hidden="true" tabindex="-1"></a>    <span class="at">by =</span> <span class="fu">c</span>(<span class="st">"Variável"</span>, <span class="st">"Categoria"</span>)</span>
+<span id="cb60-48"><a href="#cb60-48" aria-hidden="true" tabindex="-1"></a>  ) <span class="sc">%&gt;%</span></span>
+<span id="cb60-49"><a href="#cb60-49" aria-hidden="true" tabindex="-1"></a>  <span class="fu">left_join</span>(</span>
+<span id="cb60-50"><a href="#cb60-50" aria-hidden="true" tabindex="-1"></a>    final_results <span class="sc">%&gt;%</span> <span class="fu">pivot_longer</span>(<span class="at">cols =</span> <span class="fu">starts_with</span>(<span class="st">"Upper_CI_"</span>), <span class="at">names_to =</span> <span class="st">"Categoria"</span>, <span class="at">values_to =</span> <span class="st">"Upper_CI"</span>) <span class="sc">%&gt;%</span> <span class="fu">mutate</span>(<span class="at">Categoria =</span> <span class="fu">sub</span>(<span class="st">"Upper_CI_"</span>, <span class="st">""</span>, Categoria)),</span>
+<span id="cb60-51"><a href="#cb60-51" aria-hidden="true" tabindex="-1"></a>    <span class="at">by =</span> <span class="fu">c</span>(<span class="st">"Variável"</span>, <span class="st">"Categoria"</span>)</span>
+<span id="cb60-52"><a href="#cb60-52" aria-hidden="true" tabindex="-1"></a>  ) <span class="sc">%&gt;%</span></span>
+<span id="cb60-53"><a href="#cb60-53" aria-hidden="true" tabindex="-1"></a>  <span class="fu">mutate</span>(<span class="at">IC95 =</span> <span class="fu">sprintf</span>(<span class="st">"[%.2f - %.2f]"</span>, <span class="fu">as.numeric</span>(Lower_CI), <span class="fu">as.numeric</span>(Upper_CI))) <span class="sc">%&gt;%</span></span>
+<span id="cb60-54"><a href="#cb60-54" aria-hidden="true" tabindex="-1"></a>  <span class="fu">select</span>(Variável, Categoria, OR, IC95)</span>
+<span id="cb60-55"><a href="#cb60-55" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb60-56"><a href="#cb60-56" aria-hidden="true" tabindex="-1"></a><span class="co"># Calcular p-valores manualmente</span></span>
+<span id="cb60-57"><a href="#cb60-57" aria-hidden="true" tabindex="-1"></a>z_scores <span class="ot">&lt;-</span> coeficientes <span class="sc">/</span> se</span>
+<span id="cb60-58"><a href="#cb60-58" aria-hidden="true" tabindex="-1"></a>p_values <span class="ot">&lt;-</span> <span class="dv">2</span> <span class="sc">*</span> (<span class="dv">1</span> <span class="sc">-</span> <span class="fu">pnorm</span>(<span class="fu">abs</span>(z_scores)))</span>
+<span id="cb60-59"><a href="#cb60-59" aria-hidden="true" tabindex="-1"></a>p_values_df <span class="ot">&lt;-</span> <span class="fu">as.data.frame</span>(p_values) <span class="sc">%&gt;%</span></span>
+<span id="cb60-60"><a href="#cb60-60" aria-hidden="true" tabindex="-1"></a>  tibble<span class="sc">::</span><span class="fu">rownames_to_column</span>(<span class="at">var =</span> <span class="st">"Variável"</span>) <span class="sc">%&gt;%</span></span>
+<span id="cb60-61"><a href="#cb60-61" aria-hidden="true" tabindex="-1"></a>  <span class="fu">pivot_longer</span>(<span class="at">cols =</span> <span class="sc">-</span>Variável, <span class="at">names_to =</span> <span class="st">"Categoria"</span>, <span class="at">values_to =</span> <span class="st">"p_valor"</span>) <span class="sc">%&gt;%</span></span>
+<span id="cb60-62"><a href="#cb60-62" aria-hidden="true" tabindex="-1"></a>  <span class="fu">mutate</span>(<span class="at">p_valor =</span> <span class="fu">ifelse</span>(p_valor <span class="sc">&lt;</span> <span class="fl">0.001</span>, <span class="st">"&lt;0.001"</span>, <span class="fu">sprintf</span>(<span class="st">"%.3f"</span>, p_valor)))</span>
+<span id="cb60-63"><a href="#cb60-63" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb60-64"><a href="#cb60-64" aria-hidden="true" tabindex="-1"></a><span class="co"># Juntar OR, IC95% e p-valores</span></span>
+<span id="cb60-65"><a href="#cb60-65" aria-hidden="true" tabindex="-1"></a>final_results <span class="ot">&lt;-</span> final_results <span class="sc">%&gt;%</span></span>
+<span id="cb60-66"><a href="#cb60-66" aria-hidden="true" tabindex="-1"></a>  <span class="fu">left_join</span>(p_values_df, <span class="at">by =</span> <span class="fu">c</span>(<span class="st">"Variável"</span>, <span class="st">"Categoria"</span>))</span>
+<span id="cb60-67"><a href="#cb60-67" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb60-68"><a href="#cb60-68" aria-hidden="true" tabindex="-1"></a><span class="co"># Reformatação para formato largo</span></span>
+<span id="cb60-69"><a href="#cb60-69" aria-hidden="true" tabindex="-1"></a>tabela_larga <span class="ot">&lt;-</span> final_results <span class="sc">%&gt;%</span></span>
+<span id="cb60-70"><a href="#cb60-70" aria-hidden="true" tabindex="-1"></a>  <span class="fu">pivot_wider</span>(<span class="at">names_from =</span> Categoria, <span class="at">values_from =</span> <span class="fu">c</span>(OR, IC95, p_valor), <span class="at">names_glue =</span> <span class="st">"{Categoria}_{.value}"</span>)</span>
+<span id="cb60-71"><a href="#cb60-71" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb60-72"><a href="#cb60-72" aria-hidden="true" tabindex="-1"></a><span class="co"># Exportar tabela</span></span>
+<span id="cb60-73"><a href="#cb60-73" aria-hidden="true" tabindex="-1"></a><span class="fu">write.csv2</span>(tabela_larga, <span class="st">"table1_10_16.csv"</span>, <span class="at">row.names =</span> <span class="cn">FALSE</span>)</span>
+<span id="cb60-74"><a href="#cb60-74" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb60-75"><a href="#cb60-75" aria-hidden="true" tabindex="-1"></a><span class="co"># Criar tabela formatada com gt</span></span>
+<span id="cb60-76"><a href="#cb60-76" aria-hidden="true" tabindex="-1"></a>tabela_larga <span class="sc">%&gt;%</span></span>
+<span id="cb60-77"><a href="#cb60-77" aria-hidden="true" tabindex="-1"></a>  <span class="fu">gt</span>() <span class="sc">%&gt;%</span></span>
+<span id="cb60-78"><a href="#cb60-78" aria-hidden="true" tabindex="-1"></a>  <span class="fu">tab_header</span>(</span>
+<span id="cb60-79"><a href="#cb60-79" aria-hidden="true" tabindex="-1"></a>    <span class="at">title =</span> <span class="st">"Tabela 1: Modelo de Regressão Logística Multinomial"</span>,</span>
+<span id="cb60-80"><a href="#cb60-80" aria-hidden="true" tabindex="-1"></a>    <span class="at">subtitle =</span> <span class="st">"Odds Ratio, Intervalo de Confiança 95% e p-valor para dengue_pattern"</span></span>
+<span id="cb60-81"><a href="#cb60-81" aria-hidden="true" tabindex="-1"></a>  ) <span class="sc">%&gt;%</span></span>
+<span id="cb60-82"><a href="#cb60-82" aria-hidden="true" tabindex="-1"></a>  <span class="fu">cols_label</span>(Variável <span class="ot">=</span> <span class="st">"Variável"</span>) <span class="sc">%&gt;%</span></span>
+<span id="cb60-83"><a href="#cb60-83" aria-hidden="true" tabindex="-1"></a>  <span class="fu">tab_spanner</span>(<span class="at">label =</span> <span class="st">"Epidêmico"</span>, <span class="at">columns =</span> <span class="fu">starts_with</span>(<span class="st">"Epidêmico_"</span>)) <span class="sc">%&gt;%</span></span>
+<span id="cb60-84"><a href="#cb60-84" aria-hidden="true" tabindex="-1"></a>  <span class="fu">tab_spanner</span>(<span class="at">label =</span> <span class="st">"Episódico"</span>, <span class="at">columns =</span> <span class="fu">starts_with</span>(<span class="st">"Episódico_"</span>)) <span class="sc">%&gt;%</span></span>
+<span id="cb60-85"><a href="#cb60-85" aria-hidden="true" tabindex="-1"></a>  <span class="fu">tab_spanner</span>(<span class="at">label =</span> <span class="st">"Sem transmissão"</span>, <span class="at">columns =</span> <span class="fu">starts_with</span>(<span class="st">"Sem transmissão_"</span>)) <span class="sc">%&gt;%</span></span>
+<span id="cb60-86"><a href="#cb60-86" aria-hidden="true" tabindex="-1"></a>  <span class="fu">tab_spanner</span>(<span class="at">label =</span> <span class="st">"Transmissão Persistente"</span>, <span class="at">columns =</span> <span class="fu">starts_with</span>(<span class="st">"Transmissão Persistente_"</span>)) <span class="sc">%&gt;%</span></span>
+<span id="cb60-87"><a href="#cb60-87" aria-hidden="true" tabindex="-1"></a>  <span class="fu">fmt_missing</span>(<span class="at">columns =</span> <span class="fu">everything</span>(), <span class="at">missing_text =</span> <span class="st">"—"</span>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 <div class="cell-output cell-output-stderr">
 <pre><code>Warning: Since gt v0.6.0 the `fmt_missing()` function is deprecated and will soon be
 removed.
@@ -1641,23 +1680,23 @@ removed.
 This warning is displayed once every 8 hours.</code></pre>
 </div>
 <div class="cell-output-display">
-<div id="hfrurbpbks" style="padding-left:0px;padding-right:0px;padding-top:10px;padding-bottom:10px;overflow-x:auto;overflow-y:auto;width:auto;height:auto;">
-<style>#hfrurbpbks table {
+<div id="esrsdmyvgh" style="padding-left:0px;padding-right:0px;padding-top:10px;padding-bottom:10px;overflow-x:auto;overflow-y:auto;width:auto;height:auto;">
+<style>#esrsdmyvgh table {
   font-family: system-ui, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif, 'Apple Color Emoji', 'Segoe UI Emoji', 'Segoe UI Symbol', 'Noto Color Emoji';
   -webkit-font-smoothing: antialiased;
   -moz-osx-font-smoothing: grayscale;
 }
 
-#hfrurbpbks thead, #hfrurbpbks tbody, #hfrurbpbks tfoot, #hfrurbpbks tr, #hfrurbpbks td, #hfrurbpbks th {
+#esrsdmyvgh thead, #esrsdmyvgh tbody, #esrsdmyvgh tfoot, #esrsdmyvgh tr, #esrsdmyvgh td, #esrsdmyvgh th {
   border-style: none;
 }
 
-#hfrurbpbks p {
+#esrsdmyvgh p {
   margin: 0;
   padding: 0;
 }
 
-#hfrurbpbks .gt_table {
+#esrsdmyvgh .gt_table {
   display: table;
   border-collapse: collapse;
   line-height: normal;
@@ -1683,12 +1722,12 @@ This warning is displayed once every 8 hours.</code></pre>
   border-left-color: #D3D3D3;
 }
 
-#hfrurbpbks .gt_caption {
+#esrsdmyvgh .gt_caption {
   padding-top: 4px;
   padding-bottom: 4px;
 }
 
-#hfrurbpbks .gt_title {
+#esrsdmyvgh .gt_title {
   color: #333333;
   font-size: 125%;
   font-weight: initial;
@@ -1700,7 +1739,7 @@ This warning is displayed once every 8 hours.</code></pre>
   border-bottom-width: 0;
 }
 
-#hfrurbpbks .gt_subtitle {
+#esrsdmyvgh .gt_subtitle {
   color: #333333;
   font-size: 85%;
   font-weight: initial;
@@ -1712,7 +1751,7 @@ This warning is displayed once every 8 hours.</code></pre>
   border-top-width: 0;
 }
 
-#hfrurbpbks .gt_heading {
+#esrsdmyvgh .gt_heading {
   background-color: #FFFFFF;
   text-align: center;
   border-bottom-color: #FFFFFF;
@@ -1724,13 +1763,13 @@ This warning is displayed once every 8 hours.</code></pre>
   border-right-color: #D3D3D3;
 }
 
-#hfrurbpbks .gt_bottom_border {
+#esrsdmyvgh .gt_bottom_border {
   border-bottom-style: solid;
   border-bottom-width: 2px;
   border-bottom-color: #D3D3D3;
 }
 
-#hfrurbpbks .gt_col_headings {
+#esrsdmyvgh .gt_col_headings {
   border-top-style: solid;
   border-top-width: 2px;
   border-top-color: #D3D3D3;
@@ -1745,7 +1784,7 @@ This warning is displayed once every 8 hours.</code></pre>
   border-right-color: #D3D3D3;
 }
 
-#hfrurbpbks .gt_col_heading {
+#esrsdmyvgh .gt_col_heading {
   color: #333333;
   background-color: #FFFFFF;
   font-size: 100%;
@@ -1765,7 +1804,7 @@ This warning is displayed once every 8 hours.</code></pre>
   overflow-x: hidden;
 }
 
-#hfrurbpbks .gt_column_spanner_outer {
+#esrsdmyvgh .gt_column_spanner_outer {
   color: #333333;
   background-color: #FFFFFF;
   font-size: 100%;
@@ -1777,15 +1816,15 @@ This warning is displayed once every 8 hours.</code></pre>
   padding-right: 4px;
 }
 
-#hfrurbpbks .gt_column_spanner_outer:first-child {
+#esrsdmyvgh .gt_column_spanner_outer:first-child {
   padding-left: 0;
 }
 
-#hfrurbpbks .gt_column_spanner_outer:last-child {
+#esrsdmyvgh .gt_column_spanner_outer:last-child {
   padding-right: 0;
 }
 
-#hfrurbpbks .gt_column_spanner {
+#esrsdmyvgh .gt_column_spanner {
   border-bottom-style: solid;
   border-bottom-width: 2px;
   border-bottom-color: #D3D3D3;
@@ -1797,11 +1836,11 @@ This warning is displayed once every 8 hours.</code></pre>
   width: 100%;
 }
 
-#hfrurbpbks .gt_spanner_row {
+#esrsdmyvgh .gt_spanner_row {
   border-bottom-style: hidden;
 }
 
-#hfrurbpbks .gt_group_heading {
+#esrsdmyvgh .gt_group_heading {
   padding-top: 8px;
   padding-bottom: 8px;
   padding-left: 5px;
@@ -1827,7 +1866,7 @@ This warning is displayed once every 8 hours.</code></pre>
   text-align: left;
 }
 
-#hfrurbpbks .gt_empty_group_heading {
+#esrsdmyvgh .gt_empty_group_heading {
   padding: 0.5px;
   color: #333333;
   background-color: #FFFFFF;
@@ -1842,15 +1881,15 @@ This warning is displayed once every 8 hours.</code></pre>
   vertical-align: middle;
 }
 
-#hfrurbpbks .gt_from_md > :first-child {
+#esrsdmyvgh .gt_from_md > :first-child {
   margin-top: 0;
 }
 
-#hfrurbpbks .gt_from_md > :last-child {
+#esrsdmyvgh .gt_from_md > :last-child {
   margin-bottom: 0;
 }
 
-#hfrurbpbks .gt_row {
+#esrsdmyvgh .gt_row {
   padding-top: 8px;
   padding-bottom: 8px;
   padding-left: 5px;
@@ -1869,7 +1908,7 @@ This warning is displayed once every 8 hours.</code></pre>
   overflow-x: hidden;
 }
 
-#hfrurbpbks .gt_stub {
+#esrsdmyvgh .gt_stub {
   color: #333333;
   background-color: #FFFFFF;
   font-size: 100%;
@@ -1882,7 +1921,7 @@ This warning is displayed once every 8 hours.</code></pre>
   padding-right: 5px;
 }
 
-#hfrurbpbks .gt_stub_row_group {
+#esrsdmyvgh .gt_stub_row_group {
   color: #333333;
   background-color: #FFFFFF;
   font-size: 100%;
@@ -1896,15 +1935,15 @@ This warning is displayed once every 8 hours.</code></pre>
   vertical-align: top;
 }
 
-#hfrurbpbks .gt_row_group_first td {
+#esrsdmyvgh .gt_row_group_first td {
   border-top-width: 2px;
 }
 
-#hfrurbpbks .gt_row_group_first th {
+#esrsdmyvgh .gt_row_group_first th {
   border-top-width: 2px;
 }
 
-#hfrurbpbks .gt_summary_row {
+#esrsdmyvgh .gt_summary_row {
   color: #333333;
   background-color: #FFFFFF;
   text-transform: inherit;
@@ -1914,16 +1953,16 @@ This warning is displayed once every 8 hours.</code></pre>
   padding-right: 5px;
 }
 
-#hfrurbpbks .gt_first_summary_row {
+#esrsdmyvgh .gt_first_summary_row {
   border-top-style: solid;
   border-top-color: #D3D3D3;
 }
 
-#hfrurbpbks .gt_first_summary_row.thick {
+#esrsdmyvgh .gt_first_summary_row.thick {
   border-top-width: 2px;
 }
 
-#hfrurbpbks .gt_last_summary_row {
+#esrsdmyvgh .gt_last_summary_row {
   padding-top: 8px;
   padding-bottom: 8px;
   padding-left: 5px;
@@ -1933,7 +1972,7 @@ This warning is displayed once every 8 hours.</code></pre>
   border-bottom-color: #D3D3D3;
 }
 
-#hfrurbpbks .gt_grand_summary_row {
+#esrsdmyvgh .gt_grand_summary_row {
   color: #333333;
   background-color: #FFFFFF;
   text-transform: inherit;
@@ -1943,7 +1982,7 @@ This warning is displayed once every 8 hours.</code></pre>
   padding-right: 5px;
 }
 
-#hfrurbpbks .gt_first_grand_summary_row {
+#esrsdmyvgh .gt_first_grand_summary_row {
   padding-top: 8px;
   padding-bottom: 8px;
   padding-left: 5px;
@@ -1953,7 +1992,7 @@ This warning is displayed once every 8 hours.</code></pre>
   border-top-color: #D3D3D3;
 }
 
-#hfrurbpbks .gt_last_grand_summary_row_top {
+#esrsdmyvgh .gt_last_grand_summary_row_top {
   padding-top: 8px;
   padding-bottom: 8px;
   padding-left: 5px;
@@ -1963,11 +2002,11 @@ This warning is displayed once every 8 hours.</code></pre>
   border-bottom-color: #D3D3D3;
 }
 
-#hfrurbpbks .gt_striped {
+#esrsdmyvgh .gt_striped {
   background-color: rgba(128, 128, 128, 0.05);
 }
 
-#hfrurbpbks .gt_table_body {
+#esrsdmyvgh .gt_table_body {
   border-top-style: solid;
   border-top-width: 2px;
   border-top-color: #D3D3D3;
@@ -1976,7 +2015,7 @@ This warning is displayed once every 8 hours.</code></pre>
   border-bottom-color: #D3D3D3;
 }
 
-#hfrurbpbks .gt_footnotes {
+#esrsdmyvgh .gt_footnotes {
   color: #333333;
   background-color: #FFFFFF;
   border-bottom-style: none;
@@ -1990,7 +2029,7 @@ This warning is displayed once every 8 hours.</code></pre>
   border-right-color: #D3D3D3;
 }
 
-#hfrurbpbks .gt_footnote {
+#esrsdmyvgh .gt_footnote {
   margin: 0px;
   font-size: 90%;
   padding-top: 4px;
@@ -1999,7 +2038,7 @@ This warning is displayed once every 8 hours.</code></pre>
   padding-right: 5px;
 }
 
-#hfrurbpbks .gt_sourcenotes {
+#esrsdmyvgh .gt_sourcenotes {
   color: #333333;
   background-color: #FFFFFF;
   border-bottom-style: none;
@@ -2013,7 +2052,7 @@ This warning is displayed once every 8 hours.</code></pre>
   border-right-color: #D3D3D3;
 }
 
-#hfrurbpbks .gt_sourcenote {
+#esrsdmyvgh .gt_sourcenote {
   font-size: 90%;
   padding-top: 4px;
   padding-bottom: 4px;
@@ -2021,63 +2060,63 @@ This warning is displayed once every 8 hours.</code></pre>
   padding-right: 5px;
 }
 
-#hfrurbpbks .gt_left {
+#esrsdmyvgh .gt_left {
   text-align: left;
 }
 
-#hfrurbpbks .gt_center {
+#esrsdmyvgh .gt_center {
   text-align: center;
 }
 
-#hfrurbpbks .gt_right {
+#esrsdmyvgh .gt_right {
   text-align: right;
   font-variant-numeric: tabular-nums;
 }
 
-#hfrurbpbks .gt_font_normal {
+#esrsdmyvgh .gt_font_normal {
   font-weight: normal;
 }
 
-#hfrurbpbks .gt_font_bold {
+#esrsdmyvgh .gt_font_bold {
   font-weight: bold;
 }
 
-#hfrurbpbks .gt_font_italic {
+#esrsdmyvgh .gt_font_italic {
   font-style: italic;
 }
 
-#hfrurbpbks .gt_super {
+#esrsdmyvgh .gt_super {
   font-size: 65%;
 }
 
-#hfrurbpbks .gt_footnote_marks {
+#esrsdmyvgh .gt_footnote_marks {
   font-size: 75%;
   vertical-align: 0.4em;
   position: initial;
 }
 
-#hfrurbpbks .gt_asterisk {
+#esrsdmyvgh .gt_asterisk {
   font-size: 100%;
   vertical-align: 0;
 }
 
-#hfrurbpbks .gt_indent_1 {
+#esrsdmyvgh .gt_indent_1 {
   text-indent: 5px;
 }
 
-#hfrurbpbks .gt_indent_2 {
+#esrsdmyvgh .gt_indent_2 {
   text-indent: 10px;
 }
 
-#hfrurbpbks .gt_indent_3 {
+#esrsdmyvgh .gt_indent_3 {
   text-indent: 15px;
 }
 
-#hfrurbpbks .gt_indent_4 {
+#esrsdmyvgh .gt_indent_4 {
   text-indent: 20px;
 }
 
-#hfrurbpbks .gt_indent_5 {
+#esrsdmyvgh .gt_indent_5 {
   text-indent: 25px;
 }
 </style>
@@ -2085,453 +2124,462 @@ This warning is displayed once every 8 hours.</code></pre>
 <table class="gt_table caption-top table table-sm table-striped small" data-quarto-postprocess="true" data-quarto-disable-processing="false" data-quarto-bootstrap="false">
 <thead>
 <tr class="header gt_heading">
-<th colspan="13" class="gt_heading gt_title gt_font_normal">Tabela 1: Modelo de Regressão Logística Multinomial</th>
+<th colspan="88" class="gt_heading gt_title gt_font_normal">Tabela 1: Modelo de Regressão Logística Multinomial</th>
 </tr>
 <tr class="odd gt_heading">
-<th colspan="13" class="gt_heading gt_subtitle gt_font_normal gt_bottom_border">Odds Ratio, Intervalo de Confiança 95% e p-valor para dengue_pattern</th>
+<th colspan="88" class="gt_heading gt_subtitle gt_font_normal gt_bottom_border">Odds Ratio, Intervalo de Confiança 95% e p-valor para dengue_pattern</th>
 </tr>
-<tr class="header gt_col_headings gt_spanner_row">
-<th rowspan="2" id="Variável" class="gt_col_heading gt_columns_bottom_border gt_left" data-quarto-table-cell-role="th" scope="col">Variável</th>
-<th colspan="3" id="Epidêmico" class="gt_center gt_columns_top_border gt_column_spanner_outer" data-quarto-table-cell-role="th" scope="colgroup"><span class="gt_column_spanner">Epidêmico</span></th>
-<th colspan="3" id="Episódico" class="gt_center gt_columns_top_border gt_column_spanner_outer" data-quarto-table-cell-role="th" scope="colgroup"><span class="gt_column_spanner">Episódico</span></th>
-<th colspan="3" id="Sem transmissão" class="gt_center gt_columns_top_border gt_column_spanner_outer" data-quarto-table-cell-role="th" scope="colgroup"><span class="gt_column_spanner">Sem transmissão</span></th>
-<th colspan="3" id="Transmissão Persistente" class="gt_center gt_columns_top_border gt_column_spanner_outer" data-quarto-table-cell-role="th" scope="colgroup"><span class="gt_column_spanner">Transmissão Persistente</span></th>
-</tr>
-<tr class="odd gt_col_headings">
-<th id="Epidêmico_OR" class="gt_col_heading gt_columns_bottom_border gt_right" data-quarto-table-cell-role="th" scope="col">Epidêmico_OR</th>
-<th id="Epidêmico_IC95" class="gt_col_heading gt_columns_bottom_border gt_left" data-quarto-table-cell-role="th" scope="col">Epidêmico_IC95</th>
-<th id="Epidêmico_p_valor" class="gt_col_heading gt_columns_bottom_border gt_center" data-quarto-table-cell-role="th" scope="col">Epidêmico_p_valor</th>
-<th id="Episódico_OR" class="gt_col_heading gt_columns_bottom_border gt_right" data-quarto-table-cell-role="th" scope="col">Episódico_OR</th>
-<th id="Episódico_IC95" class="gt_col_heading gt_columns_bottom_border gt_left" data-quarto-table-cell-role="th" scope="col">Episódico_IC95</th>
-<th id="Episódico_p_valor" class="gt_col_heading gt_columns_bottom_border gt_center" data-quarto-table-cell-role="th" scope="col">Episódico_p_valor</th>
-<th id="Sem transmissão_OR" class="gt_col_heading gt_columns_bottom_border gt_right" data-quarto-table-cell-role="th" scope="col">Sem transmissão_OR</th>
-<th id="Sem transmissão_IC95" class="gt_col_heading gt_columns_bottom_border gt_left" data-quarto-table-cell-role="th" scope="col">Sem transmissão_IC95</th>
-<th id="Sem transmissão_p_valor" class="gt_col_heading gt_columns_bottom_border gt_center" data-quarto-table-cell-role="th" scope="col">Sem transmissão_p_valor</th>
-<th id="Transmissão Persistente_OR" class="gt_col_heading gt_columns_bottom_border gt_right" data-quarto-table-cell-role="th" scope="col">Transmissão Persistente_OR</th>
-<th id="Transmissão Persistente_IC95" class="gt_col_heading gt_columns_bottom_border gt_left" data-quarto-table-cell-role="th" scope="col">Transmissão Persistente_IC95</th>
-<th id="Transmissão Persistente_p_valor" class="gt_col_heading gt_columns_bottom_border gt_center" data-quarto-table-cell-role="th" scope="col">Transmissão Persistente_p_valor</th>
+<tr class="header gt_col_headings">
+<th id="Variável" class="gt_col_heading gt_columns_bottom_border gt_left" data-quarto-table-cell-role="th" scope="col">Variável</th>
+<th id="(Intercept)_OR" class="gt_col_heading gt_columns_bottom_border gt_right" data-quarto-table-cell-role="th" scope="col">(Intercept)_OR</th>
+<th id="region2_OR" class="gt_col_heading gt_columns_bottom_border gt_right" data-quarto-table-cell-role="th" scope="col">region2_OR</th>
+<th id="region3_OR" class="gt_col_heading gt_columns_bottom_border gt_right" data-quarto-table-cell-role="th" scope="col">region3_OR</th>
+<th id="region4_OR" class="gt_col_heading gt_columns_bottom_border gt_right" data-quarto-table-cell-role="th" scope="col">region4_OR</th>
+<th id="region5_OR" class="gt_col_heading gt_columns_bottom_border gt_right" data-quarto-table-cell-role="th" scope="col">region5_OR</th>
+<th id="pop10_OR" class="gt_col_heading gt_columns_bottom_border gt_right" data-quarto-table-cell-role="th" scope="col">pop10_OR</th>
+<th id="thr_temp_Spring_OR" class="gt_col_heading gt_columns_bottom_border gt_right" data-quarto-table-cell-role="th" scope="col">thr_temp_Spring_OR</th>
+<th id="biomaamazonia_OR" class="gt_col_heading gt_columns_bottom_border gt_right" data-quarto-table-cell-role="th" scope="col">biomaamazonia_OR</th>
+<th id="biomacaatinga_OR" class="gt_col_heading gt_columns_bottom_border gt_right" data-quarto-table-cell-role="th" scope="col">biomacaatinga_OR</th>
+<th id="biomacerrado_OR" class="gt_col_heading gt_columns_bottom_border gt_right" data-quarto-table-cell-role="th" scope="col">biomacerrado_OR</th>
+<th id="biomapampa_OR" class="gt_col_heading gt_columns_bottom_border gt_right" data-quarto-table-cell-role="th" scope="col">biomapampa_OR</th>
+<th id="biomapantanal_OR" class="gt_col_heading gt_columns_bottom_border gt_right" data-quarto-table-cell-role="th" scope="col">biomapantanal_OR</th>
+<th id="koppenAf_OR" class="gt_col_heading gt_columns_bottom_border gt_right" data-quarto-table-cell-role="th" scope="col">koppenAf_OR</th>
+<th id="koppenAm_OR" class="gt_col_heading gt_columns_bottom_border gt_right" data-quarto-table-cell-role="th" scope="col">koppenAm_OR</th>
+<th id="koppenAs_OR" class="gt_col_heading gt_columns_bottom_border gt_right" data-quarto-table-cell-role="th" scope="col">koppenAs_OR</th>
+<th id="koppenBSh_OR" class="gt_col_heading gt_columns_bottom_border gt_right" data-quarto-table-cell-role="th" scope="col">koppenBSh_OR</th>
+<th id="koppenCfa_OR" class="gt_col_heading gt_columns_bottom_border gt_right" data-quarto-table-cell-role="th" scope="col">koppenCfa_OR</th>
+<th id="koppenCfb_OR" class="gt_col_heading gt_columns_bottom_border gt_right" data-quarto-table-cell-role="th" scope="col">koppenCfb_OR</th>
+<th id="koppenCwa_OR" class="gt_col_heading gt_columns_bottom_border gt_right" data-quarto-table-cell-role="th" scope="col">koppenCwa_OR</th>
+<th id="koppenCwb_OR" class="gt_col_heading gt_columns_bottom_border gt_right" data-quarto-table-cell-role="th" scope="col">koppenCwb_OR</th>
+<th id="umid_med_Summer_OR" class="gt_col_heading gt_columns_bottom_border gt_right" data-quarto-table-cell-role="th" scope="col">umid_med_Summer_OR</th>
+<th id="thr_prec_Spring_OR" class="gt_col_heading gt_columns_bottom_border gt_right" data-quarto-table-cell-role="th" scope="col">thr_prec_Spring_OR</th>
+<th id="thr_temp_Summer_OR" class="gt_col_heading gt_columns_bottom_border gt_right" data-quarto-table-cell-role="th" scope="col">thr_temp_Summer_OR</th>
+<th id="umid_med_Spring_OR" class="gt_col_heading gt_columns_bottom_border gt_right" data-quarto-table-cell-role="th" scope="col">umid_med_Spring_OR</th>
+<th id="thr_umid_Spring_OR" class="gt_col_heading gt_columns_bottom_border gt_right" data-quarto-table-cell-role="th" scope="col">thr_umid_Spring_OR</th>
+<th id="precip_tot_Summer_OR" class="gt_col_heading gt_columns_bottom_border gt_right" data-quarto-table-cell-role="th" scope="col">precip_tot_Summer_OR</th>
+<th id="altitude_OR" class="gt_col_heading gt_columns_bottom_border gt_right" data-quarto-table-cell-role="th" scope="col">altitude_OR</th>
+<th id="temp_med_Winter_OR" class="gt_col_heading gt_columns_bottom_border gt_right" data-quarto-table-cell-role="th" scope="col">temp_med_Winter_OR</th>
+<th id="tipo_regiaometropolitana_OR" class="gt_col_heading gt_columns_bottom_border gt_right" data-quarto-table-cell-role="th" scope="col">tipo_regiaometropolitana_OR</th>
+<th id="(Intercept)_IC95" class="gt_col_heading gt_columns_bottom_border gt_left" data-quarto-table-cell-role="th" scope="col">(Intercept)_IC95</th>
+<th id="region2_IC95" class="gt_col_heading gt_columns_bottom_border gt_left" data-quarto-table-cell-role="th" scope="col">region2_IC95</th>
+<th id="region3_IC95" class="gt_col_heading gt_columns_bottom_border gt_left" data-quarto-table-cell-role="th" scope="col">region3_IC95</th>
+<th id="region4_IC95" class="gt_col_heading gt_columns_bottom_border gt_left" data-quarto-table-cell-role="th" scope="col">region4_IC95</th>
+<th id="region5_IC95" class="gt_col_heading gt_columns_bottom_border gt_left" data-quarto-table-cell-role="th" scope="col">region5_IC95</th>
+<th id="pop10_IC95" class="gt_col_heading gt_columns_bottom_border gt_left" data-quarto-table-cell-role="th" scope="col">pop10_IC95</th>
+<th id="thr_temp_Spring_IC95" class="gt_col_heading gt_columns_bottom_border gt_left" data-quarto-table-cell-role="th" scope="col">thr_temp_Spring_IC95</th>
+<th id="biomaamazonia_IC95" class="gt_col_heading gt_columns_bottom_border gt_left" data-quarto-table-cell-role="th" scope="col">biomaamazonia_IC95</th>
+<th id="biomacaatinga_IC95" class="gt_col_heading gt_columns_bottom_border gt_left" data-quarto-table-cell-role="th" scope="col">biomacaatinga_IC95</th>
+<th id="biomacerrado_IC95" class="gt_col_heading gt_columns_bottom_border gt_left" data-quarto-table-cell-role="th" scope="col">biomacerrado_IC95</th>
+<th id="biomapampa_IC95" class="gt_col_heading gt_columns_bottom_border gt_left" data-quarto-table-cell-role="th" scope="col">biomapampa_IC95</th>
+<th id="biomapantanal_IC95" class="gt_col_heading gt_columns_bottom_border gt_left" data-quarto-table-cell-role="th" scope="col">biomapantanal_IC95</th>
+<th id="koppenAf_IC95" class="gt_col_heading gt_columns_bottom_border gt_left" data-quarto-table-cell-role="th" scope="col">koppenAf_IC95</th>
+<th id="koppenAm_IC95" class="gt_col_heading gt_columns_bottom_border gt_left" data-quarto-table-cell-role="th" scope="col">koppenAm_IC95</th>
+<th id="koppenAs_IC95" class="gt_col_heading gt_columns_bottom_border gt_left" data-quarto-table-cell-role="th" scope="col">koppenAs_IC95</th>
+<th id="koppenBSh_IC95" class="gt_col_heading gt_columns_bottom_border gt_left" data-quarto-table-cell-role="th" scope="col">koppenBSh_IC95</th>
+<th id="koppenCfa_IC95" class="gt_col_heading gt_columns_bottom_border gt_left" data-quarto-table-cell-role="th" scope="col">koppenCfa_IC95</th>
+<th id="koppenCfb_IC95" class="gt_col_heading gt_columns_bottom_border gt_left" data-quarto-table-cell-role="th" scope="col">koppenCfb_IC95</th>
+<th id="koppenCwa_IC95" class="gt_col_heading gt_columns_bottom_border gt_left" data-quarto-table-cell-role="th" scope="col">koppenCwa_IC95</th>
+<th id="koppenCwb_IC95" class="gt_col_heading gt_columns_bottom_border gt_left" data-quarto-table-cell-role="th" scope="col">koppenCwb_IC95</th>
+<th id="umid_med_Summer_IC95" class="gt_col_heading gt_columns_bottom_border gt_left" data-quarto-table-cell-role="th" scope="col">umid_med_Summer_IC95</th>
+<th id="thr_prec_Spring_IC95" class="gt_col_heading gt_columns_bottom_border gt_left" data-quarto-table-cell-role="th" scope="col">thr_prec_Spring_IC95</th>
+<th id="thr_temp_Summer_IC95" class="gt_col_heading gt_columns_bottom_border gt_left" data-quarto-table-cell-role="th" scope="col">thr_temp_Summer_IC95</th>
+<th id="umid_med_Spring_IC95" class="gt_col_heading gt_columns_bottom_border gt_left" data-quarto-table-cell-role="th" scope="col">umid_med_Spring_IC95</th>
+<th id="thr_umid_Spring_IC95" class="gt_col_heading gt_columns_bottom_border gt_left" data-quarto-table-cell-role="th" scope="col">thr_umid_Spring_IC95</th>
+<th id="precip_tot_Summer_IC95" class="gt_col_heading gt_columns_bottom_border gt_left" data-quarto-table-cell-role="th" scope="col">precip_tot_Summer_IC95</th>
+<th id="altitude_IC95" class="gt_col_heading gt_columns_bottom_border gt_left" data-quarto-table-cell-role="th" scope="col">altitude_IC95</th>
+<th id="temp_med_Winter_IC95" class="gt_col_heading gt_columns_bottom_border gt_left" data-quarto-table-cell-role="th" scope="col">temp_med_Winter_IC95</th>
+<th id="tipo_regiaometropolitana_IC95" class="gt_col_heading gt_columns_bottom_border gt_left" data-quarto-table-cell-role="th" scope="col">tipo_regiaometropolitana_IC95</th>
+<th id="(Intercept)_p_valor" class="gt_col_heading gt_columns_bottom_border gt_left" data-quarto-table-cell-role="th" scope="col">(Intercept)_p_valor</th>
+<th id="region2_p_valor" class="gt_col_heading gt_columns_bottom_border gt_left" data-quarto-table-cell-role="th" scope="col">region2_p_valor</th>
+<th id="region3_p_valor" class="gt_col_heading gt_columns_bottom_border gt_left" data-quarto-table-cell-role="th" scope="col">region3_p_valor</th>
+<th id="region4_p_valor" class="gt_col_heading gt_columns_bottom_border gt_left" data-quarto-table-cell-role="th" scope="col">region4_p_valor</th>
+<th id="region5_p_valor" class="gt_col_heading gt_columns_bottom_border gt_left" data-quarto-table-cell-role="th" scope="col">region5_p_valor</th>
+<th id="pop10_p_valor" class="gt_col_heading gt_columns_bottom_border gt_left" data-quarto-table-cell-role="th" scope="col">pop10_p_valor</th>
+<th id="thr_temp_Spring_p_valor" class="gt_col_heading gt_columns_bottom_border gt_left" data-quarto-table-cell-role="th" scope="col">thr_temp_Spring_p_valor</th>
+<th id="biomaamazonia_p_valor" class="gt_col_heading gt_columns_bottom_border gt_left" data-quarto-table-cell-role="th" scope="col">biomaamazonia_p_valor</th>
+<th id="biomacaatinga_p_valor" class="gt_col_heading gt_columns_bottom_border gt_left" data-quarto-table-cell-role="th" scope="col">biomacaatinga_p_valor</th>
+<th id="biomacerrado_p_valor" class="gt_col_heading gt_columns_bottom_border gt_left" data-quarto-table-cell-role="th" scope="col">biomacerrado_p_valor</th>
+<th id="biomapampa_p_valor" class="gt_col_heading gt_columns_bottom_border gt_left" data-quarto-table-cell-role="th" scope="col">biomapampa_p_valor</th>
+<th id="biomapantanal_p_valor" class="gt_col_heading gt_columns_bottom_border gt_left" data-quarto-table-cell-role="th" scope="col">biomapantanal_p_valor</th>
+<th id="koppenAf_p_valor" class="gt_col_heading gt_columns_bottom_border gt_left" data-quarto-table-cell-role="th" scope="col">koppenAf_p_valor</th>
+<th id="koppenAm_p_valor" class="gt_col_heading gt_columns_bottom_border gt_left" data-quarto-table-cell-role="th" scope="col">koppenAm_p_valor</th>
+<th id="koppenAs_p_valor" class="gt_col_heading gt_columns_bottom_border gt_left" data-quarto-table-cell-role="th" scope="col">koppenAs_p_valor</th>
+<th id="koppenBSh_p_valor" class="gt_col_heading gt_columns_bottom_border gt_left" data-quarto-table-cell-role="th" scope="col">koppenBSh_p_valor</th>
+<th id="koppenCfa_p_valor" class="gt_col_heading gt_columns_bottom_border gt_left" data-quarto-table-cell-role="th" scope="col">koppenCfa_p_valor</th>
+<th id="koppenCfb_p_valor" class="gt_col_heading gt_columns_bottom_border gt_left" data-quarto-table-cell-role="th" scope="col">koppenCfb_p_valor</th>
+<th id="koppenCwa_p_valor" class="gt_col_heading gt_columns_bottom_border gt_left" data-quarto-table-cell-role="th" scope="col">koppenCwa_p_valor</th>
+<th id="koppenCwb_p_valor" class="gt_col_heading gt_columns_bottom_border gt_left" data-quarto-table-cell-role="th" scope="col">koppenCwb_p_valor</th>
+<th id="umid_med_Summer_p_valor" class="gt_col_heading gt_columns_bottom_border gt_left" data-quarto-table-cell-role="th" scope="col">umid_med_Summer_p_valor</th>
+<th id="thr_prec_Spring_p_valor" class="gt_col_heading gt_columns_bottom_border gt_left" data-quarto-table-cell-role="th" scope="col">thr_prec_Spring_p_valor</th>
+<th id="thr_temp_Summer_p_valor" class="gt_col_heading gt_columns_bottom_border gt_left" data-quarto-table-cell-role="th" scope="col">thr_temp_Summer_p_valor</th>
+<th id="umid_med_Spring_p_valor" class="gt_col_heading gt_columns_bottom_border gt_left" data-quarto-table-cell-role="th" scope="col">umid_med_Spring_p_valor</th>
+<th id="thr_umid_Spring_p_valor" class="gt_col_heading gt_columns_bottom_border gt_left" data-quarto-table-cell-role="th" scope="col">thr_umid_Spring_p_valor</th>
+<th id="precip_tot_Summer_p_valor" class="gt_col_heading gt_columns_bottom_border gt_left" data-quarto-table-cell-role="th" scope="col">precip_tot_Summer_p_valor</th>
+<th id="altitude_p_valor" class="gt_col_heading gt_columns_bottom_border gt_left" data-quarto-table-cell-role="th" scope="col">altitude_p_valor</th>
+<th id="temp_med_Winter_p_valor" class="gt_col_heading gt_columns_bottom_border gt_left" data-quarto-table-cell-role="th" scope="col">temp_med_Winter_p_valor</th>
+<th id="tipo_regiaometropolitana_p_valor" class="gt_col_heading gt_columns_bottom_border gt_left" data-quarto-table-cell-role="th" scope="col">tipo_regiaometropolitana_p_valor</th>
 </tr>
 </thead>
 <tbody class="gt_table_body">
 <tr class="odd">
-<td class="gt_row gt_left" headers="Variável">region2</td>
-<td class="gt_row gt_right" headers="Epidêmico_OR">0.09</td>
-<td class="gt_row gt_left" headers="Epidêmico_IC95">[0.09 - 0.09]</td>
-<td class="gt_row gt_center" headers="Epidêmico_p_valor">—</td>
-<td class="gt_row gt_right" headers="Episódico_OR">5.54</td>
-<td class="gt_row gt_left" headers="Episódico_IC95">[5.54 - 5.54]</td>
-<td class="gt_row gt_center" headers="Episódico_p_valor">—</td>
-<td class="gt_row gt_right" headers="Sem transmissão_OR">2.20</td>
-<td class="gt_row gt_left" headers="Sem transmissão_IC95">[2.2 - 2.2]</td>
-<td class="gt_row gt_center" headers="Sem transmissão_p_valor">—</td>
-<td class="gt_row gt_right" headers="Transmissão Persistente_OR">9.09</td>
-<td class="gt_row gt_left" headers="Transmissão Persistente_IC95">[9.09 - 9.09]</td>
-<td class="gt_row gt_center" headers="Transmissão Persistente_p_valor">—</td>
+<td class="gt_row gt_left" headers="Variável">Epidêmico</td>
+<td class="gt_row gt_right" headers="(Intercept)_OR">0.00</td>
+<td class="gt_row gt_right" headers="region2_OR">0.09</td>
+<td class="gt_row gt_right" headers="region3_OR">1.50</td>
+<td class="gt_row gt_right" headers="region4_OR">1.11</td>
+<td class="gt_row gt_right" headers="region5_OR">1.21</td>
+<td class="gt_row gt_right" headers="pop10_OR">1.00</td>
+<td class="gt_row gt_right" headers="thr_temp_Spring_OR">1.13</td>
+<td class="gt_row gt_right" headers="biomaamazonia_OR">0.05</td>
+<td class="gt_row gt_right" headers="biomacaatinga_OR">2.05</td>
+<td class="gt_row gt_right" headers="biomacerrado_OR">0.32</td>
+<td class="gt_row gt_right" headers="biomapampa_OR">0.00</td>
+<td class="gt_row gt_right" headers="biomapantanal_OR">0.11</td>
+<td class="gt_row gt_right" headers="koppenAf_OR">1.61</td>
+<td class="gt_row gt_right" headers="koppenAm_OR">1.66</td>
+<td class="gt_row gt_right" headers="koppenAs_OR">1.39</td>
+<td class="gt_row gt_right" headers="koppenBSh_OR">3.10</td>
+<td class="gt_row gt_right" headers="koppenCfa_OR">4.31</td>
+<td class="gt_row gt_right" headers="koppenCfb_OR">0.55</td>
+<td class="gt_row gt_right" headers="koppenCwa_OR">1.60</td>
+<td class="gt_row gt_right" headers="koppenCwb_OR">3.60</td>
+<td class="gt_row gt_right" headers="umid_med_Summer_OR">1.06</td>
+<td class="gt_row gt_right" headers="thr_prec_Spring_OR">1.00</td>
+<td class="gt_row gt_right" headers="thr_temp_Summer_OR">1.30</td>
+<td class="gt_row gt_right" headers="umid_med_Spring_OR">1.12</td>
+<td class="gt_row gt_right" headers="thr_umid_Spring_OR">0.99</td>
+<td class="gt_row gt_right" headers="precip_tot_Summer_OR">1.00</td>
+<td class="gt_row gt_right" headers="altitude_OR">1.00</td>
+<td class="gt_row gt_right" headers="temp_med_Winter_OR">1.40</td>
+<td class="gt_row gt_right" headers="tipo_regiaometropolitana_OR">0.88</td>
+<td class="gt_row gt_left" headers="(Intercept)_IC95">[0.00 - 0.00]</td>
+<td class="gt_row gt_left" headers="region2_IC95">[0.09 - 0.09]</td>
+<td class="gt_row gt_left" headers="region3_IC95">[1.50 - 1.50]</td>
+<td class="gt_row gt_left" headers="region4_IC95">[1.11 - 1.11]</td>
+<td class="gt_row gt_left" headers="region5_IC95">[1.21 - 1.21]</td>
+<td class="gt_row gt_left" headers="pop10_IC95">[1.00 - 1.00]</td>
+<td class="gt_row gt_left" headers="thr_temp_Spring_IC95">[1.12 - 1.13]</td>
+<td class="gt_row gt_left" headers="biomaamazonia_IC95">[0.05 - 0.05]</td>
+<td class="gt_row gt_left" headers="biomacaatinga_IC95">[2.05 - 2.05]</td>
+<td class="gt_row gt_left" headers="biomacerrado_IC95">[0.32 - 0.32]</td>
+<td class="gt_row gt_left" headers="biomapampa_IC95">[0.00 - 0.00]</td>
+<td class="gt_row gt_left" headers="biomapantanal_IC95">[0.11 - 0.11]</td>
+<td class="gt_row gt_left" headers="koppenAf_IC95">[1.61 - 1.61]</td>
+<td class="gt_row gt_left" headers="koppenAm_IC95">[1.66 - 1.66]</td>
+<td class="gt_row gt_left" headers="koppenAs_IC95">[1.39 - 1.39]</td>
+<td class="gt_row gt_left" headers="koppenBSh_IC95">[3.10 - 3.10]</td>
+<td class="gt_row gt_left" headers="koppenCfa_IC95">[4.31 - 4.31]</td>
+<td class="gt_row gt_left" headers="koppenCfb_IC95">[0.55 - 0.55]</td>
+<td class="gt_row gt_left" headers="koppenCwa_IC95">[1.60 - 1.60]</td>
+<td class="gt_row gt_left" headers="koppenCwb_IC95">[3.60 - 3.60]</td>
+<td class="gt_row gt_left" headers="umid_med_Summer_IC95">[1.06 - 1.06]</td>
+<td class="gt_row gt_left" headers="thr_prec_Spring_IC95">[1.00 - 1.00]</td>
+<td class="gt_row gt_left" headers="thr_temp_Summer_IC95">[1.30 - 1.30]</td>
+<td class="gt_row gt_left" headers="umid_med_Spring_IC95">[1.12 - 1.12]</td>
+<td class="gt_row gt_left" headers="thr_umid_Spring_IC95">[0.99 - 0.99]</td>
+<td class="gt_row gt_left" headers="precip_tot_Summer_IC95">[1.00 - 1.00]</td>
+<td class="gt_row gt_left" headers="altitude_IC95">[1.00 - 1.00]</td>
+<td class="gt_row gt_left" headers="temp_med_Winter_IC95">[1.40 - 1.40]</td>
+<td class="gt_row gt_left" headers="tipo_regiaometropolitana_IC95">[0.88 - 0.88]</td>
+<td class="gt_row gt_left" headers="(Intercept)_p_valor">&lt;0.001</td>
+<td class="gt_row gt_left" headers="region2_p_valor">&lt;0.001</td>
+<td class="gt_row gt_left" headers="region3_p_valor">&lt;0.001</td>
+<td class="gt_row gt_left" headers="region4_p_valor">&lt;0.001</td>
+<td class="gt_row gt_left" headers="region5_p_valor">&lt;0.001</td>
+<td class="gt_row gt_left" headers="pop10_p_valor">&lt;0.001</td>
+<td class="gt_row gt_left" headers="thr_temp_Spring_p_valor">&lt;0.001</td>
+<td class="gt_row gt_left" headers="biomaamazonia_p_valor">&lt;0.001</td>
+<td class="gt_row gt_left" headers="biomacaatinga_p_valor">&lt;0.001</td>
+<td class="gt_row gt_left" headers="biomacerrado_p_valor">&lt;0.001</td>
+<td class="gt_row gt_left" headers="biomapampa_p_valor">&lt;0.001</td>
+<td class="gt_row gt_left" headers="biomapantanal_p_valor">&lt;0.001</td>
+<td class="gt_row gt_left" headers="koppenAf_p_valor">&lt;0.001</td>
+<td class="gt_row gt_left" headers="koppenAm_p_valor">&lt;0.001</td>
+<td class="gt_row gt_left" headers="koppenAs_p_valor">&lt;0.001</td>
+<td class="gt_row gt_left" headers="koppenBSh_p_valor">&lt;0.001</td>
+<td class="gt_row gt_left" headers="koppenCfa_p_valor">&lt;0.001</td>
+<td class="gt_row gt_left" headers="koppenCfb_p_valor">&lt;0.001</td>
+<td class="gt_row gt_left" headers="koppenCwa_p_valor">&lt;0.001</td>
+<td class="gt_row gt_left" headers="koppenCwb_p_valor">&lt;0.001</td>
+<td class="gt_row gt_left" headers="umid_med_Summer_p_valor">&lt;0.001</td>
+<td class="gt_row gt_left" headers="thr_prec_Spring_p_valor">&lt;0.001</td>
+<td class="gt_row gt_left" headers="thr_temp_Summer_p_valor">&lt;0.001</td>
+<td class="gt_row gt_left" headers="umid_med_Spring_p_valor">&lt;0.001</td>
+<td class="gt_row gt_left" headers="thr_umid_Spring_p_valor">&lt;0.001</td>
+<td class="gt_row gt_left" headers="precip_tot_Summer_p_valor">&lt;0.001</td>
+<td class="gt_row gt_left" headers="altitude_p_valor">&lt;0.001</td>
+<td class="gt_row gt_left" headers="temp_med_Winter_p_valor">&lt;0.001</td>
+<td class="gt_row gt_left" headers="tipo_regiaometropolitana_p_valor">&lt;0.001</td>
 </tr>
 <tr class="even">
-<td class="gt_row gt_left" headers="Variável">region3</td>
-<td class="gt_row gt_right" headers="Epidêmico_OR">1.50</td>
-<td class="gt_row gt_left" headers="Epidêmico_IC95">[1.5 - 1.5]</td>
-<td class="gt_row gt_center" headers="Epidêmico_p_valor">—</td>
-<td class="gt_row gt_right" headers="Episódico_OR">0.32</td>
-<td class="gt_row gt_left" headers="Episódico_IC95">[0.32 - 0.32]</td>
-<td class="gt_row gt_center" headers="Episódico_p_valor">—</td>
-<td class="gt_row gt_right" headers="Sem transmissão_OR">0.08</td>
-<td class="gt_row gt_left" headers="Sem transmissão_IC95">[0.08 - 0.08]</td>
-<td class="gt_row gt_center" headers="Sem transmissão_p_valor">—</td>
-<td class="gt_row gt_right" headers="Transmissão Persistente_OR">63.87</td>
-<td class="gt_row gt_left" headers="Transmissão Persistente_IC95">[63.87 - 63.88]</td>
-<td class="gt_row gt_center" headers="Transmissão Persistente_p_valor">—</td>
+<td class="gt_row gt_left" headers="Variável">Episódico</td>
+<td class="gt_row gt_right" headers="(Intercept)_OR">22026.47</td>
+<td class="gt_row gt_right" headers="region2_OR">5.54</td>
+<td class="gt_row gt_right" headers="region3_OR">0.32</td>
+<td class="gt_row gt_right" headers="region4_OR">0.89</td>
+<td class="gt_row gt_right" headers="region5_OR">0.30</td>
+<td class="gt_row gt_right" headers="pop10_OR">1.00</td>
+<td class="gt_row gt_right" headers="thr_temp_Spring_OR">0.85</td>
+<td class="gt_row gt_right" headers="biomaamazonia_OR">10.20</td>
+<td class="gt_row gt_right" headers="biomacaatinga_OR">0.50</td>
+<td class="gt_row gt_right" headers="biomacerrado_OR">2.81</td>
+<td class="gt_row gt_right" headers="biomapampa_OR">9.34</td>
+<td class="gt_row gt_right" headers="biomapantanal_OR">5.54</td>
+<td class="gt_row gt_right" headers="koppenAf_OR">2.89</td>
+<td class="gt_row gt_right" headers="koppenAm_OR">0.71</td>
+<td class="gt_row gt_right" headers="koppenAs_OR">1.25</td>
+<td class="gt_row gt_right" headers="koppenBSh_OR">0.87</td>
+<td class="gt_row gt_right" headers="koppenCfa_OR">0.19</td>
+<td class="gt_row gt_right" headers="koppenCfb_OR">0.42</td>
+<td class="gt_row gt_right" headers="koppenCwa_OR">0.82</td>
+<td class="gt_row gt_right" headers="koppenCwb_OR">0.51</td>
+<td class="gt_row gt_right" headers="umid_med_Summer_OR">0.92</td>
+<td class="gt_row gt_right" headers="thr_prec_Spring_OR">1.01</td>
+<td class="gt_row gt_right" headers="thr_temp_Summer_OR">1.11</td>
+<td class="gt_row gt_right" headers="umid_med_Spring_OR">0.92</td>
+<td class="gt_row gt_right" headers="thr_umid_Spring_OR">1.03</td>
+<td class="gt_row gt_right" headers="precip_tot_Summer_OR">1.00</td>
+<td class="gt_row gt_right" headers="altitude_OR">1.00</td>
+<td class="gt_row gt_right" headers="temp_med_Winter_OR">0.89</td>
+<td class="gt_row gt_right" headers="tipo_regiaometropolitana_OR">0.81</td>
+<td class="gt_row gt_left" headers="(Intercept)_IC95">[22026.30 - 22026.63]</td>
+<td class="gt_row gt_left" headers="region2_IC95">[5.54 - 5.54]</td>
+<td class="gt_row gt_left" headers="region3_IC95">[0.32 - 0.32]</td>
+<td class="gt_row gt_left" headers="region4_IC95">[0.89 - 0.89]</td>
+<td class="gt_row gt_left" headers="region5_IC95">[0.30 - 0.30]</td>
+<td class="gt_row gt_left" headers="pop10_IC95">[1.00 - 1.00]</td>
+<td class="gt_row gt_left" headers="thr_temp_Spring_IC95">[0.85 - 0.85]</td>
+<td class="gt_row gt_left" headers="biomaamazonia_IC95">[10.20 - 10.20]</td>
+<td class="gt_row gt_left" headers="biomacaatinga_IC95">[0.50 - 0.50]</td>
+<td class="gt_row gt_left" headers="biomacerrado_IC95">[2.81 - 2.81]</td>
+<td class="gt_row gt_left" headers="biomapampa_IC95">[9.34 - 9.34]</td>
+<td class="gt_row gt_left" headers="biomapantanal_IC95">[5.54 - 5.54]</td>
+<td class="gt_row gt_left" headers="koppenAf_IC95">[2.89 - 2.89]</td>
+<td class="gt_row gt_left" headers="koppenAm_IC95">[0.71 - 0.71]</td>
+<td class="gt_row gt_left" headers="koppenAs_IC95">[1.25 - 1.25]</td>
+<td class="gt_row gt_left" headers="koppenBSh_IC95">[0.87 - 0.87]</td>
+<td class="gt_row gt_left" headers="koppenCfa_IC95">[0.19 - 0.19]</td>
+<td class="gt_row gt_left" headers="koppenCfb_IC95">[0.42 - 0.42]</td>
+<td class="gt_row gt_left" headers="koppenCwa_IC95">[0.82 - 0.82]</td>
+<td class="gt_row gt_left" headers="koppenCwb_IC95">[0.51 - 0.51]</td>
+<td class="gt_row gt_left" headers="umid_med_Summer_IC95">[0.92 - 0.92]</td>
+<td class="gt_row gt_left" headers="thr_prec_Spring_IC95">[1.01 - 1.01]</td>
+<td class="gt_row gt_left" headers="thr_temp_Summer_IC95">[1.11 - 1.11]</td>
+<td class="gt_row gt_left" headers="umid_med_Spring_IC95">[0.92 - 0.92]</td>
+<td class="gt_row gt_left" headers="thr_umid_Spring_IC95">[1.03 - 1.03]</td>
+<td class="gt_row gt_left" headers="precip_tot_Summer_IC95">[1.00 - 1.00]</td>
+<td class="gt_row gt_left" headers="altitude_IC95">[1.00 - 1.00]</td>
+<td class="gt_row gt_left" headers="temp_med_Winter_IC95">[0.89 - 0.89]</td>
+<td class="gt_row gt_left" headers="tipo_regiaometropolitana_IC95">[0.81 - 0.81]</td>
+<td class="gt_row gt_left" headers="(Intercept)_p_valor">&lt;0.001</td>
+<td class="gt_row gt_left" headers="region2_p_valor">&lt;0.001</td>
+<td class="gt_row gt_left" headers="region3_p_valor">&lt;0.001</td>
+<td class="gt_row gt_left" headers="region4_p_valor">&lt;0.001</td>
+<td class="gt_row gt_left" headers="region5_p_valor">&lt;0.001</td>
+<td class="gt_row gt_left" headers="pop10_p_valor">&lt;0.001</td>
+<td class="gt_row gt_left" headers="thr_temp_Spring_p_valor">&lt;0.001</td>
+<td class="gt_row gt_left" headers="biomaamazonia_p_valor">&lt;0.001</td>
+<td class="gt_row gt_left" headers="biomacaatinga_p_valor">&lt;0.001</td>
+<td class="gt_row gt_left" headers="biomacerrado_p_valor">&lt;0.001</td>
+<td class="gt_row gt_left" headers="biomapampa_p_valor">&lt;0.001</td>
+<td class="gt_row gt_left" headers="biomapantanal_p_valor">&lt;0.001</td>
+<td class="gt_row gt_left" headers="koppenAf_p_valor">&lt;0.001</td>
+<td class="gt_row gt_left" headers="koppenAm_p_valor">&lt;0.001</td>
+<td class="gt_row gt_left" headers="koppenAs_p_valor">&lt;0.001</td>
+<td class="gt_row gt_left" headers="koppenBSh_p_valor">&lt;0.001</td>
+<td class="gt_row gt_left" headers="koppenCfa_p_valor">&lt;0.001</td>
+<td class="gt_row gt_left" headers="koppenCfb_p_valor">&lt;0.001</td>
+<td class="gt_row gt_left" headers="koppenCwa_p_valor">&lt;0.001</td>
+<td class="gt_row gt_left" headers="koppenCwb_p_valor">&lt;0.001</td>
+<td class="gt_row gt_left" headers="umid_med_Summer_p_valor">&lt;0.001</td>
+<td class="gt_row gt_left" headers="thr_prec_Spring_p_valor">&lt;0.001</td>
+<td class="gt_row gt_left" headers="thr_temp_Summer_p_valor">&lt;0.001</td>
+<td class="gt_row gt_left" headers="umid_med_Spring_p_valor">&lt;0.001</td>
+<td class="gt_row gt_left" headers="thr_umid_Spring_p_valor">&lt;0.001</td>
+<td class="gt_row gt_left" headers="precip_tot_Summer_p_valor">&lt;0.001</td>
+<td class="gt_row gt_left" headers="altitude_p_valor">&lt;0.001</td>
+<td class="gt_row gt_left" headers="temp_med_Winter_p_valor">&lt;0.001</td>
+<td class="gt_row gt_left" headers="tipo_regiaometropolitana_p_valor">&lt;0.001</td>
 </tr>
 <tr class="odd">
-<td class="gt_row gt_left" headers="Variável">region4</td>
-<td class="gt_row gt_right" headers="Epidêmico_OR">1.11</td>
-<td class="gt_row gt_left" headers="Epidêmico_IC95">[1.11 - 1.11]</td>
-<td class="gt_row gt_center" headers="Epidêmico_p_valor">—</td>
-<td class="gt_row gt_right" headers="Episódico_OR">0.89</td>
-<td class="gt_row gt_left" headers="Episódico_IC95">[0.89 - 0.89]</td>
-<td class="gt_row gt_center" headers="Episódico_p_valor">—</td>
-<td class="gt_row gt_right" headers="Sem transmissão_OR">2.14</td>
-<td class="gt_row gt_left" headers="Sem transmissão_IC95">[2.14 - 2.14]</td>
-<td class="gt_row gt_center" headers="Sem transmissão_p_valor">—</td>
-<td class="gt_row gt_right" headers="Transmissão Persistente_OR">0.00</td>
-<td class="gt_row gt_left" headers="Transmissão Persistente_IC95">[0 - 0]</td>
-<td class="gt_row gt_center" headers="Transmissão Persistente_p_valor">—</td>
+<td class="gt_row gt_left" headers="Variável">Sem transmissão</td>
+<td class="gt_row gt_right" headers="(Intercept)_OR">22026.47</td>
+<td class="gt_row gt_right" headers="region2_OR">2.20</td>
+<td class="gt_row gt_right" headers="region3_OR">0.08</td>
+<td class="gt_row gt_right" headers="region4_OR">2.14</td>
+<td class="gt_row gt_right" headers="region5_OR">0.23</td>
+<td class="gt_row gt_right" headers="pop10_OR">1.00</td>
+<td class="gt_row gt_right" headers="thr_temp_Spring_OR">0.78</td>
+<td class="gt_row gt_right" headers="biomaamazonia_OR">82.43</td>
+<td class="gt_row gt_right" headers="biomacaatinga_OR">0.95</td>
+<td class="gt_row gt_right" headers="biomacerrado_OR">2.70</td>
+<td class="gt_row gt_right" headers="biomapampa_OR">9.48</td>
+<td class="gt_row gt_right" headers="biomapantanal_OR">0.02</td>
+<td class="gt_row gt_right" headers="koppenAf_OR">19.54</td>
+<td class="gt_row gt_right" headers="koppenAm_OR">0.43</td>
+<td class="gt_row gt_right" headers="koppenAs_OR">1.13</td>
+<td class="gt_row gt_right" headers="koppenBSh_OR">0.41</td>
+<td class="gt_row gt_right" headers="koppenCfa_OR">0.01</td>
+<td class="gt_row gt_right" headers="koppenCfb_OR">0.01</td>
+<td class="gt_row gt_right" headers="koppenCwa_OR">0.39</td>
+<td class="gt_row gt_right" headers="koppenCwb_OR">0.08</td>
+<td class="gt_row gt_right" headers="umid_med_Summer_OR">0.88</td>
+<td class="gt_row gt_right" headers="thr_prec_Spring_OR">1.01</td>
+<td class="gt_row gt_right" headers="thr_temp_Summer_OR">1.11</td>
+<td class="gt_row gt_right" headers="umid_med_Spring_OR">0.73</td>
+<td class="gt_row gt_right" headers="thr_umid_Spring_OR">1.09</td>
+<td class="gt_row gt_right" headers="precip_tot_Summer_OR">1.00</td>
+<td class="gt_row gt_right" headers="altitude_OR">1.00</td>
+<td class="gt_row gt_right" headers="temp_med_Winter_OR">0.68</td>
+<td class="gt_row gt_right" headers="tipo_regiaometropolitana_OR">0.66</td>
+<td class="gt_row gt_left" headers="(Intercept)_IC95">[22026.09 - 22026.84]</td>
+<td class="gt_row gt_left" headers="region2_IC95">[2.20 - 2.20]</td>
+<td class="gt_row gt_left" headers="region3_IC95">[0.08 - 0.08]</td>
+<td class="gt_row gt_left" headers="region4_IC95">[2.14 - 2.14]</td>
+<td class="gt_row gt_left" headers="region5_IC95">[0.23 - 0.23]</td>
+<td class="gt_row gt_left" headers="pop10_IC95">[1.00 - 1.00]</td>
+<td class="gt_row gt_left" headers="thr_temp_Spring_IC95">[0.78 - 0.78]</td>
+<td class="gt_row gt_left" headers="biomaamazonia_IC95">[82.43 - 82.43]</td>
+<td class="gt_row gt_left" headers="biomacaatinga_IC95">[0.95 - 0.95]</td>
+<td class="gt_row gt_left" headers="biomacerrado_IC95">[2.70 - 2.70]</td>
+<td class="gt_row gt_left" headers="biomapampa_IC95">[9.48 - 9.48]</td>
+<td class="gt_row gt_left" headers="biomapantanal_IC95">[0.02 - 0.02]</td>
+<td class="gt_row gt_left" headers="koppenAf_IC95">[19.54 - 19.54]</td>
+<td class="gt_row gt_left" headers="koppenAm_IC95">[0.43 - 0.43]</td>
+<td class="gt_row gt_left" headers="koppenAs_IC95">[1.13 - 1.13]</td>
+<td class="gt_row gt_left" headers="koppenBSh_IC95">[0.41 - 0.41]</td>
+<td class="gt_row gt_left" headers="koppenCfa_IC95">[0.01 - 0.01]</td>
+<td class="gt_row gt_left" headers="koppenCfb_IC95">[0.01 - 0.01]</td>
+<td class="gt_row gt_left" headers="koppenCwa_IC95">[0.39 - 0.39]</td>
+<td class="gt_row gt_left" headers="koppenCwb_IC95">[0.08 - 0.08]</td>
+<td class="gt_row gt_left" headers="umid_med_Summer_IC95">[0.88 - 0.89]</td>
+<td class="gt_row gt_left" headers="thr_prec_Spring_IC95">[1.01 - 1.01]</td>
+<td class="gt_row gt_left" headers="thr_temp_Summer_IC95">[1.10 - 1.11]</td>
+<td class="gt_row gt_left" headers="umid_med_Spring_IC95">[0.72 - 0.73]</td>
+<td class="gt_row gt_left" headers="thr_umid_Spring_IC95">[1.09 - 1.09]</td>
+<td class="gt_row gt_left" headers="precip_tot_Summer_IC95">[1.00 - 1.00]</td>
+<td class="gt_row gt_left" headers="altitude_IC95">[1.00 - 1.00]</td>
+<td class="gt_row gt_left" headers="temp_med_Winter_IC95">[0.68 - 0.68]</td>
+<td class="gt_row gt_left" headers="tipo_regiaometropolitana_IC95">[0.66 - 0.66]</td>
+<td class="gt_row gt_left" headers="(Intercept)_p_valor">&lt;0.001</td>
+<td class="gt_row gt_left" headers="region2_p_valor">&lt;0.001</td>
+<td class="gt_row gt_left" headers="region3_p_valor">&lt;0.001</td>
+<td class="gt_row gt_left" headers="region4_p_valor">&lt;0.001</td>
+<td class="gt_row gt_left" headers="region5_p_valor">&lt;0.001</td>
+<td class="gt_row gt_left" headers="pop10_p_valor">&lt;0.001</td>
+<td class="gt_row gt_left" headers="thr_temp_Spring_p_valor">&lt;0.001</td>
+<td class="gt_row gt_left" headers="biomaamazonia_p_valor">&lt;0.001</td>
+<td class="gt_row gt_left" headers="biomacaatinga_p_valor">&lt;0.001</td>
+<td class="gt_row gt_left" headers="biomacerrado_p_valor">&lt;0.001</td>
+<td class="gt_row gt_left" headers="biomapampa_p_valor">&lt;0.001</td>
+<td class="gt_row gt_left" headers="biomapantanal_p_valor">&lt;0.001</td>
+<td class="gt_row gt_left" headers="koppenAf_p_valor">&lt;0.001</td>
+<td class="gt_row gt_left" headers="koppenAm_p_valor">&lt;0.001</td>
+<td class="gt_row gt_left" headers="koppenAs_p_valor">&lt;0.001</td>
+<td class="gt_row gt_left" headers="koppenBSh_p_valor">&lt;0.001</td>
+<td class="gt_row gt_left" headers="koppenCfa_p_valor">&lt;0.001</td>
+<td class="gt_row gt_left" headers="koppenCfb_p_valor">&lt;0.001</td>
+<td class="gt_row gt_left" headers="koppenCwa_p_valor">&lt;0.001</td>
+<td class="gt_row gt_left" headers="koppenCwb_p_valor">&lt;0.001</td>
+<td class="gt_row gt_left" headers="umid_med_Summer_p_valor">&lt;0.001</td>
+<td class="gt_row gt_left" headers="thr_prec_Spring_p_valor">&lt;0.001</td>
+<td class="gt_row gt_left" headers="thr_temp_Summer_p_valor">&lt;0.001</td>
+<td class="gt_row gt_left" headers="umid_med_Spring_p_valor">&lt;0.001</td>
+<td class="gt_row gt_left" headers="thr_umid_Spring_p_valor">&lt;0.001</td>
+<td class="gt_row gt_left" headers="precip_tot_Summer_p_valor">&lt;0.001</td>
+<td class="gt_row gt_left" headers="altitude_p_valor">&lt;0.001</td>
+<td class="gt_row gt_left" headers="temp_med_Winter_p_valor">&lt;0.001</td>
+<td class="gt_row gt_left" headers="tipo_regiaometropolitana_p_valor">&lt;0.001</td>
 </tr>
 <tr class="even">
-<td class="gt_row gt_left" headers="Variável">region5</td>
-<td class="gt_row gt_right" headers="Epidêmico_OR">1.21</td>
-<td class="gt_row gt_left" headers="Epidêmico_IC95">[1.21 - 1.21]</td>
-<td class="gt_row gt_center" headers="Epidêmico_p_valor">—</td>
-<td class="gt_row gt_right" headers="Episódico_OR">0.30</td>
-<td class="gt_row gt_left" headers="Episódico_IC95">[0.3 - 0.3]</td>
-<td class="gt_row gt_center" headers="Episódico_p_valor">—</td>
-<td class="gt_row gt_right" headers="Sem transmissão_OR">0.23</td>
-<td class="gt_row gt_left" headers="Sem transmissão_IC95">[0.23 - 0.23]</td>
-<td class="gt_row gt_center" headers="Sem transmissão_p_valor">—</td>
-<td class="gt_row gt_right" headers="Transmissão Persistente_OR">0.35</td>
-<td class="gt_row gt_left" headers="Transmissão Persistente_IC95">[0.35 - 0.35]</td>
-<td class="gt_row gt_center" headers="Transmissão Persistente_p_valor">—</td>
-</tr>
-<tr class="odd">
-<td class="gt_row gt_left" headers="Variável">pop10</td>
-<td class="gt_row gt_right" headers="Epidêmico_OR">1.00</td>
-<td class="gt_row gt_left" headers="Epidêmico_IC95">[1 - 1]</td>
-<td class="gt_row gt_center" headers="Epidêmico_p_valor">—</td>
-<td class="gt_row gt_right" headers="Episódico_OR">1.00</td>
-<td class="gt_row gt_left" headers="Episódico_IC95">[1 - 1]</td>
-<td class="gt_row gt_center" headers="Episódico_p_valor">—</td>
-<td class="gt_row gt_right" headers="Sem transmissão_OR">1.00</td>
-<td class="gt_row gt_left" headers="Sem transmissão_IC95">[1 - 1]</td>
-<td class="gt_row gt_center" headers="Sem transmissão_p_valor">—</td>
-<td class="gt_row gt_right" headers="Transmissão Persistente_OR">1.00</td>
-<td class="gt_row gt_left" headers="Transmissão Persistente_IC95">[1 - 1]</td>
-<td class="gt_row gt_center" headers="Transmissão Persistente_p_valor">—</td>
-</tr>
-<tr class="even">
-<td class="gt_row gt_left" headers="Variável">thr_temp_Spring</td>
-<td class="gt_row gt_right" headers="Epidêmico_OR">1.13</td>
-<td class="gt_row gt_left" headers="Epidêmico_IC95">[1.12 - 1.13]</td>
-<td class="gt_row gt_center" headers="Epidêmico_p_valor">—</td>
-<td class="gt_row gt_right" headers="Episódico_OR">0.85</td>
-<td class="gt_row gt_left" headers="Episódico_IC95">[0.85 - 0.85]</td>
-<td class="gt_row gt_center" headers="Episódico_p_valor">—</td>
-<td class="gt_row gt_right" headers="Sem transmissão_OR">0.78</td>
-<td class="gt_row gt_left" headers="Sem transmissão_IC95">[0.78 - 0.78]</td>
-<td class="gt_row gt_center" headers="Sem transmissão_p_valor">—</td>
-<td class="gt_row gt_right" headers="Transmissão Persistente_OR">1.29</td>
-<td class="gt_row gt_left" headers="Transmissão Persistente_IC95">[1.29 - 1.29]</td>
-<td class="gt_row gt_center" headers="Transmissão Persistente_p_valor">—</td>
-</tr>
-<tr class="odd">
-<td class="gt_row gt_left" headers="Variável">biomaamazonia</td>
-<td class="gt_row gt_right" headers="Epidêmico_OR">0.05</td>
-<td class="gt_row gt_left" headers="Epidêmico_IC95">[0.05 - 0.05]</td>
-<td class="gt_row gt_center" headers="Epidêmico_p_valor">—</td>
-<td class="gt_row gt_right" headers="Episódico_OR">10.20</td>
-<td class="gt_row gt_left" headers="Episódico_IC95">[10.2 - 10.2]</td>
-<td class="gt_row gt_center" headers="Episódico_p_valor">—</td>
-<td class="gt_row gt_right" headers="Sem transmissão_OR">82.43</td>
-<td class="gt_row gt_left" headers="Sem transmissão_IC95">[82.43 - 82.43]</td>
-<td class="gt_row gt_center" headers="Sem transmissão_p_valor">—</td>
-<td class="gt_row gt_right" headers="Transmissão Persistente_OR">3806.07</td>
-<td class="gt_row gt_left" headers="Transmissão Persistente_IC95">[3806.06 - 3806.08]</td>
-<td class="gt_row gt_center" headers="Transmissão Persistente_p_valor">—</td>
-</tr>
-<tr class="even">
-<td class="gt_row gt_left" headers="Variável">biomacaatinga</td>
-<td class="gt_row gt_right" headers="Epidêmico_OR">2.05</td>
-<td class="gt_row gt_left" headers="Epidêmico_IC95">[2.05 - 2.05]</td>
-<td class="gt_row gt_center" headers="Epidêmico_p_valor">—</td>
-<td class="gt_row gt_right" headers="Episódico_OR">0.50</td>
-<td class="gt_row gt_left" headers="Episódico_IC95">[0.5 - 0.5]</td>
-<td class="gt_row gt_center" headers="Episódico_p_valor">—</td>
-<td class="gt_row gt_right" headers="Sem transmissão_OR">0.95</td>
-<td class="gt_row gt_left" headers="Sem transmissão_IC95">[0.95 - 0.95]</td>
-<td class="gt_row gt_center" headers="Sem transmissão_p_valor">—</td>
-<td class="gt_row gt_right" headers="Transmissão Persistente_OR">13117.93</td>
-<td class="gt_row gt_left" headers="Transmissão Persistente_IC95">[13117.93 - 13117.94]</td>
-<td class="gt_row gt_center" headers="Transmissão Persistente_p_valor">—</td>
-</tr>
-<tr class="odd">
-<td class="gt_row gt_left" headers="Variável">biomacerrado</td>
-<td class="gt_row gt_right" headers="Epidêmico_OR">0.32</td>
-<td class="gt_row gt_left" headers="Epidêmico_IC95">[0.32 - 0.32]</td>
-<td class="gt_row gt_center" headers="Epidêmico_p_valor">—</td>
-<td class="gt_row gt_right" headers="Episódico_OR">2.81</td>
-<td class="gt_row gt_left" headers="Episódico_IC95">[2.81 - 2.81]</td>
-<td class="gt_row gt_center" headers="Episódico_p_valor">—</td>
-<td class="gt_row gt_right" headers="Sem transmissão_OR">2.70</td>
-<td class="gt_row gt_left" headers="Sem transmissão_IC95">[2.7 - 2.7]</td>
-<td class="gt_row gt_center" headers="Sem transmissão_p_valor">—</td>
-<td class="gt_row gt_right" headers="Transmissão Persistente_OR">0.47</td>
-<td class="gt_row gt_left" headers="Transmissão Persistente_IC95">[0.47 - 0.47]</td>
-<td class="gt_row gt_center" headers="Transmissão Persistente_p_valor">—</td>
-</tr>
-<tr class="even">
-<td class="gt_row gt_left" headers="Variável">biomapampa</td>
-<td class="gt_row gt_right" headers="Epidêmico_OR">0.00</td>
-<td class="gt_row gt_left" headers="Epidêmico_IC95">[0 - 0]</td>
-<td class="gt_row gt_center" headers="Epidêmico_p_valor">—</td>
-<td class="gt_row gt_right" headers="Episódico_OR">9.34</td>
-<td class="gt_row gt_left" headers="Episódico_IC95">[9.34 - 9.34]</td>
-<td class="gt_row gt_center" headers="Episódico_p_valor">—</td>
-<td class="gt_row gt_right" headers="Sem transmissão_OR">9.48</td>
-<td class="gt_row gt_left" headers="Sem transmissão_IC95">[9.48 - 9.48]</td>
-<td class="gt_row gt_center" headers="Sem transmissão_p_valor">—</td>
-<td class="gt_row gt_right" headers="Transmissão Persistente_OR">0.00</td>
-<td class="gt_row gt_left" headers="Transmissão Persistente_IC95">[0 - 0]</td>
-<td class="gt_row gt_center" headers="Transmissão Persistente_p_valor">—</td>
-</tr>
-<tr class="odd">
-<td class="gt_row gt_left" headers="Variável">biomapantanal</td>
-<td class="gt_row gt_right" headers="Epidêmico_OR">0.11</td>
-<td class="gt_row gt_left" headers="Epidêmico_IC95">[0.11 - 0.11]</td>
-<td class="gt_row gt_center" headers="Epidêmico_p_valor">—</td>
-<td class="gt_row gt_right" headers="Episódico_OR">5.54</td>
-<td class="gt_row gt_left" headers="Episódico_IC95">[5.54 - 5.54]</td>
-<td class="gt_row gt_center" headers="Episódico_p_valor">—</td>
-<td class="gt_row gt_right" headers="Sem transmissão_OR">0.02</td>
-<td class="gt_row gt_left" headers="Sem transmissão_IC95">[0.02 - 0.02]</td>
-<td class="gt_row gt_center" headers="Sem transmissão_p_valor">—</td>
-<td class="gt_row gt_right" headers="Transmissão Persistente_OR">0.01</td>
-<td class="gt_row gt_left" headers="Transmissão Persistente_IC95">[0.01 - 0.01]</td>
-<td class="gt_row gt_center" headers="Transmissão Persistente_p_valor">—</td>
-</tr>
-<tr class="even">
-<td class="gt_row gt_left" headers="Variável">koppenAf</td>
-<td class="gt_row gt_right" headers="Epidêmico_OR">1.61</td>
-<td class="gt_row gt_left" headers="Epidêmico_IC95">[1.61 - 1.61]</td>
-<td class="gt_row gt_center" headers="Epidêmico_p_valor">—</td>
-<td class="gt_row gt_right" headers="Episódico_OR">2.89</td>
-<td class="gt_row gt_left" headers="Episódico_IC95">[2.89 - 2.89]</td>
-<td class="gt_row gt_center" headers="Episódico_p_valor">—</td>
-<td class="gt_row gt_right" headers="Sem transmissão_OR">19.54</td>
-<td class="gt_row gt_left" headers="Sem transmissão_IC95">[19.54 - 19.54]</td>
-<td class="gt_row gt_center" headers="Sem transmissão_p_valor">—</td>
-<td class="gt_row gt_right" headers="Transmissão Persistente_OR">4.18</td>
-<td class="gt_row gt_left" headers="Transmissão Persistente_IC95">[4.18 - 4.18]</td>
-<td class="gt_row gt_center" headers="Transmissão Persistente_p_valor">—</td>
-</tr>
-<tr class="odd">
-<td class="gt_row gt_left" headers="Variável">koppenAm</td>
-<td class="gt_row gt_right" headers="Epidêmico_OR">1.66</td>
-<td class="gt_row gt_left" headers="Epidêmico_IC95">[1.66 - 1.66]</td>
-<td class="gt_row gt_center" headers="Epidêmico_p_valor">—</td>
-<td class="gt_row gt_right" headers="Episódico_OR">0.71</td>
-<td class="gt_row gt_left" headers="Episódico_IC95">[0.71 - 0.71]</td>
-<td class="gt_row gt_center" headers="Episódico_p_valor">—</td>
-<td class="gt_row gt_right" headers="Sem transmissão_OR">0.43</td>
-<td class="gt_row gt_left" headers="Sem transmissão_IC95">[0.43 - 0.43]</td>
-<td class="gt_row gt_center" headers="Sem transmissão_p_valor">—</td>
-<td class="gt_row gt_right" headers="Transmissão Persistente_OR">71.82</td>
-<td class="gt_row gt_left" headers="Transmissão Persistente_IC95">[71.82 - 71.82]</td>
-<td class="gt_row gt_center" headers="Transmissão Persistente_p_valor">—</td>
-</tr>
-<tr class="even">
-<td class="gt_row gt_left" headers="Variável">koppenAs</td>
-<td class="gt_row gt_right" headers="Epidêmico_OR">1.39</td>
-<td class="gt_row gt_left" headers="Epidêmico_IC95">[1.39 - 1.39]</td>
-<td class="gt_row gt_center" headers="Epidêmico_p_valor">—</td>
-<td class="gt_row gt_right" headers="Episódico_OR">1.25</td>
-<td class="gt_row gt_left" headers="Episódico_IC95">[1.25 - 1.25]</td>
-<td class="gt_row gt_center" headers="Episódico_p_valor">—</td>
-<td class="gt_row gt_right" headers="Sem transmissão_OR">1.13</td>
-<td class="gt_row gt_left" headers="Sem transmissão_IC95">[1.13 - 1.13]</td>
-<td class="gt_row gt_center" headers="Sem transmissão_p_valor">—</td>
-<td class="gt_row gt_right" headers="Transmissão Persistente_OR">13.70</td>
-<td class="gt_row gt_left" headers="Transmissão Persistente_IC95">[13.7 - 13.7]</td>
-<td class="gt_row gt_center" headers="Transmissão Persistente_p_valor">—</td>
-</tr>
-<tr class="odd">
-<td class="gt_row gt_left" headers="Variável">koppenBSh</td>
-<td class="gt_row gt_right" headers="Epidêmico_OR">3.10</td>
-<td class="gt_row gt_left" headers="Epidêmico_IC95">[3.1 - 3.1]</td>
-<td class="gt_row gt_center" headers="Epidêmico_p_valor">—</td>
-<td class="gt_row gt_right" headers="Episódico_OR">0.87</td>
-<td class="gt_row gt_left" headers="Episódico_IC95">[0.87 - 0.87]</td>
-<td class="gt_row gt_center" headers="Episódico_p_valor">—</td>
-<td class="gt_row gt_right" headers="Sem transmissão_OR">0.41</td>
-<td class="gt_row gt_left" headers="Sem transmissão_IC95">[0.41 - 0.41]</td>
-<td class="gt_row gt_center" headers="Sem transmissão_p_valor">—</td>
-<td class="gt_row gt_right" headers="Transmissão Persistente_OR">4.86</td>
-<td class="gt_row gt_left" headers="Transmissão Persistente_IC95">[4.86 - 4.86]</td>
-<td class="gt_row gt_center" headers="Transmissão Persistente_p_valor">—</td>
-</tr>
-<tr class="even">
-<td class="gt_row gt_left" headers="Variável">koppenCfa</td>
-<td class="gt_row gt_right" headers="Epidêmico_OR">4.31</td>
-<td class="gt_row gt_left" headers="Epidêmico_IC95">[4.31 - 4.31]</td>
-<td class="gt_row gt_center" headers="Epidêmico_p_valor">—</td>
-<td class="gt_row gt_right" headers="Episódico_OR">0.19</td>
-<td class="gt_row gt_left" headers="Episódico_IC95">[0.19 - 0.19]</td>
-<td class="gt_row gt_center" headers="Episódico_p_valor">—</td>
-<td class="gt_row gt_right" headers="Sem transmissão_OR">0.01</td>
-<td class="gt_row gt_left" headers="Sem transmissão_IC95">[0.01 - 0.01]</td>
-<td class="gt_row gt_center" headers="Sem transmissão_p_valor">—</td>
-<td class="gt_row gt_right" headers="Transmissão Persistente_OR">22.37</td>
-<td class="gt_row gt_left" headers="Transmissão Persistente_IC95">[22.37 - 22.37]</td>
-<td class="gt_row gt_center" headers="Transmissão Persistente_p_valor">—</td>
-</tr>
-<tr class="odd">
-<td class="gt_row gt_left" headers="Variável">koppenCfb</td>
-<td class="gt_row gt_right" headers="Epidêmico_OR">0.55</td>
-<td class="gt_row gt_left" headers="Epidêmico_IC95">[0.55 - 0.55]</td>
-<td class="gt_row gt_center" headers="Epidêmico_p_valor">—</td>
-<td class="gt_row gt_right" headers="Episódico_OR">0.42</td>
-<td class="gt_row gt_left" headers="Episódico_IC95">[0.42 - 0.42]</td>
-<td class="gt_row gt_center" headers="Episódico_p_valor">—</td>
-<td class="gt_row gt_right" headers="Sem transmissão_OR">0.01</td>
-<td class="gt_row gt_left" headers="Sem transmissão_IC95">[0.01 - 0.01]</td>
-<td class="gt_row gt_center" headers="Sem transmissão_p_valor">—</td>
-<td class="gt_row gt_right" headers="Transmissão Persistente_OR">179.36</td>
-<td class="gt_row gt_left" headers="Transmissão Persistente_IC95">[179.36 - 179.36]</td>
-<td class="gt_row gt_center" headers="Transmissão Persistente_p_valor">—</td>
-</tr>
-<tr class="even">
-<td class="gt_row gt_left" headers="Variável">koppenCwa</td>
-<td class="gt_row gt_right" headers="Epidêmico_OR">1.60</td>
-<td class="gt_row gt_left" headers="Epidêmico_IC95">[1.6 - 1.6]</td>
-<td class="gt_row gt_center" headers="Epidêmico_p_valor">—</td>
-<td class="gt_row gt_right" headers="Episódico_OR">0.82</td>
-<td class="gt_row gt_left" headers="Episódico_IC95">[0.82 - 0.82]</td>
-<td class="gt_row gt_center" headers="Episódico_p_valor">—</td>
-<td class="gt_row gt_right" headers="Sem transmissão_OR">0.39</td>
-<td class="gt_row gt_left" headers="Sem transmissão_IC95">[0.39 - 0.39]</td>
-<td class="gt_row gt_center" headers="Sem transmissão_p_valor">—</td>
-<td class="gt_row gt_right" headers="Transmissão Persistente_OR">1.42</td>
-<td class="gt_row gt_left" headers="Transmissão Persistente_IC95">[1.42 - 1.42]</td>
-<td class="gt_row gt_center" headers="Transmissão Persistente_p_valor">—</td>
-</tr>
-<tr class="odd">
-<td class="gt_row gt_left" headers="Variável">koppenCwb</td>
-<td class="gt_row gt_right" headers="Epidêmico_OR">3.60</td>
-<td class="gt_row gt_left" headers="Epidêmico_IC95">[3.6 - 3.6]</td>
-<td class="gt_row gt_center" headers="Epidêmico_p_valor">—</td>
-<td class="gt_row gt_right" headers="Episódico_OR">0.51</td>
-<td class="gt_row gt_left" headers="Episódico_IC95">[0.51 - 0.51]</td>
-<td class="gt_row gt_center" headers="Episódico_p_valor">—</td>
-<td class="gt_row gt_right" headers="Sem transmissão_OR">0.08</td>
-<td class="gt_row gt_left" headers="Sem transmissão_IC95">[0.08 - 0.08]</td>
-<td class="gt_row gt_center" headers="Sem transmissão_p_valor">—</td>
-<td class="gt_row gt_right" headers="Transmissão Persistente_OR">1400.04</td>
-<td class="gt_row gt_left" headers="Transmissão Persistente_IC95">[1400.04 - 1400.04]</td>
-<td class="gt_row gt_center" headers="Transmissão Persistente_p_valor">—</td>
-</tr>
-<tr class="even">
-<td class="gt_row gt_left" headers="Variável">umid_med_Summer</td>
-<td class="gt_row gt_right" headers="Epidêmico_OR">1.06</td>
-<td class="gt_row gt_left" headers="Epidêmico_IC95">[1.06 - 1.06]</td>
-<td class="gt_row gt_center" headers="Epidêmico_p_valor">—</td>
-<td class="gt_row gt_right" headers="Episódico_OR">0.92</td>
-<td class="gt_row gt_left" headers="Episódico_IC95">[0.92 - 0.92]</td>
-<td class="gt_row gt_center" headers="Episódico_p_valor">—</td>
-<td class="gt_row gt_right" headers="Sem transmissão_OR">0.88</td>
-<td class="gt_row gt_left" headers="Sem transmissão_IC95">[0.88 - 0.89]</td>
-<td class="gt_row gt_center" headers="Sem transmissão_p_valor">—</td>
-<td class="gt_row gt_right" headers="Transmissão Persistente_OR">3.45</td>
-<td class="gt_row gt_left" headers="Transmissão Persistente_IC95">[3.45 - 3.45]</td>
-<td class="gt_row gt_center" headers="Transmissão Persistente_p_valor">—</td>
-</tr>
-<tr class="odd">
-<td class="gt_row gt_left" headers="Variável">thr_prec_Spring</td>
-<td class="gt_row gt_right" headers="Epidêmico_OR">1.00</td>
-<td class="gt_row gt_left" headers="Epidêmico_IC95">[1 - 1]</td>
-<td class="gt_row gt_center" headers="Epidêmico_p_valor">—</td>
-<td class="gt_row gt_right" headers="Episódico_OR">1.01</td>
-<td class="gt_row gt_left" headers="Episódico_IC95">[1.01 - 1.01]</td>
-<td class="gt_row gt_center" headers="Episódico_p_valor">—</td>
-<td class="gt_row gt_right" headers="Sem transmissão_OR">1.01</td>
-<td class="gt_row gt_left" headers="Sem transmissão_IC95">[1.01 - 1.01]</td>
-<td class="gt_row gt_center" headers="Sem transmissão_p_valor">—</td>
-<td class="gt_row gt_right" headers="Transmissão Persistente_OR">1.84</td>
-<td class="gt_row gt_left" headers="Transmissão Persistente_IC95">[1.84 - 1.84]</td>
-<td class="gt_row gt_center" headers="Transmissão Persistente_p_valor">—</td>
-</tr>
-<tr class="even">
-<td class="gt_row gt_left" headers="Variável">thr_temp_Summer</td>
-<td class="gt_row gt_right" headers="Epidêmico_OR">1.30</td>
-<td class="gt_row gt_left" headers="Epidêmico_IC95">[1.3 - 1.3]</td>
-<td class="gt_row gt_center" headers="Epidêmico_p_valor">—</td>
-<td class="gt_row gt_right" headers="Episódico_OR">1.11</td>
-<td class="gt_row gt_left" headers="Episódico_IC95">[1.11 - 1.11]</td>
-<td class="gt_row gt_center" headers="Episódico_p_valor">—</td>
-<td class="gt_row gt_right" headers="Sem transmissão_OR">1.11</td>
-<td class="gt_row gt_left" headers="Sem transmissão_IC95">[1.1 - 1.11]</td>
-<td class="gt_row gt_center" headers="Sem transmissão_p_valor">—</td>
-<td class="gt_row gt_right" headers="Transmissão Persistente_OR">1.36</td>
-<td class="gt_row gt_left" headers="Transmissão Persistente_IC95">[1.36 - 1.36]</td>
-<td class="gt_row gt_center" headers="Transmissão Persistente_p_valor">—</td>
-</tr>
-<tr class="odd">
-<td class="gt_row gt_left" headers="Variável">umid_med_Spring</td>
-<td class="gt_row gt_right" headers="Epidêmico_OR">1.12</td>
-<td class="gt_row gt_left" headers="Epidêmico_IC95">[1.12 - 1.12]</td>
-<td class="gt_row gt_center" headers="Epidêmico_p_valor">—</td>
-<td class="gt_row gt_right" headers="Episódico_OR">0.92</td>
-<td class="gt_row gt_left" headers="Episódico_IC95">[0.92 - 0.92]</td>
-<td class="gt_row gt_center" headers="Episódico_p_valor">—</td>
-<td class="gt_row gt_right" headers="Sem transmissão_OR">0.73</td>
-<td class="gt_row gt_left" headers="Sem transmissão_IC95">[0.72 - 0.73]</td>
-<td class="gt_row gt_center" headers="Sem transmissão_p_valor">—</td>
-<td class="gt_row gt_right" headers="Transmissão Persistente_OR">0.10</td>
-<td class="gt_row gt_left" headers="Transmissão Persistente_IC95">[0.1 - 0.1]</td>
-<td class="gt_row gt_center" headers="Transmissão Persistente_p_valor">—</td>
-</tr>
-<tr class="even">
-<td class="gt_row gt_left" headers="Variável">thr_umid_Spring</td>
-<td class="gt_row gt_right" headers="Epidêmico_OR">0.99</td>
-<td class="gt_row gt_left" headers="Epidêmico_IC95">[0.99 - 0.99]</td>
-<td class="gt_row gt_center" headers="Epidêmico_p_valor">—</td>
-<td class="gt_row gt_right" headers="Episódico_OR">1.03</td>
-<td class="gt_row gt_left" headers="Episódico_IC95">[1.03 - 1.03]</td>
-<td class="gt_row gt_center" headers="Episódico_p_valor">—</td>
-<td class="gt_row gt_right" headers="Sem transmissão_OR">1.09</td>
-<td class="gt_row gt_left" headers="Sem transmissão_IC95">[1.09 - 1.09]</td>
-<td class="gt_row gt_center" headers="Sem transmissão_p_valor">—</td>
-<td class="gt_row gt_right" headers="Transmissão Persistente_OR">1.44</td>
-<td class="gt_row gt_left" headers="Transmissão Persistente_IC95">[1.44 - 1.44]</td>
-<td class="gt_row gt_center" headers="Transmissão Persistente_p_valor">—</td>
-</tr>
-<tr class="odd">
-<td class="gt_row gt_left" headers="Variável">precip_tot_Summer</td>
-<td class="gt_row gt_right" headers="Epidêmico_OR">1.00</td>
-<td class="gt_row gt_left" headers="Epidêmico_IC95">[1 - 1]</td>
-<td class="gt_row gt_center" headers="Epidêmico_p_valor">—</td>
-<td class="gt_row gt_right" headers="Episódico_OR">1.00</td>
-<td class="gt_row gt_left" headers="Episódico_IC95">[1 - 1]</td>
-<td class="gt_row gt_center" headers="Episódico_p_valor">—</td>
-<td class="gt_row gt_right" headers="Sem transmissão_OR">1.00</td>
-<td class="gt_row gt_left" headers="Sem transmissão_IC95">[1 - 1]</td>
-<td class="gt_row gt_center" headers="Sem transmissão_p_valor">—</td>
-<td class="gt_row gt_right" headers="Transmissão Persistente_OR">1.00</td>
-<td class="gt_row gt_left" headers="Transmissão Persistente_IC95">[0.99 - 1]</td>
-<td class="gt_row gt_center" headers="Transmissão Persistente_p_valor">—</td>
-</tr>
-<tr class="even">
-<td class="gt_row gt_left" headers="Variável">altitude</td>
-<td class="gt_row gt_right" headers="Epidêmico_OR">1.00</td>
-<td class="gt_row gt_left" headers="Epidêmico_IC95">[1 - 1]</td>
-<td class="gt_row gt_center" headers="Epidêmico_p_valor">—</td>
-<td class="gt_row gt_right" headers="Episódico_OR">1.00</td>
-<td class="gt_row gt_left" headers="Episódico_IC95">[1 - 1]</td>
-<td class="gt_row gt_center" headers="Episódico_p_valor">—</td>
-<td class="gt_row gt_right" headers="Sem transmissão_OR">1.00</td>
-<td class="gt_row gt_left" headers="Sem transmissão_IC95">[1 - 1]</td>
-<td class="gt_row gt_center" headers="Sem transmissão_p_valor">—</td>
-<td class="gt_row gt_right" headers="Transmissão Persistente_OR">0.99</td>
-<td class="gt_row gt_left" headers="Transmissão Persistente_IC95">[0.99 - 0.99]</td>
-<td class="gt_row gt_center" headers="Transmissão Persistente_p_valor">—</td>
-</tr>
-<tr class="odd">
-<td class="gt_row gt_left" headers="Variável">temp_med_Winter</td>
-<td class="gt_row gt_right" headers="Epidêmico_OR">1.40</td>
-<td class="gt_row gt_left" headers="Epidêmico_IC95">[1.4 - 1.4]</td>
-<td class="gt_row gt_center" headers="Epidêmico_p_valor">—</td>
-<td class="gt_row gt_right" headers="Episódico_OR">0.89</td>
-<td class="gt_row gt_left" headers="Episódico_IC95">[0.89 - 0.89]</td>
-<td class="gt_row gt_center" headers="Episódico_p_valor">—</td>
-<td class="gt_row gt_right" headers="Sem transmissão_OR">0.68</td>
-<td class="gt_row gt_left" headers="Sem transmissão_IC95">[0.68 - 0.68]</td>
-<td class="gt_row gt_center" headers="Sem transmissão_p_valor">—</td>
-<td class="gt_row gt_right" headers="Transmissão Persistente_OR">0.13</td>
-<td class="gt_row gt_left" headers="Transmissão Persistente_IC95">[0.13 - 0.13]</td>
-<td class="gt_row gt_center" headers="Transmissão Persistente_p_valor">—</td>
-</tr>
-<tr class="even">
-<td class="gt_row gt_left" headers="Variável">tipo_regiaometropolitana</td>
-<td class="gt_row gt_right" headers="Epidêmico_OR">0.88</td>
-<td class="gt_row gt_left" headers="Epidêmico_IC95">[0.88 - 0.88]</td>
-<td class="gt_row gt_center" headers="Epidêmico_p_valor">—</td>
-<td class="gt_row gt_right" headers="Episódico_OR">0.81</td>
-<td class="gt_row gt_left" headers="Episódico_IC95">[0.81 - 0.81]</td>
-<td class="gt_row gt_center" headers="Episódico_p_valor">—</td>
-<td class="gt_row gt_right" headers="Sem transmissão_OR">0.66</td>
-<td class="gt_row gt_left" headers="Sem transmissão_IC95">[0.66 - 0.66]</td>
-<td class="gt_row gt_center" headers="Sem transmissão_p_valor">—</td>
-<td class="gt_row gt_right" headers="Transmissão Persistente_OR">4542.66</td>
-<td class="gt_row gt_left" headers="Transmissão Persistente_IC95">[4542.66 - 4542.66]</td>
-<td class="gt_row gt_center" headers="Transmissão Persistente_p_valor">—</td>
+<td class="gt_row gt_left" headers="Variável">Transmissão Persistente</td>
+<td class="gt_row gt_right" headers="(Intercept)_OR">68.74</td>
+<td class="gt_row gt_right" headers="region2_OR">9.09</td>
+<td class="gt_row gt_right" headers="region3_OR">63.87</td>
+<td class="gt_row gt_right" headers="region4_OR">0.00</td>
+<td class="gt_row gt_right" headers="region5_OR">0.35</td>
+<td class="gt_row gt_right" headers="pop10_OR">1.00</td>
+<td class="gt_row gt_right" headers="thr_temp_Spring_OR">1.29</td>
+<td class="gt_row gt_right" headers="biomaamazonia_OR">3806.07</td>
+<td class="gt_row gt_right" headers="biomacaatinga_OR">13117.93</td>
+<td class="gt_row gt_right" headers="biomacerrado_OR">0.47</td>
+<td class="gt_row gt_right" headers="biomapampa_OR">0.00</td>
+<td class="gt_row gt_right" headers="biomapantanal_OR">0.01</td>
+<td class="gt_row gt_right" headers="koppenAf_OR">4.18</td>
+<td class="gt_row gt_right" headers="koppenAm_OR">71.82</td>
+<td class="gt_row gt_right" headers="koppenAs_OR">13.70</td>
+<td class="gt_row gt_right" headers="koppenBSh_OR">4.86</td>
+<td class="gt_row gt_right" headers="koppenCfa_OR">22.37</td>
+<td class="gt_row gt_right" headers="koppenCfb_OR">179.36</td>
+<td class="gt_row gt_right" headers="koppenCwa_OR">1.42</td>
+<td class="gt_row gt_right" headers="koppenCwb_OR">1400.04</td>
+<td class="gt_row gt_right" headers="umid_med_Summer_OR">3.45</td>
+<td class="gt_row gt_right" headers="thr_prec_Spring_OR">1.84</td>
+<td class="gt_row gt_right" headers="thr_temp_Summer_OR">1.36</td>
+<td class="gt_row gt_right" headers="umid_med_Spring_OR">0.10</td>
+<td class="gt_row gt_right" headers="thr_umid_Spring_OR">1.44</td>
+<td class="gt_row gt_right" headers="precip_tot_Summer_OR">1.00</td>
+<td class="gt_row gt_right" headers="altitude_OR">0.99</td>
+<td class="gt_row gt_right" headers="temp_med_Winter_OR">0.13</td>
+<td class="gt_row gt_right" headers="tipo_regiaometropolitana_OR">4542.66</td>
+<td class="gt_row gt_left" headers="(Intercept)_IC95">[68.74 - 68.74]</td>
+<td class="gt_row gt_left" headers="region2_IC95">[9.09 - 9.09]</td>
+<td class="gt_row gt_left" headers="region3_IC95">[63.87 - 63.88]</td>
+<td class="gt_row gt_left" headers="region4_IC95">[0.00 - 0.00]</td>
+<td class="gt_row gt_left" headers="region5_IC95">[0.35 - 0.35]</td>
+<td class="gt_row gt_left" headers="pop10_IC95">[1.00 - 1.00]</td>
+<td class="gt_row gt_left" headers="thr_temp_Spring_IC95">[1.29 - 1.29]</td>
+<td class="gt_row gt_left" headers="biomaamazonia_IC95">[3806.06 - 3806.08]</td>
+<td class="gt_row gt_left" headers="biomacaatinga_IC95">[13117.93 - 13117.94]</td>
+<td class="gt_row gt_left" headers="biomacerrado_IC95">[0.47 - 0.47]</td>
+<td class="gt_row gt_left" headers="biomapampa_IC95">[0.00 - 0.00]</td>
+<td class="gt_row gt_left" headers="biomapantanal_IC95">[0.01 - 0.01]</td>
+<td class="gt_row gt_left" headers="koppenAf_IC95">[4.18 - 4.18]</td>
+<td class="gt_row gt_left" headers="koppenAm_IC95">[71.82 - 71.82]</td>
+<td class="gt_row gt_left" headers="koppenAs_IC95">[13.70 - 13.70]</td>
+<td class="gt_row gt_left" headers="koppenBSh_IC95">[4.86 - 4.86]</td>
+<td class="gt_row gt_left" headers="koppenCfa_IC95">[22.37 - 22.37]</td>
+<td class="gt_row gt_left" headers="koppenCfb_IC95">[179.36 - 179.36]</td>
+<td class="gt_row gt_left" headers="koppenCwa_IC95">[1.42 - 1.42]</td>
+<td class="gt_row gt_left" headers="koppenCwb_IC95">[1400.04 - 1400.04]</td>
+<td class="gt_row gt_left" headers="umid_med_Summer_IC95">[3.45 - 3.45]</td>
+<td class="gt_row gt_left" headers="thr_prec_Spring_IC95">[1.84 - 1.84]</td>
+<td class="gt_row gt_left" headers="thr_temp_Summer_IC95">[1.36 - 1.36]</td>
+<td class="gt_row gt_left" headers="umid_med_Spring_IC95">[0.10 - 0.10]</td>
+<td class="gt_row gt_left" headers="thr_umid_Spring_IC95">[1.44 - 1.44]</td>
+<td class="gt_row gt_left" headers="precip_tot_Summer_IC95">[0.99 - 1.00]</td>
+<td class="gt_row gt_left" headers="altitude_IC95">[0.99 - 0.99]</td>
+<td class="gt_row gt_left" headers="temp_med_Winter_IC95">[0.13 - 0.13]</td>
+<td class="gt_row gt_left" headers="tipo_regiaometropolitana_IC95">[4542.66 - 4542.66]</td>
+<td class="gt_row gt_left" headers="(Intercept)_p_valor">&lt;0.001</td>
+<td class="gt_row gt_left" headers="region2_p_valor">&lt;0.001</td>
+<td class="gt_row gt_left" headers="region3_p_valor">&lt;0.001</td>
+<td class="gt_row gt_left" headers="region4_p_valor">&lt;0.001</td>
+<td class="gt_row gt_left" headers="region5_p_valor">&lt;0.001</td>
+<td class="gt_row gt_left" headers="pop10_p_valor">&lt;0.001</td>
+<td class="gt_row gt_left" headers="thr_temp_Spring_p_valor">&lt;0.001</td>
+<td class="gt_row gt_left" headers="biomaamazonia_p_valor">&lt;0.001</td>
+<td class="gt_row gt_left" headers="biomacaatinga_p_valor">&lt;0.001</td>
+<td class="gt_row gt_left" headers="biomacerrado_p_valor">&lt;0.001</td>
+<td class="gt_row gt_left" headers="biomapampa_p_valor">&lt;0.001</td>
+<td class="gt_row gt_left" headers="biomapantanal_p_valor">&lt;0.001</td>
+<td class="gt_row gt_left" headers="koppenAf_p_valor">&lt;0.001</td>
+<td class="gt_row gt_left" headers="koppenAm_p_valor">&lt;0.001</td>
+<td class="gt_row gt_left" headers="koppenAs_p_valor">&lt;0.001</td>
+<td class="gt_row gt_left" headers="koppenBSh_p_valor">&lt;0.001</td>
+<td class="gt_row gt_left" headers="koppenCfa_p_valor">&lt;0.001</td>
+<td class="gt_row gt_left" headers="koppenCfb_p_valor">&lt;0.001</td>
+<td class="gt_row gt_left" headers="koppenCwa_p_valor">&lt;0.001</td>
+<td class="gt_row gt_left" headers="koppenCwb_p_valor">&lt;0.001</td>
+<td class="gt_row gt_left" headers="umid_med_Summer_p_valor">&lt;0.001</td>
+<td class="gt_row gt_left" headers="thr_prec_Spring_p_valor">&lt;0.001</td>
+<td class="gt_row gt_left" headers="thr_temp_Summer_p_valor">&lt;0.001</td>
+<td class="gt_row gt_left" headers="umid_med_Spring_p_valor">&lt;0.001</td>
+<td class="gt_row gt_left" headers="thr_umid_Spring_p_valor">&lt;0.001</td>
+<td class="gt_row gt_left" headers="precip_tot_Summer_p_valor">&lt;0.001</td>
+<td class="gt_row gt_left" headers="altitude_p_valor">&lt;0.001</td>
+<td class="gt_row gt_left" headers="temp_med_Winter_p_valor">&lt;0.001</td>
+<td class="gt_row gt_left" headers="tipo_regiaometropolitana_p_valor">&lt;0.001</td>
 </tr>
 </tbody>
 </table>
