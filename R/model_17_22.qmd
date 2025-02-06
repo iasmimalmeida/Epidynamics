@@ -190,6 +190,7 @@ summary(det_17_22)
 det_17_22$bioma <- relevel(det_17_22$bioma, ref = "mata atlantica")
 det_17_22$tipo_regiao <- relevel(det_17_22$tipo_regiao , ref = "nao metropolitana")
 det_17_22$koppen <- relevel(det_17_22$koppen, ref = "Aw")
+det_17_22$dengue_pattern_2010_2016 <- relevel(det_17_22$dengue_pattern_2010_2016, ref = "Episódico/Epidêmico") 
 summary(det_17_22)
 
 # Modelo com tudo
@@ -282,7 +283,6 @@ qqPlot(residuals_deviance,
 
 ```
 
-
 ## Reanalizando modelo final
 
 Nessa parte vamos olhar para o modelo final e rodar manualmente cada colocando variaveis em grupo e criar uma tabela de AIC e Acurácia, para ve se o modelo se enxuga. Depois gerar o gráfico de ODDS. Ratio.
@@ -290,12 +290,11 @@ Nessa parte vamos olhar para o modelo final e rodar manualmente cada colocando v
 #### modelo final
 
 ```{r}
-model_final <- modelo <- multinom(
-  formula = dengue_pattern ~ region + pop22 + dengue_pattern_2010_2016 + 
+model_final <- multinom(formula = dengue_pattern ~ region + pop22 + dengue_pattern_2010_2016 + 
     thr_temp_Spring + bioma + precip_tot_Autumn + altitude + 
-    thr_temp_umid_Autumn + precip_tot_Winter + thr_prec_Summer, 
-  data = det_17_22
-)
+    thr_temp_umid_Autumn + precip_tot_Winter + tipo_regiao + 
+    thr_temp_umid_Summer + precip_tot_Spring, data = det_17_22)
+
 model_final
 model_final <- na.omit(model_final)
 
@@ -342,7 +341,7 @@ coloca uma a uma
 ```{r}
 
 m2 <- multinom(formula = dengue_pattern ~ region + pop22 + dengue_pattern_2010_2016 + 
-    bioma + altitude, data = det_17_22)
+    bioma + altitude + tipo_regiao, data = det_17_22)
 m2
 m2 <- na.omit(m2)
 # previsoes
@@ -365,9 +364,10 @@ abline(h = 0, col = "red")
 ```{r}
 
 
-m3 <- multinom(formula = dengue_pattern ~ region + pop22 + + dengue_pattern_2010_2016 + thr_temp_Spring + precip_tot_Autumn +  thr_temp_umid_Autumn + precip_tot_Winter 
-               + thr_prec_Summer, data = det_17_22
-)
+m3 <-multinom(formula = dengue_pattern ~ region + pop22 + dengue_pattern_2010_2016 + 
+    thr_temp_Spring + precip_tot_Autumn + thr_temp_umid_Autumn + 
+      precip_tot_Winter + thr_temp_umid_Summer 
+    + precip_tot_Spring, data = det_17_22)
 
 m3
 m3 <- na.omit(m3)
@@ -390,6 +390,7 @@ abline(h = 0, col = "red")
 Agora com modelo com melhor AIC e acurácia
 
 ## Or e IC95%
+
 ```{r}
 # Obter os coeficientes do modelo
 coeficientes <- summary(model_final)$coefficients
@@ -412,8 +413,8 @@ tabela_resultado
 
 ```
 
-
 ## Figura
+
 ```{r, fig.width=10, fig.height=6, out.width="100%"}
 # geral
 # Extraindo os coeficientes do modelo multinomial com intervalo de confiança

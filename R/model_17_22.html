@@ -452,7 +452,8 @@ Specify the column types or set `show_col_types = FALSE` to quiet this message.
 <div class="sourceCode cell-code" id="cb16"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb16-1"><a href="#cb16-1" aria-hidden="true" tabindex="-1"></a>det_17_22<span class="sc">$</span>bioma <span class="ot">&lt;-</span> <span class="fu">relevel</span>(det_17_22<span class="sc">$</span>bioma, <span class="at">ref =</span> <span class="st">"mata atlantica"</span>)</span>
 <span id="cb16-2"><a href="#cb16-2" aria-hidden="true" tabindex="-1"></a>det_17_22<span class="sc">$</span>tipo_regiao <span class="ot">&lt;-</span> <span class="fu">relevel</span>(det_17_22<span class="sc">$</span>tipo_regiao , <span class="at">ref =</span> <span class="st">"nao metropolitana"</span>)</span>
 <span id="cb16-3"><a href="#cb16-3" aria-hidden="true" tabindex="-1"></a>det_17_22<span class="sc">$</span>koppen <span class="ot">&lt;-</span> <span class="fu">relevel</span>(det_17_22<span class="sc">$</span>koppen, <span class="at">ref =</span> <span class="st">"Aw"</span>)</span>
-<span id="cb16-4"><a href="#cb16-4" aria-hidden="true" tabindex="-1"></a><span class="fu">summary</span>(det_17_22)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<span id="cb16-4"><a href="#cb16-4" aria-hidden="true" tabindex="-1"></a>det_17_22<span class="sc">$</span>dengue_pattern_2010_2016 <span class="ot">&lt;-</span> <span class="fu">relevel</span>(det_17_22<span class="sc">$</span>dengue_pattern_2010_2016, <span class="at">ref =</span> <span class="st">"Episódico/Epidêmico"</span>) </span>
+<span id="cb16-5"><a href="#cb16-5" aria-hidden="true" tabindex="-1"></a><span class="fu">summary</span>(det_17_22)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 <div class="cell-output cell-output-stdout">
 <pre><code> region              tipo_regiao              bioma         altitude      
  1: 450   nao metropolitana:5125   mata atlantica:2736   Min.   :   1.67  
@@ -471,9 +472,9 @@ Specify the column types or set `show_col_types = FALSE` to quiet this message.
  Cfb    : 405   Max.   :12200180   Max.   :100.00   Max.   :100.00  
  (Other): 969                                                       
             dengue_pattern_2010_2016                 dengue_pattern
- Epidêmico              : 641        Episódico/Epidêmico    :2819  
- Episódico              :1722        Epidêmico              : 725  
- Episódico/Epidêmico    :2905        Episódico              :1841  
+ Episódico/Epidêmico    :2905        Episódico/Epidêmico    :2819  
+ Epidêmico              : 641        Epidêmico              : 725  
+ Episódico              :1722        Episódico              :1841  
  Sem transmissão        : 286        Sem transmissão        : 150  
  Transmissão Persistente:  13        Transmissão Persistente:  32  
                                                                    
@@ -540,17 +541,17 @@ Specify the column types or set `show_col_types = FALSE` to quiet this message.
 <div class="cell-output cell-output-stdout">
 <pre><code># weights:  280 (220 variable)
 initial  value 8959.740859 
-iter  10 value 6392.619146
-iter  20 value 5977.159155
-iter  30 value 5813.033637
-iter  40 value 5640.654785
-iter  50 value 5360.255387
-iter  60 value 5168.504319
-iter  70 value 4896.447242
-iter  80 value 4744.766753
-iter  90 value 4598.997945
-iter 100 value 4397.478924
-final  value 4397.478924 
+iter  10 value 6392.619641
+iter  20 value 5977.191619
+iter  30 value 5813.295862
+iter  40 value 5646.545606
+iter  50 value 5349.435789
+iter  60 value 5150.731260
+iter  70 value 4998.473721
+iter  80 value 4855.296066
+iter  90 value 4681.504134
+iter 100 value 4388.276945
+final  value 4388.276945 
 stopped after 100 iterations</code></pre>
 </div>
 <div class="sourceCode cell-code" id="cb20"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb20-1"><a href="#cb20-1" aria-hidden="true" tabindex="-1"></a><span class="fu">summary</span>(multinom_model)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
@@ -559,211 +560,211 @@ stopped after 100 iterations</code></pre>
 multinom(formula = dengue_pattern ~ ., data = det_17_22)
 
 Coefficients:
-                         (Intercept)   region2     region3      region4
-Epidêmico               -0.018027977 1.3675569  0.06838342  0.231289242
-Episódico                0.031018849 0.3745951 -0.39172734 -1.403803812
-Sem transmissão         -0.004523369 1.2259812  0.02031498 -0.114185691
-Transmissão Persistente  0.016330634 0.6507241 -0.51027526 -0.001637363
-                            region5 tipo_regiaometropolitana biomaamazonia
-Epidêmico                0.22339229                0.3780611     0.5001259
-Episódico               -0.72082922               -0.6276134    -0.3872854
-Sem transmissão          0.50245356               -0.4385340     0.4810764
-Transmissão Persistente -0.09540883               -0.4422029     0.1501330
+                         (Intercept)   region2    region3     region4
+Epidêmico               -0.018576793 1.5678411  0.0928276  0.07477273
+Episódico                0.040422318 0.6564346 -0.4908037 -1.78044829
+Sem transmissão         -0.002693178 1.2407455  0.2725911 -0.22589274
+Transmissão Persistente  0.023187803 0.4202978 -0.3733822 -0.05457856
+                           region5 tipo_regiaometropolitana biomaamazonia
+Epidêmico                0.2456696                0.1920793     0.3058666
+Episódico               -0.6384732               -0.5746361    -0.1295275
+Sem transmissão          0.5497549               -0.3379590     0.4943355
+Transmissão Persistente -0.1004759               -0.4873605     0.4462078
                         biomacaatinga biomacerrado biomapampa biomapantanal
-Epidêmico                  -0.7935014  -0.03188927 -1.3179529    0.50803151
-Episódico                  -0.3252587   0.29873903  0.1759736    0.01537118
-Sem transmissão            -0.4212965   0.05768213  0.6988316   -0.02838151
-Transmissão Persistente    -0.3599698   0.29715901  0.2170896    0.04369982
-                             altitude   koppenAf     koppenAm   koppenAs
-Epidêmico                2.867180e-03  0.3366224  0.226506480 -0.1383468
-Episódico               -1.566220e-03 -0.2535341  0.183180073 -0.3296705
-Sem transmissão          5.604469e-05 -0.4504094 -0.167851983 -0.1623096
-Transmissão Persistente  1.193582e-03  0.1102006 -0.006499182  0.1130333
-                         koppenBSh    koppenCfa   koppenCfb   koppenCwa
-Epidêmico               -0.6214318 -0.442780253 -0.52005336  0.31912209
-Episódico               -0.7686553 -0.407836700 -0.48023318 -0.06113989
-Sem transmissão         -0.5009487 -0.055513114 -0.09435469  0.44686524
-Transmissão Persistente -0.1389675 -0.007305022 -0.46881153  0.20252145
-                        koppenCwb         pop22 prop_residuo   prop_esgot
-Epidêmico               0.6188115  4.261951e-07  0.009599428 -0.008577995
-Episódico               0.2697928 -3.470000e-06  0.001849993 -0.007067229
-Sem transmissão         0.8921901  6.030291e-07 -0.001264657 -0.005010027
-Transmissão Persistente 0.6531866  1.102788e-06 -0.002122337  0.002246689
+Epidêmico                  -0.6072244   0.17707612 -1.4364405    0.64933214
+Episódico                  -0.5085508   0.10268742  0.2433157   -0.10528692
+Sem transmissão            -0.3654411   0.05883302  0.8223464   -0.02550862
+Transmissão Persistente    -0.7669739   0.04394466  0.1354659    0.11519987
+                             altitude   koppenAf   koppenAm    koppenAs
+Epidêmico                3.010597e-03  0.1393370  0.3926232 -0.16183366
+Episódico               -1.824742e-03 -0.1571548 -0.0603752 -0.33474945
+Sem transmissão         -5.475247e-05 -0.2571085 -0.1253484 -0.14978351
+Transmissão Persistente -7.693026e-04 -0.1178452  0.2568772  0.07103698
+                         koppenBSh   koppenCfa  koppenCfb  koppenCwa koppenCwb
+Epidêmico               -0.3332987 -0.13238248 -0.6565727 0.36180266 0.4457502
+Episódico               -1.0127599 -0.49855859 -0.6636627 0.03890584 0.3479939
+Sem transmissão         -0.8383547 -0.24502001 -0.1414272 0.60076614 1.0797696
+Transmissão Persistente -0.4216402 -0.07441309 -0.7276393 0.29236745 0.8873623
+                                pop22  prop_residuo    prop_esgot
+Epidêmico                5.179102e-07 -0.0038508001 -0.0021162522
+Episódico               -2.976520e-06  0.0005960974 -0.0034326930
+Sem transmissão         -1.697541e-06 -0.0109986774  0.0005606868
+Transmissão Persistente  3.104856e-06 -0.0034980679 -0.0016628857
+                        dengue_pattern_2010_2016Epidêmico
+Epidêmico                                        3.898890
+Episódico                                        0.739678
+Sem transmissão                                  3.205225
+Transmissão Persistente                          1.996317
                         dengue_pattern_2010_2016Episódico
-Epidêmico                                      -2.8766576
-Episódico                                       1.7283256
-Sem transmissão                                 0.3261054
-Transmissão Persistente                        -1.8683310
-                        dengue_pattern_2010_2016Episódico/Epidêmico
-Epidêmico                                                -3.2484700
-Episódico                                                -0.7284881
-Sem transmissão                                          -1.6558533
-Transmissão Persistente                                  -3.4059501
+Epidêmico                                      -0.5539300
+Episódico                                       2.2855058
+Sem transmissão                                 1.8243091
+Transmissão Persistente                         0.4188449
                         dengue_pattern_2010_2016Sem transmissão
-Epidêmico                                             -1.035009
-Episódico                                              4.912930
-Sem transmissão                                        4.783679
-Transmissão Persistente                                2.795344
+Epidêmico                                              2.984172
+Episódico                                              6.367177
+Sem transmissão                                        7.453752
+Transmissão Persistente                                5.634819
                         dengue_pattern_2010_2016Transmissão Persistente
-Epidêmico                                                    -2.1720253
-Episódico                                                     0.4310416
-Sem transmissão                                               0.1792906
-Transmissão Persistente                                       1.3095218
+Epidêmico                                                  -1.343726250
+Episódico                                                   0.451460292
+Sem transmissão                                             0.001996119
+Transmissão Persistente                                     1.830684619
                         temp_med_Autumn umid_med_Autumn precip_tot_Autumn
-Epidêmico                    -0.3590029      0.03622527      1.949319e-05
-Episódico                     0.1592934      0.07863427      3.220330e-04
-Sem transmissão               0.1230731     -0.24940033     -6.095590e-04
-Transmissão Persistente       0.1894538     -0.07516782      8.164830e-04
+Epidêmico                    -0.6022858     -0.15876046      0.0012604973
+Episódico                     0.2199491      0.09712182     -0.0001455146
+Sem transmissão              -0.1474054      0.24069704      0.0006239596
+Transmissão Persistente       0.1625392     -0.04314033      0.0018553992
                         thr_temp_Autumn thr_umid_Autumn thr_prec_Autumn
-Epidêmico                  -0.096126172     -0.16088733     -0.03521223
-Episódico                   0.016376942      0.05093622     -0.03155931
-Sem transmissão            -0.009429541      0.02931862      0.09838097
-Transmissão Persistente    -0.089788303     -0.09693903     -0.03499175
+Epidêmico                   -0.13868564     -0.09593458     -0.06291584
+Episódico                    0.02537714      0.02286172     -0.01688022
+Sem transmissão              0.06328874     -0.07610849     -0.13138517
+Transmissão Persistente     -0.23601692     -0.15238563     -0.07436475
                         thr_temp_umid_Autumn temp_med_Spring umid_med_Spring
-Epidêmico                        0.093600795      0.23504175      0.21983682
-Episódico                       -0.055616493      0.54941178      0.10617381
-Sem transmissão                 -0.003820031      0.49353884      0.18175729
-Transmissão Persistente          0.133519301      0.07874462      0.07713525
+Epidêmico                         0.11001013      0.35413232     -0.11982801
+Episódico                        -0.04504361      0.58896385      0.02177677
+Sem transmissão                  -0.03180052      0.75466690     -0.09097111
+Transmissão Persistente           0.16771673      0.07987777     -0.04627988
                         precip_tot_Spring thr_temp_Spring thr_umid_Spring
-Epidêmico                   -0.0006621664      0.16233186      0.07619138
-Episódico                    0.0007085816     -0.10480417     -0.07157042
-Sem transmissão             -0.0011576790      0.02575041      0.01095960
-Transmissão Persistente      0.0002590797     -0.24269176     -0.21849303
+Epidêmico                   -0.0024401908       0.1981454       0.1800984
+Episódico                   -0.0003412007      -0.1737738      -0.1565318
+Sem transmissão             -0.0004393193      -0.1511589      -0.1073890
+Transmissão Persistente     -0.0011648382      -0.2607760      -0.2244679
                         thr_prec_Spring thr_temp_umid_Spring temp_med_Summer
-Epidêmico                   -0.03481583          -0.11820403       0.6217293
-Episódico                   -0.05280217           0.06883944      -0.6545719
-Sem transmissão              0.05665563          -0.06585495      -0.2431619
-Transmissão Persistente      0.01794896           0.17196990       0.1555810
+Epidêmico                    0.13708577           -0.1372768       0.9109101
+Episódico                    0.01202541            0.1727064      -0.8967450
+Sem transmissão              0.01127151            0.1381302      -0.1318844
+Transmissão Persistente      0.11186052            0.2146177       0.1214932
                         umid_med_Summer precip_tot_Summer thr_temp_Summer
-Epidêmico                   -0.09119267      0.0006926170    -0.306236277
-Episódico                   -0.07250584      0.0005853040     0.120550153
-Sem transmissão              0.04181056      0.0014061651     0.007880637
-Transmissão Persistente      0.16005082      0.0006958467     0.193298016
+Epidêmico                     0.2199741      0.0007034472     -0.44173765
+Episódico                    -0.1312800      0.0002530954      0.22667146
+Sem transmissão               0.1293263     -0.0001066208     -0.02103555
+Transmissão Persistente       0.1044052     -0.0008217733      0.31367760
                         thr_umid_Summer thr_prec_Summer thr_temp_umid_Summer
-Epidêmico                   -0.21404795      0.02115986           0.25013079
-Episódico                    0.09745639     -0.02969101          -0.10837086
-Sem transmissão              0.06113204     -0.11834446          -0.02590758
-Transmissão Persistente      0.19257419     -0.08455810          -0.20164322
+Epidêmico                  -0.407002419    -0.036503415           0.36618909
+Episódico                   0.229744486     0.004308137          -0.23596439
+Sem transmissão             0.008236867     0.002479334          -0.04943104
+Transmissão Persistente     0.267432302    -0.024494836          -0.27093107
                         temp_med_Winter umid_med_Winter precip_tot_Winter
-Epidêmico                    0.02502503      0.03855718      0.0023798153
-Episódico                   -0.27883864     -0.07880844      0.0002535388
-Sem transmissão             -0.27310002     -0.09337739      0.0024324432
-Transmissão Persistente     -0.05343411     -0.11948524      0.0005580013
+Epidêmico                   -0.18966823      0.12038933      0.0004191235
+Episódico                   -0.27673303     -0.02076293      0.0005326754
+Sem transmissão             -0.09364959     -0.07438357      0.0015344349
+Transmissão Persistente     -0.13669600     -0.06863680     -0.0020684604
                         thr_temp_Winter thr_umid_Winter thr_prec_Winter
-Epidêmico                  -0.005067831    0.0054909110    -0.084167881
-Episódico                   0.024945212    0.0008579443    -0.002719062
-Sem transmissão            -0.016189794    0.0102134015    -0.093467510
-Transmissão Persistente    -0.014116468    0.0306102026     0.005675895
+Epidêmico                    0.15683278      0.12416472     -0.05503592
+Episódico                    0.06201124      0.06303505     -0.02146392
+Sem transmissão             -0.12281816     -0.05553394      0.02572277
+Transmissão Persistente      0.12404947      0.10814653      0.01603818
                         thr_temp_umid_Winter
-Epidêmico                       -0.009643703
-Episódico                        0.009375885
-Sem transmissão                  0.035477981
-Transmissão Persistente          0.007335188
+Epidêmico                         -0.1474037
+Episódico                         -0.0657660
+Sem transmissão                    0.1029611
+Transmissão Persistente           -0.0792302
 
 Std. Errors:
                          (Intercept)      region2      region3      region4
-Epidêmico               1.978821e-06 3.452314e-06 1.046679e-05 2.813327e-06
-Episódico               5.008650e-06 4.549253e-06 5.135221e-06 9.718756e-06
-Sem transmissão         2.209775e-06 2.853887e-06 6.108130e-06 2.684406e-06
-Transmissão Persistente 2.254943e-06 3.078202e-06 5.173649e-06 9.708267e-07
+Epidêmico               2.270971e-06 4.548425e-06 1.233701e-05 3.791454e-06
+Episódico               5.387873e-06 8.957792e-06 1.080668e-05 1.107582e-05
+Sem transmissão         2.756565e-06 5.093294e-06 7.988154e-06 3.535627e-06
+Transmissão Persistente 3.038753e-06 5.860436e-06 1.459906e-05 2.205309e-06
                              region5 tipo_regiaometropolitana biomaamazonia
-Epidêmico               5.694549e-06             7.533759e-07  1.659697e-06
-Episódico               3.887438e-06             3.569934e-07  4.238145e-06
-Sem transmissão         3.874629e-06             4.480462e-07  8.125423e-07
-Transmissão Persistente 3.291269e-06             2.364775e-07  6.769018e-07
+Epidêmico               7.159209e-06             1.327916e-06  1.652261e-06
+Episódico               9.774254e-06             1.389209e-06  4.869344e-06
+Sem transmissão         4.163256e-06             5.743016e-07  2.127704e-06
+Transmissão Persistente 7.264217e-06             8.358143e-07  3.181523e-06
                         biomacaatinga biomacerrado   biomapampa biomapantanal
-Epidêmico                2.036130e-06 5.664374e-06 1.267473e-07  1.160964e-07
-Episódico                5.625793e-06 5.058161e-06 2.123622e-06  7.268459e-08
-Sem transmissão          3.021549e-06 5.747506e-06 1.293883e-06  2.578798e-08
-Transmissão Persistente  2.176929e-06 4.821349e-06 5.497873e-07  3.133721e-08
+Epidêmico                5.150685e-06 6.982988e-06 1.153111e-07  1.713262e-07
+Episódico                1.300603e-05 1.273121e-05 2.688910e-06  9.779127e-08
+Sem transmissão          3.120385e-06 7.330390e-06 1.440314e-06  4.232739e-08
+Transmissão Persistente  3.882157e-06 8.638792e-06 9.866068e-07  1.332601e-07
                             altitude     koppenAf     koppenAm     koppenAs
-Epidêmico               0.0002023653 7.320015e-07 1.872126e-06 1.159024e-06
-Episódico               0.0001864255 2.971754e-06 4.264040e-06 1.012872e-06
-Sem transmissão         0.0002346741 6.717741e-07 8.930947e-07 1.007128e-06
-Transmissão Persistente 0.0002657850 3.401398e-07 4.847022e-07 1.073097e-06
+Epidêmico               0.0002082049 7.220997e-07 2.104458e-06 1.246596e-06
+Episódico               0.0001882384 4.795016e-06 4.650969e-06 1.970656e-06
+Sem transmissão         0.0002637513 1.896807e-06 1.607226e-06 2.283882e-06
+Transmissão Persistente 0.0003082227 4.205254e-07 3.875231e-06 1.556318e-06
                            koppenBSh    koppenCfa    koppenCfb    koppenCwa
-Epidêmico               8.584621e-07 2.156285e-06 9.511128e-07 2.386045e-06
-Episódico               2.983221e-06 9.974799e-06 7.111099e-07 2.050678e-06
-Sem transmissão         1.425426e-06 2.758018e-06 1.271553e-06 1.527612e-06
-Transmissão Persistente 1.127946e-06 9.868830e-07 1.195307e-06 1.111075e-06
-                           koppenCwb        pop22 prop_residuo   prop_esgot
-Epidêmico               2.384486e-06 4.721612e-07 0.0005480378 0.0011735917
-Episódico               2.153188e-06 1.319281e-06 0.0005580731 0.0009588537
-Sem transmissão         2.862243e-06 6.606371e-07 0.0003171498 0.0007221145
-Transmissão Persistente 1.447115e-06 4.795442e-07 0.0002401581 0.0004885252
+Epidêmico               3.316468e-06 2.342775e-06 1.354170e-06 3.009514e-06
+Episódico               8.948326e-06 1.092236e-05 5.013793e-06 4.053706e-06
+Sem transmissão         1.712017e-06 4.756277e-06 2.663619e-06 1.479995e-06
+Transmissão Persistente 1.906851e-06 3.666994e-06 1.822336e-06 3.037497e-06
+                           koppenCwb        pop22 prop_residuo  prop_esgot
+Epidêmico               2.506333e-06 5.896872e-07 0.0007271606 0.001342936
+Episódico               3.003743e-06 1.378981e-06 0.0019059249 0.001561403
+Sem transmissão         3.403931e-06 1.246418e-06 0.0011268718 0.001708213
+Transmissão Persistente 4.370308e-06 6.194065e-07 0.0010661134 0.001981389
+                        dengue_pattern_2010_2016Epidêmico
+Epidêmico                                    1.761815e-06
+Episódico                                    1.245737e-06
+Sem transmissão                              1.314864e-06
+Transmissão Persistente                      1.207139e-06
                         dengue_pattern_2010_2016Episódico
-Epidêmico                                    1.296051e-06
-Episódico                                    7.828590e-06
-Sem transmissão                              2.182051e-06
-Transmissão Persistente                      8.836179e-07
-                        dengue_pattern_2010_2016Episódico/Epidêmico
-Epidêmico                                              2.790610e-06
-Episódico                                              4.016280e-06
-Sem transmissão                                        3.006553e-06
-Transmissão Persistente                                1.833458e-06
+Epidêmico                                    1.105471e-06
+Episódico                                    9.184741e-06
+Sem transmissão                              3.503113e-06
+Transmissão Persistente                      1.682053e-06
                         dengue_pattern_2010_2016Sem transmissão
-Epidêmico                                          9.538109e-08
-Episódico                                          1.448567e-06
-Sem transmissão                                    1.038744e-06
-Transmissão Persistente                            5.316256e-07
+Epidêmico                                          1.804634e-07
+Episódico                                          2.778407e-06
+Sem transmissão                                    2.654665e-06
+Transmissão Persistente                            1.309046e-06
                         dengue_pattern_2010_2016Transmissão Persistente
-Epidêmico                                                  7.829340e-08
-Episódico                                                  3.239446e-09
-Sem transmissão                                            1.947576e-08
-Transmissão Persistente                                    4.778897e-08
+Epidêmico                                                  5.350884e-08
+Episódico                                                  1.150415e-08
+Sem transmissão                                            9.214757e-09
+Transmissão Persistente                                    4.242056e-07
                         temp_med_Autumn umid_med_Autumn precip_tot_Autumn
-Epidêmico                  6.463509e-05    0.0001478224      0.0001525768
-Episódico                  8.541048e-05    0.0003838603      0.0001194982
-Sem transmissão            7.547717e-05    0.0001517518      0.0001660019
-Transmissão Persistente    7.445180e-05    0.0001510814      0.0001742776
+Epidêmico                  7.567578e-05    0.0001568120      0.0001497957
+Episódico                  9.723225e-05    0.0004206002      0.0001282990
+Sem transmissão            1.016756e-04    0.0001801374      0.0001912856
+Transmissão Persistente    1.104810e-04    0.0001934249      0.0002010593
                         thr_temp_Autumn thr_umid_Autumn thr_prec_Autumn
-Epidêmico                  0.0003745386    0.0003281097    7.729889e-05
-Episódico                  0.0003955295    0.0006391852    1.449377e-04
-Sem transmissão            0.0004687242    0.0002926004    5.886047e-05
-Transmissão Persistente    0.0003983062    0.0002411748    3.085223e-05
+Epidêmico                  0.0004278423    0.0003677860    7.588646e-05
+Episódico                  0.0004728049    0.0007671105    1.671398e-04
+Sem transmissão            0.0006123493    0.0004335983    1.395819e-04
+Transmissão Persistente    0.0006368114    0.0004457868    1.310803e-04
                         thr_temp_umid_Autumn temp_med_Spring umid_med_Spring
-Epidêmico                       0.0002567882    8.116502e-05    0.0001423614
-Episódico                       0.0001787309    1.201076e-04    0.0002097163
-Sem transmissão                 0.0002222411    9.023939e-05    0.0001621839
-Transmissão Persistente         0.0002464248    8.279378e-05    0.0001385846
+Epidêmico                       0.0002860194    9.602754e-05    0.0001497130
+Episódico                       0.0004844435    1.335121e-04    0.0002308687
+Sem transmissão                 0.0003347836    1.271674e-04    0.0002142151
+Transmissão Persistente         0.0003838446    1.361613e-04    0.0002209103
                         precip_tot_Spring thr_temp_Spring thr_umid_Spring
-Epidêmico                    0.0001523811    0.0002853723    0.0004439263
-Episódico                    0.0001165601    0.0002328542    0.0003855899
-Sem transmissão              0.0001886608    0.0003705305    0.0004806567
-Transmissão Persistente      0.0001893885    0.0003242170    0.0003043072
+Epidêmico                    0.0001494192    0.0003254721    0.0006006189
+Episódico                    0.0001187784    0.0003367607    0.0009201182
+Sem transmissão              0.0002112335    0.0005141563    0.0006766750
+Transmissão Persistente      0.0002149666    0.0005029001    0.0007454634
                         thr_prec_Spring thr_temp_umid_Spring temp_med_Summer
-Epidêmico                  3.347890e-05         0.0003614995    6.595139e-05
-Episódico                  1.116958e-04         0.0005887927    1.275574e-04
-Sem transmissão            2.863587e-05         0.0003048366    7.165750e-05
-Transmissão Persistente    1.570902e-05         0.0002110735    7.041268e-05
+Epidêmico                  5.044016e-05         0.0005433544    7.914016e-05
+Episódico                  1.481952e-04         0.0011051129    1.442094e-04
+Sem transmissão            6.144066e-05         0.0004287598    9.674811e-05
+Transmissão Persistente    5.348436e-05         0.0005323352    1.061588e-04
                         umid_med_Summer precip_tot_Summer thr_temp_Summer
-Epidêmico                  0.0001097891      0.0001302939    0.0002183728
-Episódico                  0.0002980021      0.0001069449    0.0004927037
-Sem transmissão            0.0001238267      0.0001605339    0.0002858303
-Transmissão Persistente    0.0001374445      0.0001619367    0.0002517741
+Epidêmico                  0.0001125902      0.0001286837    0.0002441675
+Episódico                  0.0003441478      0.0001161340    0.0005595135
+Sem transmissão            0.0001333765      0.0001781221    0.0004013560
+Transmissão Persistente    0.0001509720      0.0001872495    0.0003614722
                         thr_umid_Summer thr_prec_Summer thr_temp_umid_Summer
-Epidêmico                  0.0001335639    4.756416e-05         0.0001409820
-Episódico                  0.0002794888    3.736705e-05         0.0003089994
-Sem transmissão            0.0001614581    2.892067e-05         0.0001818349
-Transmissão Persistente    0.0001506369    4.589241e-05         0.0001782513
+Epidêmico                  0.0002186965    1.075708e-04         0.0002450480
+Episódico                  0.0006506876    2.948483e-04         0.0007808134
+Sem transmissão            0.0001926624    3.654618e-05         0.0002430766
+Transmissão Persistente    0.0001836186    7.032716e-05         0.0001929003
                         temp_med_Winter umid_med_Winter precip_tot_Winter
-Epidêmico                  7.582213e-05    0.0002341585      0.0002169418
-Episódico                  8.707243e-05    0.0003523863      0.0001824072
-Sem transmissão            8.868806e-05    0.0002507361      0.0002205304
-Transmissão Persistente    8.201877e-05    0.0002075407      0.0002401200
+Epidêmico                  8.693800e-05    0.0002601661      0.0002245621
+Episódico                  9.611832e-05    0.0004736811      0.0001879601
+Sem transmissão            1.226482e-04    0.0003380827      0.0002615293
+Transmissão Persistente    1.310253e-04    0.0003567493      0.0002839383
                         thr_temp_Winter thr_umid_Winter thr_prec_Winter
-Epidêmico                  0.0004928062    0.0007632494    3.808481e-05
-Episódico                  0.0007174160    0.0006555400    2.105594e-04
-Sem transmissão            0.0005791881    0.0007739558    5.898636e-05
-Transmissão Persistente    0.0004736885    0.0005969046    1.992818e-05
+Epidêmico                  0.0005488072    0.0008575815    4.326399e-05
+Episódico                  0.0008057363    0.0009904020    2.312539e-04
+Sem transmissão            0.0007383789    0.0011239435    8.492869e-05
+Transmissão Persistente    0.0007770776    0.0012640072    3.876409e-05
                         thr_temp_umid_Winter
-Epidêmico                       0.0004831597
-Episódico                       0.0008307427
-Sem transmissão                 0.0004285644
-Transmissão Persistente         0.0003327328
+Epidêmico                       0.0005318524
+Episódico                       0.0011124482
+Sem transmissão                 0.0007575433
+Transmissão Persistente         0.0008530565
 
-Residual Deviance: 8794.958 
-AIC: 9234.958 </code></pre>
+Residual Deviance: 8776.554 
+AIC: 9216.554 </code></pre>
 </div>
 </div>
 </section>
@@ -849,26 +850,24 @@ AIC: 9234.958 </code></pre>
 <section id="modelo-final" class="level4">
 <h4 class="anchored" data-anchor-id="modelo-final">modelo final</h4>
 <div class="cell">
-<div class="sourceCode cell-code" id="cb26"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb26-1"><a href="#cb26-1" aria-hidden="true" tabindex="-1"></a>model_final <span class="ot">&lt;-</span> modelo <span class="ot">&lt;-</span> <span class="fu">multinom</span>(</span>
-<span id="cb26-2"><a href="#cb26-2" aria-hidden="true" tabindex="-1"></a>  <span class="at">formula =</span> dengue_pattern <span class="sc">~</span> region <span class="sc">+</span> pop22 <span class="sc">+</span> dengue_pattern_2010_2016 <span class="sc">+</span> </span>
-<span id="cb26-3"><a href="#cb26-3" aria-hidden="true" tabindex="-1"></a>    thr_temp_Spring <span class="sc">+</span> bioma <span class="sc">+</span> precip_tot_Autumn <span class="sc">+</span> altitude <span class="sc">+</span> </span>
-<span id="cb26-4"><a href="#cb26-4" aria-hidden="true" tabindex="-1"></a>    thr_temp_umid_Autumn <span class="sc">+</span> precip_tot_Winter <span class="sc">+</span> thr_prec_Summer, </span>
-<span id="cb26-5"><a href="#cb26-5" aria-hidden="true" tabindex="-1"></a>  <span class="at">data =</span> det_17_22</span>
-<span id="cb26-6"><a href="#cb26-6" aria-hidden="true" tabindex="-1"></a>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="sourceCode cell-code" id="cb26"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb26-1"><a href="#cb26-1" aria-hidden="true" tabindex="-1"></a>model_final <span class="ot">&lt;-</span> <span class="fu">multinom</span>(<span class="at">formula =</span> dengue_pattern <span class="sc">~</span> region <span class="sc">+</span> pop22 <span class="sc">+</span> dengue_pattern_2010_2016 <span class="sc">+</span> </span>
+<span id="cb26-2"><a href="#cb26-2" aria-hidden="true" tabindex="-1"></a>    thr_temp_Spring <span class="sc">+</span> bioma <span class="sc">+</span> precip_tot_Autumn <span class="sc">+</span> altitude <span class="sc">+</span> </span>
+<span id="cb26-3"><a href="#cb26-3" aria-hidden="true" tabindex="-1"></a>    thr_temp_umid_Autumn <span class="sc">+</span> precip_tot_Winter <span class="sc">+</span> tipo_regiao <span class="sc">+</span> </span>
+<span id="cb26-4"><a href="#cb26-4" aria-hidden="true" tabindex="-1"></a>    thr_temp_umid_Summer <span class="sc">+</span> precip_tot_Spring, <span class="at">data =</span> det_17_22)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 <div class="cell-output cell-output-stdout">
-<pre><code># weights:  110 (84 variable)
+<pre><code># weights:  120 (92 variable)
 initial  value 8959.740859 
-iter  10 value 6510.575399
-iter  20 value 6155.441693
-iter  30 value 5648.372862
-iter  40 value 4176.339926
-iter  50 value 3782.370883
-iter  60 value 3566.601581
-iter  70 value 3450.825617
-iter  80 value 3372.943491
-iter  90 value 3354.458839
-iter 100 value 3336.567604
-final  value 3336.567604 
+iter  10 value 5797.596570
+iter  20 value 5567.177140
+iter  30 value 4869.846156
+iter  40 value 4224.226019
+iter  50 value 3720.250326
+iter  60 value 3598.982572
+iter  70 value 3433.397194
+iter  80 value 3378.358479
+iter  90 value 3349.817174
+iter 100 value 3318.675906
+final  value 3318.675906 
 stopped after 100 iterations</code></pre>
 </div>
 <div class="sourceCode cell-code" id="cb28"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb28-1"><a href="#cb28-1" aria-hidden="true" tabindex="-1"></a>model_final</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
@@ -876,58 +875,63 @@ stopped after 100 iterations</code></pre>
 <pre><code>Call:
 multinom(formula = dengue_pattern ~ region + pop22 + dengue_pattern_2010_2016 + 
     thr_temp_Spring + bioma + precip_tot_Autumn + altitude + 
-    thr_temp_umid_Autumn + precip_tot_Winter + thr_prec_Summer, 
-    data = det_17_22)
+    thr_temp_umid_Autumn + precip_tot_Winter + tipo_regiao + 
+    thr_temp_umid_Summer + precip_tot_Spring, data = det_17_22)
 
 Coefficients:
-                        (Intercept)    region2    region3   region4    region5
-Epidêmico                 -7.596216 -0.3754993  0.5993100  1.049989  0.5650511
-Episódico                  4.398781  1.0998924 -0.6300251 -1.867526 -0.9542474
-Sem transmissão            3.078713  1.1868354  0.1483456 -1.540349  0.8703817
-Transmissão Persistente  -33.117289 -7.6569511  2.5246683  4.259269  0.4166417
-                                pop22 dengue_pattern_2010_2016Episódico
-Epidêmico                1.907126e-05                         -4.252696
-Episódico               -6.598051e-05                          5.176576
-Sem transmissão         -1.598815e-04                          5.791823
-Transmissão Persistente  2.760074e-05                         -2.124897
-                        dengue_pattern_2010_2016Episódico/Epidêmico
-Epidêmico                                                 -2.553083
-Episódico                                                  3.318119
-Sem transmissão                                           -3.051737
-Transmissão Persistente                                   -7.812237
+                        (Intercept)    region2    region3    region4    region5
+Epidêmico                -12.254471 -0.8951847  0.2822413  0.8134143  0.4478167
+Episódico                  6.238465  1.3842261 -0.3337853 -1.5462131 -0.8342341
+Sem transmissão            3.446555  1.7031728  0.7646036 -0.8076123  0.9663358
+Transmissão Persistente  -51.143445 -7.3560238  3.1383761  4.3202103  0.5582059
+                                pop22 dengue_pattern_2010_2016Epidêmico
+Epidêmico                2.456184e-05                          2.505587
+Episódico               -6.231325e-05                         -3.822894
+Sem transmissão         -1.728013e-04                         -2.437794
+Transmissão Persistente  3.130975e-05                          7.839903
+                        dengue_pattern_2010_2016Episódico
+Epidêmico                                       -1.516638
+Episódico                                        1.882151
+Sem transmissão                                  4.324661
+Transmissão Persistente                         -1.806540
                         dengue_pattern_2010_2016Sem transmissão
-Epidêmico                                            -21.161644
-Episódico                                              8.120157
-Sem transmissão                                       10.551452
-Transmissão Persistente                               -2.737901
+Epidêmico                                           -15.1759581
+Episódico                                             5.3168693
+Sem transmissão                                       9.5514569
+Transmissão Persistente                               0.1640895
                         dengue_pattern_2010_2016Transmissão Persistente
-Epidêmico                                                    -0.6049778
-Episódico                                                    31.7966339
-Sem transmissão                                              44.5453819
-Transmissão Persistente                                       1.8229832
+Epidêmico                                                     0.4167645
+Episódico                                                    -1.2809396
+Sem transmissão                                              75.9028808
+Transmissão Persistente                                       7.2233496
                         thr_temp_Spring biomaamazonia biomacaatinga
-Epidêmico                    0.09774210     0.3517681     0.3669617
-Episódico                   -0.08580905     0.6559148    -0.8860303
-Sem transmissão             -0.15349112     3.5480004     1.9526568
-Transmissão Persistente      0.34765247   -30.2409569    -3.6423844
+Epidêmico                     0.1054027     0.8067480     0.5920781
+Episódico                    -0.0799210     0.2246336    -0.6581410
+Sem transmissão              -0.1538323     3.3126347     2.3648407
+Transmissão Persistente       0.3524341   -37.6878034    -1.4269189
                         biomacerrado biomapampa biomapantanal precip_tot_Autumn
-Epidêmico                -0.17447365  -5.232503      1.759368      -0.001234055
-Episódico                 0.33805732   1.142204      1.152114       0.000807756
-Sem transmissão           2.90882305   2.202110     -1.477424       0.001471012
-Transmissão Persistente   0.03070583 -23.928755     -1.241458       0.004272204
+Epidêmico                 -0.1020383 -17.570788     2.0041698     -0.0010236159
+Episódico                  0.2582114   1.212985     1.3990463      0.0005577976
+Sem transmissão            2.9307446   2.263212    -0.3174793      0.0013490883
+Transmissão Persistente    0.7584132 -47.678448    -0.2852474      0.0044132087
                              altitude thr_temp_umid_Autumn precip_tot_Winter
-Epidêmico               -0.0003613074         -0.027958825      0.0016911104
-Episódico               -0.0012786862          0.001035445     -0.0009845205
-Sem transmissão         -0.0013969413          0.006920460     -0.0014151060
-Transmissão Persistente  0.0009009444         -0.099019037     -0.0032935787
-                        thr_prec_Summer
-Epidêmico                   0.023193369
-Episódico                  -0.022870933
-Sem transmissão            -0.015223228
-Transmissão Persistente    -0.004610835
+Epidêmico               -0.0001588773         -0.039288190      0.0013949582
+Episódico               -0.0012031572          0.009645444     -0.0004612221
+Sem transmissão         -0.0017345202          0.016588032     -0.0013450320
+Transmissão Persistente  0.0015784464         -0.144329115     -0.0014998516
+                        tipo_regiaometropolitana thr_temp_umid_Summer
+Epidêmico                             -0.5165581           0.03946084
+Episódico                             -0.5012074          -0.01225094
+Sem transmissão                       -0.5791451          -0.01430583
+Transmissão Persistente                1.5916052           0.12138260
+                        precip_tot_Spring
+Epidêmico                   -0.0001645013
+Episódico                    0.0001619549
+Sem transmissão              0.0005933068
+Transmissão Persistente     -0.0004227900
 
-Residual Deviance: 6673.135 
-AIC: 6841.135 </code></pre>
+Residual Deviance: 6637.352 
+AIC: 6821.352 </code></pre>
 </div>
 <div class="sourceCode cell-code" id="cb30"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb30-1"><a href="#cb30-1" aria-hidden="true" tabindex="-1"></a>model_final <span class="ot">&lt;-</span> <span class="fu">na.omit</span>(model_final)</span>
 <span id="cb30-2"><a href="#cb30-2" aria-hidden="true" tabindex="-1"></a></span>
@@ -942,59 +946,59 @@ AIC: 6841.135 </code></pre>
 
                          Reference
 Prediction                Episódico/Epidêmico Epidêmico Episódico
-  Episódico/Epidêmico                    2374       308       482
-  Epidêmico                                88       410         0
-  Episódico                               357         3      1342
-  Sem transmissão                           0         0        17
-  Transmissão Persistente                   0         4         0
+  Episódico/Epidêmico                    2380       312       480
+  Epidêmico                                88       405         0
+  Episódico                               351         2      1342
+  Sem transmissão                           0         0        19
+  Transmissão Persistente                   0         6         0
                          Reference
 Prediction                Sem transmissão Transmissão Persistente
-  Episódico/Epidêmico                   4                       0
-  Epidêmico                             0                      14
+  Episódico/Epidêmico                   3                       0
+  Epidêmico                             0                      15
   Episódico                           114                       0
-  Sem transmissão                      32                       0
-  Transmissão Persistente               0                      18
+  Sem transmissão                      33                       0
+  Transmissão Persistente               0                      17
 
 Overall Statistics
                                           
-               Accuracy : 0.7501          
-                 95% CI : (0.7385, 0.7615)
+               Accuracy : 0.7503          
+                 95% CI : (0.7387, 0.7616)
     No Information Rate : 0.5064          
     P-Value [Acc &gt; NIR] : &lt; 2.2e-16       
                                           
-                  Kappa : 0.5777          
+                  Kappa : 0.5779          
                                           
  Mcnemar's Test P-Value : NA              
 
 Statistics by Class:
 
                      Class: Episódico/Epidêmico Class: Epidêmico
-Sensitivity                              0.8421          0.56552
-Specificity                              0.7111          0.97893
-Pos Pred Value                           0.7494          0.80078
-Neg Pred Value                           0.8145          0.93769
+Sensitivity                              0.8443          0.55862
+Specificity                              0.7107          0.97873
+Pos Pred Value                           0.7496          0.79724
+Neg Pred Value                           0.8165          0.93675
 Prevalence                               0.5064          0.13023
-Detection Rate                           0.4264          0.07365
-Detection Prevalence                     0.5691          0.09197
-Balanced Accuracy                        0.7766          0.77223
+Detection Rate                           0.4275          0.07275
+Detection Prevalence                     0.5703          0.09125
+Balanced Accuracy                        0.7775          0.76867
                      Class: Episódico Class: Sem transmissão
-Sensitivity                    0.7290               0.213333
-Specificity                    0.8728               0.996862
-Pos Pred Value                 0.7390               0.653061
-Neg Pred Value                 0.8670               0.978615
+Sensitivity                    0.7290               0.220000
+Specificity                    0.8747               0.996493
+Pos Pred Value                 0.7418               0.634615
+Neg Pred Value                 0.8672               0.978785
 Prevalence                     0.3307               0.026944
-Detection Rate                 0.2411               0.005748
-Detection Prevalence           0.3262               0.008802
-Balanced Accuracy              0.8009               0.605098
+Detection Rate                 0.2411               0.005928
+Detection Prevalence           0.3250               0.009341
+Balanced Accuracy              0.8018               0.608246
                      Class: Transmissão Persistente
-Sensitivity                                0.562500
-Specificity                                0.999277
-Pos Pred Value                             0.818182
-Neg Pred Value                             0.997475
+Sensitivity                                0.531250
+Specificity                                0.998916
+Pos Pred Value                             0.739130
+Neg Pred Value                             0.997294
 Prevalence                                 0.005748
-Detection Rate                             0.003233
-Detection Prevalence                       0.003952
-Balanced Accuracy                          0.780889</code></pre>
+Detection Rate                             0.003054
+Detection Prevalence                       0.004131
+Balanced Accuracy                          0.765083</code></pre>
 </div>
 <div class="sourceCode cell-code" id="cb32"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb32-1"><a href="#cb32-1" aria-hidden="true" tabindex="-1"></a><span class="co"># Resíduos deviance</span></span>
 <span id="cb32-2"><a href="#cb32-2" aria-hidden="true" tabindex="-1"></a>residuals_deviance <span class="ot">&lt;-</span> <span class="fu">residuals</span>(model_final, <span class="at">type =</span> <span class="st">"deviance"</span>)</span>
@@ -1132,68 +1136,68 @@ Balanced Accuracy                          0.624639</code></pre>
 <p>coloca uma a uma</p>
 <div class="cell">
 <div class="sourceCode cell-code" id="cb40"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb40-1"><a href="#cb40-1" aria-hidden="true" tabindex="-1"></a>m2 <span class="ot">&lt;-</span> <span class="fu">multinom</span>(<span class="at">formula =</span> dengue_pattern <span class="sc">~</span> region <span class="sc">+</span> pop22 <span class="sc">+</span> dengue_pattern_2010_2016 <span class="sc">+</span> </span>
-<span id="cb40-2"><a href="#cb40-2" aria-hidden="true" tabindex="-1"></a>    bioma <span class="sc">+</span> altitude, <span class="at">data =</span> det_17_22)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<span id="cb40-2"><a href="#cb40-2" aria-hidden="true" tabindex="-1"></a>    bioma <span class="sc">+</span> altitude <span class="sc">+</span> tipo_regiao, <span class="at">data =</span> det_17_22)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 <div class="cell-output cell-output-stdout">
-<pre><code># weights:  85 (64 variable)
+<pre><code># weights:  90 (68 variable)
 initial  value 8959.740859 
-iter  10 value 5717.326366
-iter  20 value 4725.918002
-iter  30 value 4007.251143
-iter  40 value 3858.328741
-iter  50 value 3751.162344
-iter  60 value 3690.196797
-iter  70 value 3674.788323
-iter  80 value 3665.878991
-iter  90 value 3660.097447
-iter 100 value 3658.426226
-final  value 3658.426226 
+iter  10 value 5878.325468
+iter  20 value 4827.654105
+iter  30 value 4025.697810
+iter  40 value 3876.271362
+iter  50 value 3787.852642
+iter  60 value 3698.419023
+iter  70 value 3664.183717
+iter  80 value 3660.661850
+iter  90 value 3652.698391
+iter 100 value 3651.144304
+final  value 3651.144304 
 stopped after 100 iterations</code></pre>
 </div>
 <div class="sourceCode cell-code" id="cb42"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb42-1"><a href="#cb42-1" aria-hidden="true" tabindex="-1"></a>m2</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 <div class="cell-output cell-output-stdout">
 <pre><code>Call:
 multinom(formula = dengue_pattern ~ region + pop22 + dengue_pattern_2010_2016 + 
-    bioma + altitude, data = det_17_22)
+    bioma + altitude + tipo_regiao, data = det_17_22)
 
 Coefficients:
                         (Intercept)    region2    region3    region4    region5
-Epidêmico                -0.3458842 -0.4490697  1.2472431  1.7124020  1.5169857
-Episódico                -3.7287442  1.1780161 -0.4264507 -0.1961246 -1.5021562
-Sem transmissão          -5.5243639  1.5114336 -0.4678522  0.5344664 -1.0166477
-Transmissão Persistente  -4.7978022 -4.5199199  1.6802706  3.9185381  0.4671219
-                                pop22 dengue_pattern_2010_2016Episódico
-Epidêmico                1.079663e-05                         -5.188773
-Episódico               -4.015249e-05                          4.945016
-Sem transmissão         -1.174598e-04                          2.444360
-Transmissão Persistente  1.509375e-05                         -8.621685
-                        dengue_pattern_2010_2016Episódico/Epidêmico
-Epidêmico                                                 -2.664746
-Episódico                                                  2.689281
-Sem transmissão                                           -2.383344
-Transmissão Persistente                                   -8.487057
+Epidêmico                 -2.917654 -0.4987032  1.1282518  1.5658537  1.4656448
+Episódico                 -1.035474  1.1772847 -0.4361680 -0.2093164 -1.5183804
+Sem transmissão           -8.059555  1.4846544 -0.4405379  0.4783492 -0.8977359
+Transmissão Persistente  -14.748497 -2.7725241  1.4999835  3.6567403  0.3922608
+                                pop22 dengue_pattern_2010_2016Epidêmico
+Epidêmico                1.350997e-05                          2.640592
+Episódico               -3.996874e-05                         -3.254200
+Sem transmissão         -9.418007e-05                          1.646491
+Transmissão Persistente  1.618221e-05                          9.635146
+                        dengue_pattern_2010_2016Episódico
+Epidêmico                                      -2.4262275
+Episódico                                       2.2614031
+Sem transmissão                                 4.8073631
+Transmissão Persistente                         0.1197985
                         dengue_pattern_2010_2016Sem transmissão
-Epidêmico                                            -25.555625
-Episódico                                              8.443346
-Sem transmissão                                        7.985721
-Transmissão Persistente                              -12.383951
+Epidêmico                                            -16.597467
+Episódico                                              6.081700
+Sem transmissão                                       10.756086
+Transmissão Persistente                                5.666699
                         dengue_pattern_2010_2016Transmissão Persistente
-Epidêmico                                                     -1.794212
-Episódico                                                     18.093202
-Sem transmissão                                               38.956688
-Transmissão Persistente                                        1.828868
+Epidêmico                                                      7.571826
+Episódico                                                    -18.772523
+Sem transmissão                                               51.390223
+Transmissão Persistente                                       17.810408
                         biomaamazonia biomacaatinga biomacerrado biomapampa
-Epidêmico                  -0.3954157    0.01498312   0.09874214 -12.190037
-Episódico                   0.7897979   -0.92349733  -0.09944696   1.348088
-Sem transmissão             3.6732242   -0.67685684   0.78967750   2.208712
-Transmissão Persistente   -23.4478078   -3.77411280   2.66248189 -53.432871
-                        biomapantanal      altitude
-Epidêmico                    1.499825 -0.0005806630
-Episódico                    1.339142  0.0001348925
-Sem transmissão             -1.618948  0.0019969060
-Transmissão Persistente     -1.129899 -0.0023364439
+Epidêmico                  -0.5100014    -0.0883291    0.1025944 -15.705038
+Episódico                   0.7879631    -0.9293463   -0.1057756   1.354703
+Sem transmissão             3.5271857    -0.6294595    0.8003360   2.217190
+Transmissão Persistente   -27.0615977    -2.3896099    2.3300939 -29.649742
+                        biomapantanal      altitude tipo_regiaometropolitana
+Epidêmico                   1.6229527 -0.0005761750              -0.74807061
+Episódico                   1.2451016  0.0001311721              -0.01900586
+Sem transmissão            -3.2522953  0.0020131568               0.37798256
+Transmissão Persistente    -0.7875212 -0.0017879870               0.95113188
 
-Residual Deviance: 7316.852 
-AIC: 7444.852 </code></pre>
+Residual Deviance: 7302.289 
+AIC: 7438.289 </code></pre>
 </div>
 <div class="sourceCode cell-code" id="cb44"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb44-1"><a href="#cb44-1" aria-hidden="true" tabindex="-1"></a>m2 <span class="ot">&lt;-</span> <span class="fu">na.omit</span>(m2)</span>
 <span id="cb44-2"><a href="#cb44-2" aria-hidden="true" tabindex="-1"></a><span class="co"># previsoes</span></span>
@@ -1207,59 +1211,59 @@ AIC: 7444.852 </code></pre>
 
                          Reference
 Prediction                Episódico/Epidêmico Epidêmico Episódico
-  Episódico/Epidêmico                    2305       309       500
-  Epidêmico                                96       408         0
-  Episódico                               418         5      1333
+  Episódico/Epidêmico                    2302       307       500
+  Epidêmico                               100       411         0
+  Episódico                               417         5      1333
   Sem transmissão                           0         0         8
-  Transmissão Persistente                   0         3         0
+  Transmissão Persistente                   0         2         0
                          Reference
 Prediction                Sem transmissão Transmissão Persistente
   Episódico/Epidêmico                   2                       0
-  Epidêmico                             0                      17
-  Episódico                           133                       0
-  Sem transmissão                      15                       0
-  Transmissão Persistente               0                      15
+  Epidêmico                             0                      16
+  Episódico                           132                       0
+  Sem transmissão                      16                       0
+  Transmissão Persistente               0                      16
 
 Overall Statistics
                                           
-               Accuracy : 0.7322          
-                 95% CI : (0.7203, 0.7438)
+               Accuracy : 0.7325          
+                 95% CI : (0.7207, 0.7441)
     No Information Rate : 0.5064          
     P-Value [Acc &gt; NIR] : &lt; 2.2e-16       
                                           
-                  Kappa : 0.5476          
+                  Kappa : 0.5485          
                                           
  Mcnemar's Test P-Value : NA              
 
 Statistics by Class:
 
                      Class: Episódico/Epidêmico Class: Epidêmico
-Sensitivity                              0.8177          0.56276
-Specificity                              0.7049          0.97666
-Pos Pred Value                           0.7397          0.78311
-Neg Pred Value                           0.7903          0.93718
+Sensitivity                              0.8166          0.56690
+Specificity                              0.7056          0.97604
+Pos Pred Value                           0.7400          0.77989
+Neg Pred Value                           0.7895          0.93770
 Prevalence                               0.5064          0.13023
-Detection Rate                           0.4140          0.07329
-Detection Prevalence                     0.5597          0.09359
-Balanced Accuracy                        0.7613          0.76971
+Detection Rate                           0.4135          0.07383
+Detection Prevalence                     0.5588          0.09466
+Balanced Accuracy                        0.7611          0.77147
                      Class: Episódico Class: Sem transmissão
-Sensitivity                    0.7241               0.100000
-Specificity                    0.8508               0.998523
-Pos Pred Value                 0.7057               0.652174
-Neg Pred Value                 0.8619               0.975649
+Sensitivity                    0.7241               0.106667
+Specificity                    0.8513               0.998523
+Pos Pred Value                 0.7064               0.666667
+Neg Pred Value                 0.8620               0.975825
 Prevalence                     0.3307               0.026944
-Detection Rate                 0.2394               0.002694
-Detection Prevalence           0.3393               0.004131
-Balanced Accuracy              0.7874               0.549262
+Detection Rate                 0.2394               0.002874
+Detection Prevalence           0.3390               0.004311
+Balanced Accuracy              0.7877               0.552595
                      Class: Transmissão Persistente
-Sensitivity                                0.468750
-Specificity                                0.999458
-Pos Pred Value                             0.833333
-Neg Pred Value                             0.996936
+Sensitivity                                0.500000
+Specificity                                0.999639
+Pos Pred Value                             0.888889
+Neg Pred Value                             0.997117
 Prevalence                                 0.005748
-Detection Rate                             0.002694
+Detection Rate                             0.002874
 Detection Prevalence                       0.003233
-Balanced Accuracy                          0.734104</code></pre>
+Balanced Accuracy                          0.749819</code></pre>
 </div>
 <div class="sourceCode cell-code" id="cb46"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb46-1"><a href="#cb46-1" aria-hidden="true" tabindex="-1"></a><span class="co"># Resíduos deviance</span></span>
 <span id="cb46-2"><a href="#cb46-2" aria-hidden="true" tabindex="-1"></a>residuals_deviance_m2 <span class="ot">&lt;-</span> <span class="fu">residuals</span>(m2, <span class="at">type =</span> <span class="st">"deviance"</span>)</span>
@@ -1276,71 +1280,78 @@ Balanced Accuracy                          0.734104</code></pre>
 <section id="modelo-nulo-clima" class="level5">
 <h5 class="anchored" data-anchor-id="modelo-nulo-clima">Modelo nulo + clima</h5>
 <div class="cell">
-<div class="sourceCode cell-code" id="cb47"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb47-1"><a href="#cb47-1" aria-hidden="true" tabindex="-1"></a>m3 <span class="ot">&lt;-</span> <span class="fu">multinom</span>(<span class="at">formula =</span> dengue_pattern <span class="sc">~</span> region <span class="sc">+</span> pop22 <span class="sc">+</span> <span class="sc">+</span> dengue_pattern_2010_2016 <span class="sc">+</span> thr_temp_Spring <span class="sc">+</span> precip_tot_Autumn <span class="sc">+</span>  thr_temp_umid_Autumn <span class="sc">+</span> precip_tot_Winter </span>
-<span id="cb47-2"><a href="#cb47-2" aria-hidden="true" tabindex="-1"></a>               <span class="sc">+</span> thr_prec_Summer, <span class="at">data =</span> det_17_22</span>
-<span id="cb47-3"><a href="#cb47-3" aria-hidden="true" tabindex="-1"></a>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="sourceCode cell-code" id="cb47"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb47-1"><a href="#cb47-1" aria-hidden="true" tabindex="-1"></a>m3 <span class="ot">&lt;-</span><span class="fu">multinom</span>(<span class="at">formula =</span> dengue_pattern <span class="sc">~</span> region <span class="sc">+</span> pop22 <span class="sc">+</span> dengue_pattern_2010_2016 <span class="sc">+</span> </span>
+<span id="cb47-2"><a href="#cb47-2" aria-hidden="true" tabindex="-1"></a>    thr_temp_Spring <span class="sc">+</span> precip_tot_Autumn <span class="sc">+</span> thr_temp_umid_Autumn <span class="sc">+</span> </span>
+<span id="cb47-3"><a href="#cb47-3" aria-hidden="true" tabindex="-1"></a>      precip_tot_Winter <span class="sc">+</span> thr_temp_umid_Summer </span>
+<span id="cb47-4"><a href="#cb47-4" aria-hidden="true" tabindex="-1"></a>    <span class="sc">+</span> precip_tot_Spring, <span class="at">data =</span> det_17_22)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 <div class="cell-output cell-output-stdout">
-<pre><code># weights:  80 (60 variable)
+<pre><code># weights:  85 (64 variable)
 initial  value 8959.740859 
-iter  10 value 7002.286094
-iter  20 value 6358.516537
-iter  30 value 4775.211712
-iter  40 value 3994.487233
-iter  50 value 3681.963922
-iter  60 value 3504.953867
-iter  70 value 3477.112451
-iter  80 value 3459.912198
-iter  90 value 3439.053244
-iter 100 value 3422.640560
-final  value 3422.640560 
+iter  10 value 5927.471630
+iter  20 value 5620.467522
+iter  30 value 4793.281474
+iter  40 value 3908.725815
+iter  50 value 3667.911038
+iter  60 value 3492.982140
+iter  70 value 3452.704638
+iter  80 value 3434.066401
+iter  90 value 3416.143979
+iter 100 value 3412.047163
+final  value 3412.047163 
 stopped after 100 iterations</code></pre>
 </div>
 <div class="sourceCode cell-code" id="cb49"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb49-1"><a href="#cb49-1" aria-hidden="true" tabindex="-1"></a>m3</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 <div class="cell-output cell-output-stdout">
 <pre><code>Call:
-multinom(formula = dengue_pattern ~ region + pop22 + +dengue_pattern_2010_2016 + 
+multinom(formula = dengue_pattern ~ region + pop22 + dengue_pattern_2010_2016 + 
     thr_temp_Spring + precip_tot_Autumn + thr_temp_umid_Autumn + 
-    precip_tot_Winter + thr_prec_Summer, data = det_17_22)
+    precip_tot_Winter + thr_temp_umid_Summer + precip_tot_Spring, 
+    data = det_17_22)
 
 Coefficients:
-                        (Intercept)    region2     region3   region4    region5
-Epidêmico                -9.2021371 -0.2213616  0.73603924  1.265655  0.5749500
-Episódico                 0.4294145  0.7603414 -0.50805023 -1.509557 -0.7490032
-Sem transmissão           2.8431738  0.5915216 -1.24270686 -2.691561  1.0125134
-Transmissão Persistente -27.2860957 -1.7850643 -0.01428793  2.686835 -1.2194863
-                                pop22 dengue_pattern_2010_2016Episódico
-Epidêmico                1.914957e-05                         -4.231459
-Episódico               -5.677347e-05                          5.481195
-Sem transmissão         -1.367878e-04                          3.634168
-Transmissão Persistente  2.652138e-05                        -13.131489
-                        dengue_pattern_2010_2016Episódico/Epidêmico
-Epidêmico                                                -2.5876928
-Episódico                                                 3.5505001
-Sem transmissão                                          -0.5626212
-Transmissão Persistente                                 -17.5481311
+                        (Intercept)    region2   region3    region4    region5
+Epidêmico                -11.740193 -0.7909648  0.322434  0.9269836  0.3910501
+Episódico                  3.588353  1.0738884 -0.424555 -1.3446521 -0.6936086
+Sem transmissão            2.398632  1.0004334 -1.157909 -2.5320943  1.1769144
+Transmissão Persistente  -46.678409  0.9384357  1.573102  4.8214049  0.4047535
+                                pop22 dengue_pattern_2010_2016Epidêmico
+Epidêmico                2.003542e-05                          2.594905
+Episódico               -5.926768e-05                         -2.871280
+Sem transmissão         -1.572195e-04                          2.151723
+Transmissão Persistente  2.666052e-05                         10.112833
+                        dengue_pattern_2010_2016Episódico
+Epidêmico                                     -1.61867635
+Episódico                                      1.90906314
+Sem transmissão                                4.22713758
+Transmissão Persistente                       -0.09164584
                         dengue_pattern_2010_2016Sem transmissão
-Epidêmico                                            -17.231487
-Episódico                                              8.805301
-Sem transmissão                                        8.847997
-Transmissão Persistente                               -4.774164
+Epidêmico                                             -8.973397
+Episódico                                              5.288301
+Sem transmissão                                        9.512364
+Transmissão Persistente                              -20.458130
                         dengue_pattern_2010_2016Transmissão Persistente
-Epidêmico                                                      4.917061
-Episódico                                                     13.236007
-Sem transmissão                                               75.693765
-Transmissão Persistente                                        6.283262
+Epidêmico                                                     -7.080218
+Episódico                                                     11.898361
+Sem transmissão                                               82.253750
+Transmissão Persistente                                        1.987784
                         thr_temp_Spring precip_tot_Autumn thr_temp_umid_Autumn
-Epidêmico                    0.10981880     -0.0009631967          -0.02467254
-Episódico                   -0.07090208      0.0007049000           0.01098124
-Sem transmissão             -0.13038215      0.0012764402           0.02777571
-Transmissão Persistente      0.30353895     -0.0051386035          -0.06199864
-                        precip_tot_Winter thr_prec_Summer
-Epidêmico                    0.0013878673    0.0231245344
-Episódico                   -0.0002849998   -0.0004629878
-Sem transmissão             -0.0007325284    0.0059373557
-Transmissão Persistente      0.0029080361    0.0598691975
+Epidêmico                    0.10419897     -0.0006839745          -0.03178796
+Episódico                   -0.07198352      0.0007398573           0.01367628
+Sem transmissão             -0.13467611      0.0014078003           0.03713266
+Transmissão Persistente      0.25538875     -0.0033765622          -0.08666719
+                        precip_tot_Winter thr_temp_umid_Summer
+Epidêmico                    0.0008619757          0.028569324
+Episódico                   -0.0003408969         -0.002407426
+Sem transmissão             -0.0008806506         -0.010639391
+Transmissão Persistente      0.0007962112          0.136551313
+                        precip_tot_Spring
+Epidêmico                   -0.0001478868
+Episódico                    0.0002598123
+Sem transmissão              0.0004266933
+Transmissão Persistente      0.0023909069
 
-Residual Deviance: 6845.281 
-AIC: 6965.281 </code></pre>
+Residual Deviance: 6824.094 
+AIC: 6952.094 </code></pre>
 </div>
 <div class="sourceCode cell-code" id="cb51"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb51-1"><a href="#cb51-1" aria-hidden="true" tabindex="-1"></a>m3 <span class="ot">&lt;-</span> <span class="fu">na.omit</span>(m3)</span>
 <span id="cb51-2"><a href="#cb51-2" aria-hidden="true" tabindex="-1"></a><span class="co"># previsoes</span></span>
@@ -1354,50 +1365,50 @@ AIC: 6965.281 </code></pre>
 
                          Reference
 Prediction                Episódico/Epidêmico Epidêmico Episódico
-  Episódico/Epidêmico                    2359       316       518
-  Epidêmico                                86       403         0
-  Episódico                               374         3      1306
+  Episódico/Epidêmico                    2360       318       514
+  Epidêmico                                90       400         0
+  Episódico                               369         4      1310
   Sem transmissão                           0         0        17
   Transmissão Persistente                   0         3         0
                          Reference
 Prediction                Sem transmissão Transmissão Persistente
-  Episódico/Epidêmico                   4                       0
+  Episódico/Epidêmico                   3                       0
   Epidêmico                             0                      17
-  Episódico                           114                       0
-  Sem transmissão                      32                       0
+  Episódico                           116                       0
+  Sem transmissão                      31                       0
   Transmissão Persistente               0                      15
 
 Overall Statistics
                                           
-               Accuracy : 0.7392          
-                 95% CI : (0.7274, 0.7507)
+               Accuracy : 0.7394          
+                 95% CI : (0.7276, 0.7509)
     No Information Rate : 0.5064          
     P-Value [Acc &gt; NIR] : &lt; 2.2e-16       
                                           
-                  Kappa : 0.5582          
+                  Kappa : 0.5585          
                                           
  Mcnemar's Test P-Value : NA              
 
 Statistics by Class:
 
                      Class: Episódico/Epidêmico Class: Epidêmico
-Sensitivity                              0.8368          0.55586
-Specificity                              0.6951          0.97873
-Pos Pred Value                           0.7379          0.79644
-Neg Pred Value                           0.8059          0.93638
+Sensitivity                              0.8372          0.55172
+Specificity                              0.6961          0.97790
+Pos Pred Value                           0.7387          0.78895
+Neg Pred Value                           0.8065          0.93577
 Prevalence                               0.5064          0.13023
-Detection Rate                           0.4237          0.07239
-Detection Prevalence                     0.5743          0.09089
-Balanced Accuracy                        0.7659          0.76729
+Detection Rate                           0.4239          0.07185
+Detection Prevalence                     0.5739          0.09107
+Balanced Accuracy                        0.7667          0.76481
                      Class: Episódico Class: Sem transmissão
-Sensitivity                    0.7094               0.213333
-Specificity                    0.8682               0.996862
-Pos Pred Value                 0.7268               0.653061
-Neg Pred Value                 0.8581               0.978615
+Sensitivity                    0.7116               0.206667
+Specificity                    0.8688               0.996862
+Pos Pred Value                 0.7282               0.645833
+Neg Pred Value                 0.8591               0.978438
 Prevalence                     0.3307               0.026944
-Detection Rate                 0.2346               0.005748
-Detection Prevalence           0.3228               0.008802
-Balanced Accuracy              0.7888               0.605098
+Detection Rate                 0.2353               0.005569
+Detection Prevalence           0.3232               0.008622
+Balanced Accuracy              0.7902               0.601764
                      Class: Transmissão Persistente
 Sensitivity                                0.468750
 Specificity                                0.999458
@@ -1450,140 +1461,155 @@ Balanced Accuracy                          0.734104</code></pre>
 <span id="cb54-18"><a href="#cb54-18" aria-hidden="true" tabindex="-1"></a>tabela_resultado</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 <div class="cell-output cell-output-stdout">
 <pre><code>                        (Intercept) region2 region3 region4 region5 pop22
-Epidêmico                      0.00    0.69    1.82    2.86    1.76     1
-Episódico                     81.35    3.00    0.53    0.15    0.39     1
-Sem transmissão               21.73    3.28    1.16    0.21    2.39     1
-Transmissão Persistente        0.00    0.00   12.49   70.76    1.52     1
+Epidêmico                      0.00    0.41    1.33    2.26    1.56     1
+Episódico                    512.07    3.99    0.72    0.21    0.43     1
+Sem transmissão               31.39    5.49    2.15    0.45    2.63     1
+Transmissão Persistente        0.00    0.00   23.07   75.20    1.75     1
+                        dengue_pattern_2010_2016Epidêmico
+Epidêmico                                           12.25
+Episódico                                            0.02
+Sem transmissão                                      0.09
+Transmissão Persistente                           2539.96
                         dengue_pattern_2010_2016Episódico
-Epidêmico                                            0.01
-Episódico                                          177.08
-Sem transmissão                                    327.61
-Transmissão Persistente                              0.12
-                        dengue_pattern_2010_2016Episódico/Epidêmico
-Epidêmico                                                      0.08
-Episódico                                                     27.61
-Sem transmissão                                                0.05
-Transmissão Persistente                                        0.00
+Epidêmico                                            0.22
+Episódico                                            6.57
+Sem transmissão                                     75.54
+Transmissão Persistente                              0.16
                         dengue_pattern_2010_2016Sem transmissão
 Epidêmico                                                  0.00
-Episódico                                               3361.55
-Sem transmissão                                        38232.91
-Transmissão Persistente                                    0.06
+Episódico                                                203.75
+Sem transmissão                                        14065.17
+Transmissão Persistente                                    1.18
                         dengue_pattern_2010_2016Transmissão Persistente
-Epidêmico                                                  5.500000e-01
-Episódico                                                  6.443215e+13
-Sem transmissão                                            2.217244e+19
-Transmissão Persistente                                    6.190000e+00
+Epidêmico                                                  1.520000e+00
+Episódico                                                  2.800000e-01
+Sem transmissão                                            9.208784e+32
+Transmissão Persistente                                    1.371070e+03
                         thr_temp_Spring biomaamazonia biomacaatinga
-Epidêmico                          1.10          1.42          1.44
-Episódico                          0.92          1.93          0.41
-Sem transmissão                    0.86         34.74          7.05
-Transmissão Persistente            1.42          0.00          0.03
+Epidêmico                          1.11          2.24          1.81
+Episódico                          0.92          1.25          0.52
+Sem transmissão                    0.86         27.46         10.64
+Transmissão Persistente            1.42          0.00          0.24
                         biomacerrado biomapampa biomapantanal precip_tot_Autumn
-Epidêmico                       0.84       0.01          5.81                 1
-Episódico                       1.40       3.13          3.16                 1
-Sem transmissão                18.34       9.04          0.23                 1
-Transmissão Persistente         1.03       0.00          0.29                 1
+Epidêmico                       0.90       0.00          7.42                 1
+Episódico                       1.29       3.36          4.05                 1
+Sem transmissão                18.74       9.61          0.73                 1
+Transmissão Persistente         2.13       0.00          0.75                 1
                         altitude thr_temp_umid_Autumn precip_tot_Winter
-Epidêmico                      1                 0.97                 1
-Episódico                      1                 1.00                 1
+Epidêmico                      1                 0.96                 1
+Episódico                      1                 1.01                 1
+Sem transmissão                1                 1.02                 1
+Transmissão Persistente        1                 0.87                 1
+                        tipo_regiaometropolitana thr_temp_umid_Summer
+Epidêmico                                   0.60                 1.04
+Episódico                                   0.61                 0.99
+Sem transmissão                             0.56                 0.99
+Transmissão Persistente                     4.91                 1.13
+                        precip_tot_Spring (Intercept) region2 region3 region4
+Epidêmico                               1        0.00    0.41    1.33    2.26
+Episódico                               1      512.07    3.99    0.72    0.21
+Sem transmissão                         1       31.39    5.49    2.15    0.45
+Transmissão Persistente                 1        0.00    0.00   23.07   75.20
+                        region5 pop22 dengue_pattern_2010_2016Epidêmico
+Epidêmico                  1.56     1                             12.25
+Episódico                  0.43     1                              0.02
+Sem transmissão            2.63     1                              0.09
+Transmissão Persistente    1.75     1                           2539.96
+                        dengue_pattern_2010_2016Episódico
+Epidêmico                                            0.22
+Episódico                                            6.57
+Sem transmissão                                     75.54
+Transmissão Persistente                              0.16
+                        dengue_pattern_2010_2016Sem transmissão
+Epidêmico                                                  0.00
+Episódico                                                203.74
+Sem transmissão                                        14065.04
+Transmissão Persistente                                    1.18
+                        dengue_pattern_2010_2016Transmissão Persistente
+Epidêmico                                                  1.520000e+00
+Episódico                                                  2.800000e-01
+Sem transmissão                                            9.208784e+32
+Transmissão Persistente                                    1.371070e+03
+                        thr_temp_Spring biomaamazonia biomacaatinga
+Epidêmico                          1.11          2.24          1.81
+Episódico                          0.92          1.25          0.52
+Sem transmissão                    0.85         27.46         10.64
+Transmissão Persistente            1.42          0.00          0.24
+                        biomacerrado biomapampa biomapantanal precip_tot_Autumn
+Epidêmico                       0.90       0.00          7.42                 1
+Episódico                       1.29       3.36          4.05                 1
+Sem transmissão                18.74       9.61          0.73                 1
+Transmissão Persistente         2.13       0.00          0.75                 1
+                        altitude thr_temp_umid_Autumn precip_tot_Winter
+Epidêmico                      1                 0.96                 1
+Episódico                      1                 1.01                 1
 Sem transmissão                1                 1.01                 1
-Transmissão Persistente        1                 0.91                 1
-                        thr_prec_Summer (Intercept) region2 region3 region4
-Epidêmico                          1.02        0.00    0.69    1.82    2.86
-Episódico                          0.98       81.35    3.00    0.53    0.15
-Sem transmissão                    0.98       21.73    3.28    1.16    0.21
-Transmissão Persistente            1.00        0.00    0.00   12.49   70.76
-                        region5 pop22 dengue_pattern_2010_2016Episódico
-Epidêmico                  1.76     1                              0.01
-Episódico                  0.39     1                            177.07
-Sem transmissão            2.39     1                            327.60
-Transmissão Persistente    1.52     1                              0.12
-                        dengue_pattern_2010_2016Episódico/Epidêmico
-Epidêmico                                                      0.08
-Episódico                                                     27.61
-Sem transmissão                                                0.05
-Transmissão Persistente                                        0.00
+Transmissão Persistente        1                 0.87                 1
+                        tipo_regiaometropolitana thr_temp_umid_Summer
+Epidêmico                                   0.60                 1.04
+Episódico                                   0.61                 0.99
+Sem transmissão                             0.56                 0.98
+Transmissão Persistente                     4.91                 1.13
+                        precip_tot_Spring (Intercept) region2 region3 region4
+Epidêmico                               1        0.00    0.41    1.33    2.26
+Episódico                               1      512.08    3.99    0.72    0.21
+Sem transmissão                         1       31.39    5.49    2.15    0.45
+Transmissão Persistente                 1        0.00    0.00   23.07   75.20
+                        region5 pop22 dengue_pattern_2010_2016Epidêmico
+Epidêmico                  1.56     1                             12.25
+Episódico                  0.43     1                              0.02
+Sem transmissão            2.63     1                              0.09
+Transmissão Persistente    1.75     1                           2539.96
+                        dengue_pattern_2010_2016Episódico
+Epidêmico                                            0.22
+Episódico                                            6.57
+Sem transmissão                                     75.54
+Transmissão Persistente                              0.16
                         dengue_pattern_2010_2016Sem transmissão
 Epidêmico                                                  0.00
-Episódico                                               3361.52
-Sem transmissão                                        38232.58
-Transmissão Persistente                                    0.06
+Episódico                                                203.75
+Sem transmissão                                        14065.30
+Transmissão Persistente                                    1.18
                         dengue_pattern_2010_2016Transmissão Persistente
-Epidêmico                                                  5.500000e-01
-Episódico                                                  6.443215e+13
-Sem transmissão                                            2.217244e+19
-Transmissão Persistente                                    6.190000e+00
+Epidêmico                                                  1.520000e+00
+Episódico                                                  2.800000e-01
+Sem transmissão                                            9.208784e+32
+Transmissão Persistente                                    1.371070e+03
                         thr_temp_Spring biomaamazonia biomacaatinga
-Epidêmico                          1.10          1.42          1.44
-Episódico                          0.92          1.93          0.41
-Sem transmissão                    0.85         34.74          7.05
-Transmissão Persistente            1.42          0.00          0.03
+Epidêmico                          1.11          2.24          1.81
+Episódico                          0.92          1.25          0.52
+Sem transmissão                    0.86         27.46         10.64
+Transmissão Persistente            1.42          0.00          0.24
                         biomacerrado biomapampa biomapantanal precip_tot_Autumn
-Epidêmico                       0.84       0.01          5.81                 1
-Episódico                       1.40       3.13          3.16                 1
-Sem transmissão                18.33       9.04          0.23                 1
-Transmissão Persistente         1.03       0.00          0.29                 1
+Epidêmico                       0.90       0.00          7.42              1.00
+Episódico                       1.29       3.36          4.05              1.00
+Sem transmissão                18.74       9.61          0.73              1.00
+Transmissão Persistente         2.13       0.00          0.75              1.01
                         altitude thr_temp_umid_Autumn precip_tot_Winter
-Epidêmico                      1                 0.97              1.00
-Episódico                      1                 1.00              1.00
-Sem transmissão                1                 1.00              1.00
-Transmissão Persistente        1                 0.91              0.99
-                        thr_prec_Summer (Intercept) region2 region3 region4
-Epidêmico                          1.02        0.00    0.69    1.82    2.86
-Episódico                          0.97       81.35    3.00    0.53    0.15
-Sem transmissão                    0.98       21.73    3.28    1.16    0.21
-Transmissão Persistente            1.00        0.00    0.00   12.49   70.76
-                        region5 pop22 dengue_pattern_2010_2016Episódico
-Epidêmico                  1.76     1                              0.01
-Episódico                  0.39     1                            177.08
-Sem transmissão            2.39     1                            327.62
-Transmissão Persistente    1.52     1                              0.12
-                        dengue_pattern_2010_2016Episódico/Epidêmico
-Epidêmico                                                      0.08
-Episódico                                                     27.61
-Sem transmissão                                                0.05
-Transmissão Persistente                                        0.00
-                        dengue_pattern_2010_2016Sem transmissão
-Epidêmico                                                  0.00
-Episódico                                               3361.58
-Sem transmissão                                        38233.25
-Transmissão Persistente                                    0.06
-                        dengue_pattern_2010_2016Transmissão Persistente
-Epidêmico                                                  5.500000e-01
-Episódico                                                  6.443215e+13
-Sem transmissão                                            2.217244e+19
-Transmissão Persistente                                    6.190000e+00
-                        thr_temp_Spring biomaamazonia biomacaatinga
-Epidêmico                          1.11          1.42          1.44
-Episódico                          0.92          1.93          0.41
-Sem transmissão                    0.86         34.74          7.05
-Transmissão Persistente            1.42          0.00          0.03
-                        biomacerrado biomapampa biomapantanal precip_tot_Autumn
-Epidêmico                       0.84       0.01          5.81              1.00
-Episódico                       1.40       3.13          3.16              1.00
-Sem transmissão                18.34       9.04          0.23              1.00
-Transmissão Persistente         1.03       0.00          0.29              1.01
-                        altitude thr_temp_umid_Autumn precip_tot_Winter
-Epidêmico                      1                 0.97                 1
-Episódico                      1                 1.00                 1
-Sem transmissão                1                 1.01                 1
-Transmissão Persistente        1                 0.91                 1
-                        thr_prec_Summer (Intercept) region2 region3 region4
-Epidêmico                          1.02           0       0       0       0
-Episódico                          0.98           0       0       0       0
-Sem transmissão                    0.99           0       0       0       0
-Transmissão Persistente            1.00           0       0       0       0
-                        region5 pop22 dengue_pattern_2010_2016Episódico
+Epidêmico                      1                 0.96                 1
+Episódico                      1                 1.01                 1
+Sem transmissão                1                 1.02                 1
+Transmissão Persistente        1                 0.87                 1
+                        tipo_regiaometropolitana thr_temp_umid_Summer
+Epidêmico                                   0.60                 1.04
+Episódico                                   0.61                 0.99
+Sem transmissão                             0.56                 0.99
+Transmissão Persistente                     4.91                 1.13
+                        precip_tot_Spring (Intercept) region2 region3 region4
+Epidêmico                               1           0       0       0       0
+Episódico                               1           0       0       0       0
+Sem transmissão                         1           0       0       0       0
+Transmissão Persistente                 1           0       0       0       0
+                        region5 pop22 dengue_pattern_2010_2016Epidêmico
 Epidêmico                     0     0                                 0
 Episódico                     0     0                                 0
 Sem transmissão               0     0                                 0
 Transmissão Persistente       0     0                                 0
-                        dengue_pattern_2010_2016Episódico/Epidêmico
-Epidêmico                                                         0
-Episódico                                                         0
-Sem transmissão                                                   0
-Transmissão Persistente                                           0
+                        dengue_pattern_2010_2016Episódico
+Epidêmico                                               0
+Episódico                                               0
+Sem transmissão                                         0
+Transmissão Persistente                                 0
                         dengue_pattern_2010_2016Sem transmissão
 Epidêmico                                                     0
 Episódico                                                     0
@@ -1605,15 +1631,20 @@ Episódico                          0          0             0                 0
 Sem transmissão                    0          0             0                 0
 Transmissão Persistente            0          0             0                 0
                         altitude thr_temp_umid_Autumn precip_tot_Winter
-Epidêmico                   0.12                 0.00                 0
-Episódico                   0.00                 0.27                 0
-Sem transmissão             0.00                 0.00                 0
-Transmissão Persistente     0.16                 0.00                 0
-                        thr_prec_Summer
-Epidêmico                             0
-Episódico                             0
-Sem transmissão                       0
-Transmissão Persistente               0</code></pre>
+Epidêmico                   0.56                    0               0.0
+Episódico                   0.00                    0               0.0
+Sem transmissão             0.00                    0               0.0
+Transmissão Persistente     0.18                    0               0.2
+                        tipo_regiaometropolitana thr_temp_umid_Summer
+Epidêmico                                      0                    0
+Episódico                                      0                    0
+Sem transmissão                                0                    0
+Transmissão Persistente                        0                    0
+                        precip_tot_Spring
+Epidêmico                            0.11
+Episódico                            0.01
+Sem transmissão                      0.01
+Transmissão Persistente              0.47</code></pre>
 </div>
 </div>
 </section>
@@ -1653,7 +1684,7 @@ Transmissão Persistente               0</code></pre>
 <span id="cb56-31"><a href="#cb56-31" aria-hidden="true" tabindex="-1"></a>  <span class="fu">labs</span>(<span class="at">x =</span> <span class="st">"Odds Ratio (OR)"</span>, <span class="at">y =</span> <span class="st">""</span>, <span class="at">title =</span> <span class="st">"Forest Plot - Modelo Multinomial"</span>) <span class="sc">+</span></span>
 <span id="cb56-32"><a href="#cb56-32" aria-hidden="true" tabindex="-1"></a>  <span class="fu">theme_minimal</span>()</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 <div class="cell-output cell-output-stderr">
-<pre><code>Warning: Removed 19 rows containing missing values or values outside the scale range
+<pre><code>Warning: Removed 20 rows containing missing values or values outside the scale range
 (`geom_errorbarh()`).</code></pre>
 </div>
 <div class="cell-output-display">
@@ -1726,23 +1757,23 @@ removed.
 This warning is displayed once every 8 hours.</code></pre>
 </div>
 <div class="cell-output-display">
-<div id="qyhooftcpg" style="padding-left:0px;padding-right:0px;padding-top:10px;padding-bottom:10px;overflow-x:auto;overflow-y:auto;width:auto;height:auto;">
-<style>#qyhooftcpg table {
+<div id="iqaxakozkv" style="padding-left:0px;padding-right:0px;padding-top:10px;padding-bottom:10px;overflow-x:auto;overflow-y:auto;width:auto;height:auto;">
+<style>#iqaxakozkv table {
   font-family: system-ui, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif, 'Apple Color Emoji', 'Segoe UI Emoji', 'Segoe UI Symbol', 'Noto Color Emoji';
   -webkit-font-smoothing: antialiased;
   -moz-osx-font-smoothing: grayscale;
 }
 
-#qyhooftcpg thead, #qyhooftcpg tbody, #qyhooftcpg tfoot, #qyhooftcpg tr, #qyhooftcpg td, #qyhooftcpg th {
+#iqaxakozkv thead, #iqaxakozkv tbody, #iqaxakozkv tfoot, #iqaxakozkv tr, #iqaxakozkv td, #iqaxakozkv th {
   border-style: none;
 }
 
-#qyhooftcpg p {
+#iqaxakozkv p {
   margin: 0;
   padding: 0;
 }
 
-#qyhooftcpg .gt_table {
+#iqaxakozkv .gt_table {
   display: table;
   border-collapse: collapse;
   line-height: normal;
@@ -1768,12 +1799,12 @@ This warning is displayed once every 8 hours.</code></pre>
   border-left-color: #D3D3D3;
 }
 
-#qyhooftcpg .gt_caption {
+#iqaxakozkv .gt_caption {
   padding-top: 4px;
   padding-bottom: 4px;
 }
 
-#qyhooftcpg .gt_title {
+#iqaxakozkv .gt_title {
   color: #333333;
   font-size: 125%;
   font-weight: initial;
@@ -1785,7 +1816,7 @@ This warning is displayed once every 8 hours.</code></pre>
   border-bottom-width: 0;
 }
 
-#qyhooftcpg .gt_subtitle {
+#iqaxakozkv .gt_subtitle {
   color: #333333;
   font-size: 85%;
   font-weight: initial;
@@ -1797,7 +1828,7 @@ This warning is displayed once every 8 hours.</code></pre>
   border-top-width: 0;
 }
 
-#qyhooftcpg .gt_heading {
+#iqaxakozkv .gt_heading {
   background-color: #FFFFFF;
   text-align: center;
   border-bottom-color: #FFFFFF;
@@ -1809,13 +1840,13 @@ This warning is displayed once every 8 hours.</code></pre>
   border-right-color: #D3D3D3;
 }
 
-#qyhooftcpg .gt_bottom_border {
+#iqaxakozkv .gt_bottom_border {
   border-bottom-style: solid;
   border-bottom-width: 2px;
   border-bottom-color: #D3D3D3;
 }
 
-#qyhooftcpg .gt_col_headings {
+#iqaxakozkv .gt_col_headings {
   border-top-style: solid;
   border-top-width: 2px;
   border-top-color: #D3D3D3;
@@ -1830,7 +1861,7 @@ This warning is displayed once every 8 hours.</code></pre>
   border-right-color: #D3D3D3;
 }
 
-#qyhooftcpg .gt_col_heading {
+#iqaxakozkv .gt_col_heading {
   color: #333333;
   background-color: #FFFFFF;
   font-size: 100%;
@@ -1850,7 +1881,7 @@ This warning is displayed once every 8 hours.</code></pre>
   overflow-x: hidden;
 }
 
-#qyhooftcpg .gt_column_spanner_outer {
+#iqaxakozkv .gt_column_spanner_outer {
   color: #333333;
   background-color: #FFFFFF;
   font-size: 100%;
@@ -1862,15 +1893,15 @@ This warning is displayed once every 8 hours.</code></pre>
   padding-right: 4px;
 }
 
-#qyhooftcpg .gt_column_spanner_outer:first-child {
+#iqaxakozkv .gt_column_spanner_outer:first-child {
   padding-left: 0;
 }
 
-#qyhooftcpg .gt_column_spanner_outer:last-child {
+#iqaxakozkv .gt_column_spanner_outer:last-child {
   padding-right: 0;
 }
 
-#qyhooftcpg .gt_column_spanner {
+#iqaxakozkv .gt_column_spanner {
   border-bottom-style: solid;
   border-bottom-width: 2px;
   border-bottom-color: #D3D3D3;
@@ -1882,11 +1913,11 @@ This warning is displayed once every 8 hours.</code></pre>
   width: 100%;
 }
 
-#qyhooftcpg .gt_spanner_row {
+#iqaxakozkv .gt_spanner_row {
   border-bottom-style: hidden;
 }
 
-#qyhooftcpg .gt_group_heading {
+#iqaxakozkv .gt_group_heading {
   padding-top: 8px;
   padding-bottom: 8px;
   padding-left: 5px;
@@ -1912,7 +1943,7 @@ This warning is displayed once every 8 hours.</code></pre>
   text-align: left;
 }
 
-#qyhooftcpg .gt_empty_group_heading {
+#iqaxakozkv .gt_empty_group_heading {
   padding: 0.5px;
   color: #333333;
   background-color: #FFFFFF;
@@ -1927,15 +1958,15 @@ This warning is displayed once every 8 hours.</code></pre>
   vertical-align: middle;
 }
 
-#qyhooftcpg .gt_from_md > :first-child {
+#iqaxakozkv .gt_from_md > :first-child {
   margin-top: 0;
 }
 
-#qyhooftcpg .gt_from_md > :last-child {
+#iqaxakozkv .gt_from_md > :last-child {
   margin-bottom: 0;
 }
 
-#qyhooftcpg .gt_row {
+#iqaxakozkv .gt_row {
   padding-top: 8px;
   padding-bottom: 8px;
   padding-left: 5px;
@@ -1954,7 +1985,7 @@ This warning is displayed once every 8 hours.</code></pre>
   overflow-x: hidden;
 }
 
-#qyhooftcpg .gt_stub {
+#iqaxakozkv .gt_stub {
   color: #333333;
   background-color: #FFFFFF;
   font-size: 100%;
@@ -1967,7 +1998,7 @@ This warning is displayed once every 8 hours.</code></pre>
   padding-right: 5px;
 }
 
-#qyhooftcpg .gt_stub_row_group {
+#iqaxakozkv .gt_stub_row_group {
   color: #333333;
   background-color: #FFFFFF;
   font-size: 100%;
@@ -1981,15 +2012,15 @@ This warning is displayed once every 8 hours.</code></pre>
   vertical-align: top;
 }
 
-#qyhooftcpg .gt_row_group_first td {
+#iqaxakozkv .gt_row_group_first td {
   border-top-width: 2px;
 }
 
-#qyhooftcpg .gt_row_group_first th {
+#iqaxakozkv .gt_row_group_first th {
   border-top-width: 2px;
 }
 
-#qyhooftcpg .gt_summary_row {
+#iqaxakozkv .gt_summary_row {
   color: #333333;
   background-color: #FFFFFF;
   text-transform: inherit;
@@ -1999,16 +2030,16 @@ This warning is displayed once every 8 hours.</code></pre>
   padding-right: 5px;
 }
 
-#qyhooftcpg .gt_first_summary_row {
+#iqaxakozkv .gt_first_summary_row {
   border-top-style: solid;
   border-top-color: #D3D3D3;
 }
 
-#qyhooftcpg .gt_first_summary_row.thick {
+#iqaxakozkv .gt_first_summary_row.thick {
   border-top-width: 2px;
 }
 
-#qyhooftcpg .gt_last_summary_row {
+#iqaxakozkv .gt_last_summary_row {
   padding-top: 8px;
   padding-bottom: 8px;
   padding-left: 5px;
@@ -2018,7 +2049,7 @@ This warning is displayed once every 8 hours.</code></pre>
   border-bottom-color: #D3D3D3;
 }
 
-#qyhooftcpg .gt_grand_summary_row {
+#iqaxakozkv .gt_grand_summary_row {
   color: #333333;
   background-color: #FFFFFF;
   text-transform: inherit;
@@ -2028,7 +2059,7 @@ This warning is displayed once every 8 hours.</code></pre>
   padding-right: 5px;
 }
 
-#qyhooftcpg .gt_first_grand_summary_row {
+#iqaxakozkv .gt_first_grand_summary_row {
   padding-top: 8px;
   padding-bottom: 8px;
   padding-left: 5px;
@@ -2038,7 +2069,7 @@ This warning is displayed once every 8 hours.</code></pre>
   border-top-color: #D3D3D3;
 }
 
-#qyhooftcpg .gt_last_grand_summary_row_top {
+#iqaxakozkv .gt_last_grand_summary_row_top {
   padding-top: 8px;
   padding-bottom: 8px;
   padding-left: 5px;
@@ -2048,11 +2079,11 @@ This warning is displayed once every 8 hours.</code></pre>
   border-bottom-color: #D3D3D3;
 }
 
-#qyhooftcpg .gt_striped {
+#iqaxakozkv .gt_striped {
   background-color: rgba(128, 128, 128, 0.05);
 }
 
-#qyhooftcpg .gt_table_body {
+#iqaxakozkv .gt_table_body {
   border-top-style: solid;
   border-top-width: 2px;
   border-top-color: #D3D3D3;
@@ -2061,7 +2092,7 @@ This warning is displayed once every 8 hours.</code></pre>
   border-bottom-color: #D3D3D3;
 }
 
-#qyhooftcpg .gt_footnotes {
+#iqaxakozkv .gt_footnotes {
   color: #333333;
   background-color: #FFFFFF;
   border-bottom-style: none;
@@ -2075,7 +2106,7 @@ This warning is displayed once every 8 hours.</code></pre>
   border-right-color: #D3D3D3;
 }
 
-#qyhooftcpg .gt_footnote {
+#iqaxakozkv .gt_footnote {
   margin: 0px;
   font-size: 90%;
   padding-top: 4px;
@@ -2084,7 +2115,7 @@ This warning is displayed once every 8 hours.</code></pre>
   padding-right: 5px;
 }
 
-#qyhooftcpg .gt_sourcenotes {
+#iqaxakozkv .gt_sourcenotes {
   color: #333333;
   background-color: #FFFFFF;
   border-bottom-style: none;
@@ -2098,7 +2129,7 @@ This warning is displayed once every 8 hours.</code></pre>
   border-right-color: #D3D3D3;
 }
 
-#qyhooftcpg .gt_sourcenote {
+#iqaxakozkv .gt_sourcenote {
   font-size: 90%;
   padding-top: 4px;
   padding-bottom: 4px;
@@ -2106,63 +2137,63 @@ This warning is displayed once every 8 hours.</code></pre>
   padding-right: 5px;
 }
 
-#qyhooftcpg .gt_left {
+#iqaxakozkv .gt_left {
   text-align: left;
 }
 
-#qyhooftcpg .gt_center {
+#iqaxakozkv .gt_center {
   text-align: center;
 }
 
-#qyhooftcpg .gt_right {
+#iqaxakozkv .gt_right {
   text-align: right;
   font-variant-numeric: tabular-nums;
 }
 
-#qyhooftcpg .gt_font_normal {
+#iqaxakozkv .gt_font_normal {
   font-weight: normal;
 }
 
-#qyhooftcpg .gt_font_bold {
+#iqaxakozkv .gt_font_bold {
   font-weight: bold;
 }
 
-#qyhooftcpg .gt_font_italic {
+#iqaxakozkv .gt_font_italic {
   font-style: italic;
 }
 
-#qyhooftcpg .gt_super {
+#iqaxakozkv .gt_super {
   font-size: 65%;
 }
 
-#qyhooftcpg .gt_footnote_marks {
+#iqaxakozkv .gt_footnote_marks {
   font-size: 75%;
   vertical-align: 0.4em;
   position: initial;
 }
 
-#qyhooftcpg .gt_asterisk {
+#iqaxakozkv .gt_asterisk {
   font-size: 100%;
   vertical-align: 0;
 }
 
-#qyhooftcpg .gt_indent_1 {
+#iqaxakozkv .gt_indent_1 {
   text-indent: 5px;
 }
 
-#qyhooftcpg .gt_indent_2 {
+#iqaxakozkv .gt_indent_2 {
   text-indent: 10px;
 }
 
-#qyhooftcpg .gt_indent_3 {
+#iqaxakozkv .gt_indent_3 {
   text-indent: 15px;
 }
 
-#qyhooftcpg .gt_indent_4 {
+#iqaxakozkv .gt_indent_4 {
   text-indent: 20px;
 }
 
-#qyhooftcpg .gt_indent_5 {
+#iqaxakozkv .gt_indent_5 {
   text-indent: 25px;
 }
 </style>
@@ -2200,14 +2231,14 @@ This warning is displayed once every 8 hours.</code></pre>
 <tbody class="gt_table_body">
 <tr class="odd">
 <td class="gt_row gt_left" headers="Variável">region2</td>
-<td class="gt_row gt_right" headers="Epidêmico_OR">0.69</td>
-<td class="gt_row gt_left" headers="Epidêmico_IC95">[0.69 - 0.69]</td>
+<td class="gt_row gt_right" headers="Epidêmico_OR">0.41</td>
+<td class="gt_row gt_left" headers="Epidêmico_IC95">[0.41 - 0.41]</td>
 <td class="gt_row gt_left" headers="Epidêmico_p_valor">—</td>
-<td class="gt_row gt_right" headers="Episódico_OR">3.00</td>
-<td class="gt_row gt_left" headers="Episódico_IC95">[3.00 - 3.00]</td>
+<td class="gt_row gt_right" headers="Episódico_OR">3.99</td>
+<td class="gt_row gt_left" headers="Episódico_IC95">[3.99 - 3.99]</td>
 <td class="gt_row gt_left" headers="Episódico_p_valor">—</td>
-<td class="gt_row gt_right" headers="Sem transmissão_OR">3.28</td>
-<td class="gt_row gt_left" headers="Sem transmissão_IC95">[3.28 - 3.28]</td>
+<td class="gt_row gt_right" headers="Sem transmissão_OR">5.49</td>
+<td class="gt_row gt_left" headers="Sem transmissão_IC95">[5.49 - 5.49]</td>
 <td class="gt_row gt_left" headers="Sem transmissão_p_valor">—</td>
 <td class="gt_row gt_right" headers="Transmissão Persistente_OR">0.00</td>
 <td class="gt_row gt_left" headers="Transmissão Persistente_IC95">[0.00 - 0.00]</td>
@@ -2215,47 +2246,47 @@ This warning is displayed once every 8 hours.</code></pre>
 </tr>
 <tr class="even">
 <td class="gt_row gt_left" headers="Variável">region3</td>
-<td class="gt_row gt_right" headers="Epidêmico_OR">1.82</td>
-<td class="gt_row gt_left" headers="Epidêmico_IC95">[1.82 - 1.82]</td>
+<td class="gt_row gt_right" headers="Epidêmico_OR">1.33</td>
+<td class="gt_row gt_left" headers="Epidêmico_IC95">[1.33 - 1.33]</td>
 <td class="gt_row gt_left" headers="Epidêmico_p_valor">—</td>
-<td class="gt_row gt_right" headers="Episódico_OR">0.53</td>
-<td class="gt_row gt_left" headers="Episódico_IC95">[0.53 - 0.53]</td>
+<td class="gt_row gt_right" headers="Episódico_OR">0.72</td>
+<td class="gt_row gt_left" headers="Episódico_IC95">[0.72 - 0.72]</td>
 <td class="gt_row gt_left" headers="Episódico_p_valor">—</td>
-<td class="gt_row gt_right" headers="Sem transmissão_OR">1.16</td>
-<td class="gt_row gt_left" headers="Sem transmissão_IC95">[1.16 - 1.16]</td>
+<td class="gt_row gt_right" headers="Sem transmissão_OR">2.15</td>
+<td class="gt_row gt_left" headers="Sem transmissão_IC95">[2.15 - 2.15]</td>
 <td class="gt_row gt_left" headers="Sem transmissão_p_valor">—</td>
-<td class="gt_row gt_right" headers="Transmissão Persistente_OR">12.49</td>
-<td class="gt_row gt_left" headers="Transmissão Persistente_IC95">[12.49 - 12.49]</td>
+<td class="gt_row gt_right" headers="Transmissão Persistente_OR">23.07</td>
+<td class="gt_row gt_left" headers="Transmissão Persistente_IC95">[23.07 - 23.07]</td>
 <td class="gt_row gt_left" headers="Transmissão Persistente_p_valor">—</td>
 </tr>
 <tr class="odd">
 <td class="gt_row gt_left" headers="Variável">region4</td>
-<td class="gt_row gt_right" headers="Epidêmico_OR">2.86</td>
-<td class="gt_row gt_left" headers="Epidêmico_IC95">[2.86 - 2.86]</td>
+<td class="gt_row gt_right" headers="Epidêmico_OR">2.26</td>
+<td class="gt_row gt_left" headers="Epidêmico_IC95">[2.26 - 2.26]</td>
 <td class="gt_row gt_left" headers="Epidêmico_p_valor">—</td>
-<td class="gt_row gt_right" headers="Episódico_OR">0.15</td>
-<td class="gt_row gt_left" headers="Episódico_IC95">[0.15 - 0.15]</td>
+<td class="gt_row gt_right" headers="Episódico_OR">0.21</td>
+<td class="gt_row gt_left" headers="Episódico_IC95">[0.21 - 0.21]</td>
 <td class="gt_row gt_left" headers="Episódico_p_valor">—</td>
-<td class="gt_row gt_right" headers="Sem transmissão_OR">0.21</td>
-<td class="gt_row gt_left" headers="Sem transmissão_IC95">[0.21 - 0.21]</td>
+<td class="gt_row gt_right" headers="Sem transmissão_OR">0.45</td>
+<td class="gt_row gt_left" headers="Sem transmissão_IC95">[0.45 - 0.45]</td>
 <td class="gt_row gt_left" headers="Sem transmissão_p_valor">—</td>
-<td class="gt_row gt_right" headers="Transmissão Persistente_OR">70.76</td>
-<td class="gt_row gt_left" headers="Transmissão Persistente_IC95">[70.76 - 70.76]</td>
+<td class="gt_row gt_right" headers="Transmissão Persistente_OR">75.20</td>
+<td class="gt_row gt_left" headers="Transmissão Persistente_IC95">[75.20 - 75.20]</td>
 <td class="gt_row gt_left" headers="Transmissão Persistente_p_valor">—</td>
 </tr>
 <tr class="even">
 <td class="gt_row gt_left" headers="Variável">region5</td>
-<td class="gt_row gt_right" headers="Epidêmico_OR">1.76</td>
-<td class="gt_row gt_left" headers="Epidêmico_IC95">[1.76 - 1.76]</td>
+<td class="gt_row gt_right" headers="Epidêmico_OR">1.56</td>
+<td class="gt_row gt_left" headers="Epidêmico_IC95">[1.56 - 1.56]</td>
 <td class="gt_row gt_left" headers="Epidêmico_p_valor">—</td>
-<td class="gt_row gt_right" headers="Episódico_OR">0.39</td>
-<td class="gt_row gt_left" headers="Episódico_IC95">[0.39 - 0.39]</td>
+<td class="gt_row gt_right" headers="Episódico_OR">0.43</td>
+<td class="gt_row gt_left" headers="Episódico_IC95">[0.43 - 0.43]</td>
 <td class="gt_row gt_left" headers="Episódico_p_valor">—</td>
-<td class="gt_row gt_right" headers="Sem transmissão_OR">2.39</td>
-<td class="gt_row gt_left" headers="Sem transmissão_IC95">[2.39 - 2.39]</td>
+<td class="gt_row gt_right" headers="Sem transmissão_OR">2.63</td>
+<td class="gt_row gt_left" headers="Sem transmissão_IC95">[2.63 - 2.63]</td>
 <td class="gt_row gt_left" headers="Sem transmissão_p_valor">—</td>
-<td class="gt_row gt_right" headers="Transmissão Persistente_OR">1.52</td>
-<td class="gt_row gt_left" headers="Transmissão Persistente_IC95">[1.52 - 1.52]</td>
+<td class="gt_row gt_right" headers="Transmissão Persistente_OR">1.75</td>
+<td class="gt_row gt_left" headers="Transmissão Persistente_IC95">[1.75 - 1.75]</td>
 <td class="gt_row gt_left" headers="Transmissão Persistente_p_valor">—</td>
 </tr>
 <tr class="odd">
@@ -2274,33 +2305,33 @@ This warning is displayed once every 8 hours.</code></pre>
 <td class="gt_row gt_left" headers="Transmissão Persistente_p_valor">—</td>
 </tr>
 <tr class="even">
-<td class="gt_row gt_left" headers="Variável">dengue_pattern_2010_2016Episódico</td>
-<td class="gt_row gt_right" headers="Epidêmico_OR">0.01</td>
-<td class="gt_row gt_left" headers="Epidêmico_IC95">[0.01 - 0.01]</td>
+<td class="gt_row gt_left" headers="Variável">dengue_pattern_2010_2016Epidêmico</td>
+<td class="gt_row gt_right" headers="Epidêmico_OR">12.25</td>
+<td class="gt_row gt_left" headers="Epidêmico_IC95">[12.25 - 12.25]</td>
 <td class="gt_row gt_left" headers="Epidêmico_p_valor">—</td>
-<td class="gt_row gt_right" headers="Episódico_OR">177.08</td>
-<td class="gt_row gt_left" headers="Episódico_IC95">[177.07 - 177.08]</td>
+<td class="gt_row gt_right" headers="Episódico_OR">0.02</td>
+<td class="gt_row gt_left" headers="Episódico_IC95">[0.02 - 0.02]</td>
 <td class="gt_row gt_left" headers="Episódico_p_valor">—</td>
-<td class="gt_row gt_right" headers="Sem transmissão_OR">327.61</td>
-<td class="gt_row gt_left" headers="Sem transmissão_IC95">[327.60 - 327.62]</td>
+<td class="gt_row gt_right" headers="Sem transmissão_OR">0.09</td>
+<td class="gt_row gt_left" headers="Sem transmissão_IC95">[0.09 - 0.09]</td>
 <td class="gt_row gt_left" headers="Sem transmissão_p_valor">—</td>
-<td class="gt_row gt_right" headers="Transmissão Persistente_OR">0.12</td>
-<td class="gt_row gt_left" headers="Transmissão Persistente_IC95">[0.12 - 0.12]</td>
+<td class="gt_row gt_right" headers="Transmissão Persistente_OR">2539.96</td>
+<td class="gt_row gt_left" headers="Transmissão Persistente_IC95">[2539.96 - 2539.96]</td>
 <td class="gt_row gt_left" headers="Transmissão Persistente_p_valor">—</td>
 </tr>
 <tr class="odd">
-<td class="gt_row gt_left" headers="Variável">dengue_pattern_2010_2016Episódico/Epidêmico</td>
-<td class="gt_row gt_right" headers="Epidêmico_OR">0.08</td>
-<td class="gt_row gt_left" headers="Epidêmico_IC95">[0.08 - 0.08]</td>
+<td class="gt_row gt_left" headers="Variável">dengue_pattern_2010_2016Episódico</td>
+<td class="gt_row gt_right" headers="Epidêmico_OR">0.22</td>
+<td class="gt_row gt_left" headers="Epidêmico_IC95">[0.22 - 0.22]</td>
 <td class="gt_row gt_left" headers="Epidêmico_p_valor">—</td>
-<td class="gt_row gt_right" headers="Episódico_OR">27.61</td>
-<td class="gt_row gt_left" headers="Episódico_IC95">[27.61 - 27.61]</td>
+<td class="gt_row gt_right" headers="Episódico_OR">6.57</td>
+<td class="gt_row gt_left" headers="Episódico_IC95">[6.57 - 6.57]</td>
 <td class="gt_row gt_left" headers="Episódico_p_valor">—</td>
-<td class="gt_row gt_right" headers="Sem transmissão_OR">0.05</td>
-<td class="gt_row gt_left" headers="Sem transmissão_IC95">[0.05 - 0.05]</td>
+<td class="gt_row gt_right" headers="Sem transmissão_OR">75.54</td>
+<td class="gt_row gt_left" headers="Sem transmissão_IC95">[75.54 - 75.54]</td>
 <td class="gt_row gt_left" headers="Sem transmissão_p_valor">—</td>
-<td class="gt_row gt_right" headers="Transmissão Persistente_OR">0.00</td>
-<td class="gt_row gt_left" headers="Transmissão Persistente_IC95">[0.00 - 0.00]</td>
+<td class="gt_row gt_right" headers="Transmissão Persistente_OR">0.16</td>
+<td class="gt_row gt_left" headers="Transmissão Persistente_IC95">[0.16 - 0.16]</td>
 <td class="gt_row gt_left" headers="Transmissão Persistente_p_valor">—</td>
 </tr>
 <tr class="even">
@@ -2308,35 +2339,35 @@ This warning is displayed once every 8 hours.</code></pre>
 <td class="gt_row gt_right" headers="Epidêmico_OR">0.00</td>
 <td class="gt_row gt_left" headers="Epidêmico_IC95">[0.00 - 0.00]</td>
 <td class="gt_row gt_left" headers="Epidêmico_p_valor">—</td>
-<td class="gt_row gt_right" headers="Episódico_OR">3361.55</td>
-<td class="gt_row gt_left" headers="Episódico_IC95">[3361.52 - 3361.58]</td>
+<td class="gt_row gt_right" headers="Episódico_OR">203.75</td>
+<td class="gt_row gt_left" headers="Episódico_IC95">[203.74 - 203.75]</td>
 <td class="gt_row gt_left" headers="Episódico_p_valor">—</td>
-<td class="gt_row gt_right" headers="Sem transmissão_OR">38232.91</td>
-<td class="gt_row gt_left" headers="Sem transmissão_IC95">[38232.58 - 38233.25]</td>
+<td class="gt_row gt_right" headers="Sem transmissão_OR">14065.17</td>
+<td class="gt_row gt_left" headers="Sem transmissão_IC95">[14065.04 - 14065.30]</td>
 <td class="gt_row gt_left" headers="Sem transmissão_p_valor">—</td>
-<td class="gt_row gt_right" headers="Transmissão Persistente_OR">0.06</td>
-<td class="gt_row gt_left" headers="Transmissão Persistente_IC95">[0.06 - 0.06]</td>
+<td class="gt_row gt_right" headers="Transmissão Persistente_OR">1.18</td>
+<td class="gt_row gt_left" headers="Transmissão Persistente_IC95">[1.18 - 1.18]</td>
 <td class="gt_row gt_left" headers="Transmissão Persistente_p_valor">—</td>
 </tr>
 <tr class="odd">
 <td class="gt_row gt_left" headers="Variável">dengue_pattern_2010_2016Transmissão Persistente</td>
-<td class="gt_row gt_right" headers="Epidêmico_OR">0.55</td>
-<td class="gt_row gt_left" headers="Epidêmico_IC95">[0.55 - 0.55]</td>
+<td class="gt_row gt_right" headers="Epidêmico_OR">1.52</td>
+<td class="gt_row gt_left" headers="Epidêmico_IC95">[1.52 - 1.52]</td>
 <td class="gt_row gt_left" headers="Epidêmico_p_valor">—</td>
-<td class="gt_row gt_right" headers="Episódico_OR">64432153632844.40</td>
-<td class="gt_row gt_left" headers="Episódico_IC95">[64432153632842.57 - 64432153632846.23]</td>
+<td class="gt_row gt_right" headers="Episódico_OR">0.28</td>
+<td class="gt_row gt_left" headers="Episódico_IC95">[0.28 - 0.28]</td>
 <td class="gt_row gt_left" headers="Episódico_p_valor">—</td>
-<td class="gt_row gt_right" headers="Sem transmissão_OR">22172443706157191168.00</td>
-<td class="gt_row gt_left" headers="Sem transmissão_IC95">[22172443706157191168.00 - 22172443706157191168.00]</td>
+<td class="gt_row gt_right" headers="Sem transmissão_OR">920878381041924543202084400240886.00</td>
+<td class="gt_row gt_left" headers="Sem transmissão_IC95">[920878381041924543202084400240886.00 - 920878381041924543202084400240886.00]</td>
 <td class="gt_row gt_left" headers="Sem transmissão_p_valor">—</td>
-<td class="gt_row gt_right" headers="Transmissão Persistente_OR">6.19</td>
-<td class="gt_row gt_left" headers="Transmissão Persistente_IC95">[6.19 - 6.19]</td>
+<td class="gt_row gt_right" headers="Transmissão Persistente_OR">1371.07</td>
+<td class="gt_row gt_left" headers="Transmissão Persistente_IC95">[1371.07 - 1371.07]</td>
 <td class="gt_row gt_left" headers="Transmissão Persistente_p_valor">—</td>
 </tr>
 <tr class="even">
 <td class="gt_row gt_left" headers="Variável">thr_temp_Spring</td>
-<td class="gt_row gt_right" headers="Epidêmico_OR">1.10</td>
-<td class="gt_row gt_left" headers="Epidêmico_IC95">[1.10 - 1.11]</td>
+<td class="gt_row gt_right" headers="Epidêmico_OR">1.11</td>
+<td class="gt_row gt_left" headers="Epidêmico_IC95">[1.11 - 1.11]</td>
 <td class="gt_row gt_left" headers="Epidêmico_p_valor">—</td>
 <td class="gt_row gt_right" headers="Episódico_OR">0.92</td>
 <td class="gt_row gt_left" headers="Episódico_IC95">[0.92 - 0.92]</td>
@@ -2350,14 +2381,14 @@ This warning is displayed once every 8 hours.</code></pre>
 </tr>
 <tr class="odd">
 <td class="gt_row gt_left" headers="Variável">biomaamazonia</td>
-<td class="gt_row gt_right" headers="Epidêmico_OR">1.42</td>
-<td class="gt_row gt_left" headers="Epidêmico_IC95">[1.42 - 1.42]</td>
+<td class="gt_row gt_right" headers="Epidêmico_OR">2.24</td>
+<td class="gt_row gt_left" headers="Epidêmico_IC95">[2.24 - 2.24]</td>
 <td class="gt_row gt_left" headers="Epidêmico_p_valor">—</td>
-<td class="gt_row gt_right" headers="Episódico_OR">1.93</td>
-<td class="gt_row gt_left" headers="Episódico_IC95">[1.93 - 1.93]</td>
+<td class="gt_row gt_right" headers="Episódico_OR">1.25</td>
+<td class="gt_row gt_left" headers="Episódico_IC95">[1.25 - 1.25]</td>
 <td class="gt_row gt_left" headers="Episódico_p_valor">—</td>
-<td class="gt_row gt_right" headers="Sem transmissão_OR">34.74</td>
-<td class="gt_row gt_left" headers="Sem transmissão_IC95">[34.74 - 34.74]</td>
+<td class="gt_row gt_right" headers="Sem transmissão_OR">27.46</td>
+<td class="gt_row gt_left" headers="Sem transmissão_IC95">[27.46 - 27.46]</td>
 <td class="gt_row gt_left" headers="Sem transmissão_p_valor">—</td>
 <td class="gt_row gt_right" headers="Transmissão Persistente_OR">0.00</td>
 <td class="gt_row gt_left" headers="Transmissão Persistente_IC95">[0.00 - 0.00]</td>
@@ -2365,44 +2396,44 @@ This warning is displayed once every 8 hours.</code></pre>
 </tr>
 <tr class="even">
 <td class="gt_row gt_left" headers="Variável">biomacaatinga</td>
-<td class="gt_row gt_right" headers="Epidêmico_OR">1.44</td>
-<td class="gt_row gt_left" headers="Epidêmico_IC95">[1.44 - 1.44]</td>
+<td class="gt_row gt_right" headers="Epidêmico_OR">1.81</td>
+<td class="gt_row gt_left" headers="Epidêmico_IC95">[1.81 - 1.81]</td>
 <td class="gt_row gt_left" headers="Epidêmico_p_valor">—</td>
-<td class="gt_row gt_right" headers="Episódico_OR">0.41</td>
-<td class="gt_row gt_left" headers="Episódico_IC95">[0.41 - 0.41]</td>
+<td class="gt_row gt_right" headers="Episódico_OR">0.52</td>
+<td class="gt_row gt_left" headers="Episódico_IC95">[0.52 - 0.52]</td>
 <td class="gt_row gt_left" headers="Episódico_p_valor">—</td>
-<td class="gt_row gt_right" headers="Sem transmissão_OR">7.05</td>
-<td class="gt_row gt_left" headers="Sem transmissão_IC95">[7.05 - 7.05]</td>
+<td class="gt_row gt_right" headers="Sem transmissão_OR">10.64</td>
+<td class="gt_row gt_left" headers="Sem transmissão_IC95">[10.64 - 10.64]</td>
 <td class="gt_row gt_left" headers="Sem transmissão_p_valor">—</td>
-<td class="gt_row gt_right" headers="Transmissão Persistente_OR">0.03</td>
-<td class="gt_row gt_left" headers="Transmissão Persistente_IC95">[0.03 - 0.03]</td>
+<td class="gt_row gt_right" headers="Transmissão Persistente_OR">0.24</td>
+<td class="gt_row gt_left" headers="Transmissão Persistente_IC95">[0.24 - 0.24]</td>
 <td class="gt_row gt_left" headers="Transmissão Persistente_p_valor">—</td>
 </tr>
 <tr class="odd">
 <td class="gt_row gt_left" headers="Variável">biomacerrado</td>
-<td class="gt_row gt_right" headers="Epidêmico_OR">0.84</td>
-<td class="gt_row gt_left" headers="Epidêmico_IC95">[0.84 - 0.84]</td>
+<td class="gt_row gt_right" headers="Epidêmico_OR">0.90</td>
+<td class="gt_row gt_left" headers="Epidêmico_IC95">[0.90 - 0.90]</td>
 <td class="gt_row gt_left" headers="Epidêmico_p_valor">—</td>
-<td class="gt_row gt_right" headers="Episódico_OR">1.40</td>
-<td class="gt_row gt_left" headers="Episódico_IC95">[1.40 - 1.40]</td>
+<td class="gt_row gt_right" headers="Episódico_OR">1.29</td>
+<td class="gt_row gt_left" headers="Episódico_IC95">[1.29 - 1.29]</td>
 <td class="gt_row gt_left" headers="Episódico_p_valor">—</td>
-<td class="gt_row gt_right" headers="Sem transmissão_OR">18.34</td>
-<td class="gt_row gt_left" headers="Sem transmissão_IC95">[18.33 - 18.34]</td>
+<td class="gt_row gt_right" headers="Sem transmissão_OR">18.74</td>
+<td class="gt_row gt_left" headers="Sem transmissão_IC95">[18.74 - 18.74]</td>
 <td class="gt_row gt_left" headers="Sem transmissão_p_valor">—</td>
-<td class="gt_row gt_right" headers="Transmissão Persistente_OR">1.03</td>
-<td class="gt_row gt_left" headers="Transmissão Persistente_IC95">[1.03 - 1.03]</td>
+<td class="gt_row gt_right" headers="Transmissão Persistente_OR">2.13</td>
+<td class="gt_row gt_left" headers="Transmissão Persistente_IC95">[2.13 - 2.13]</td>
 <td class="gt_row gt_left" headers="Transmissão Persistente_p_valor">—</td>
 </tr>
 <tr class="even">
 <td class="gt_row gt_left" headers="Variável">biomapampa</td>
-<td class="gt_row gt_right" headers="Epidêmico_OR">0.01</td>
-<td class="gt_row gt_left" headers="Epidêmico_IC95">[0.01 - 0.01]</td>
+<td class="gt_row gt_right" headers="Epidêmico_OR">0.00</td>
+<td class="gt_row gt_left" headers="Epidêmico_IC95">[0.00 - 0.00]</td>
 <td class="gt_row gt_left" headers="Epidêmico_p_valor">—</td>
-<td class="gt_row gt_right" headers="Episódico_OR">3.13</td>
-<td class="gt_row gt_left" headers="Episódico_IC95">[3.13 - 3.13]</td>
+<td class="gt_row gt_right" headers="Episódico_OR">3.36</td>
+<td class="gt_row gt_left" headers="Episódico_IC95">[3.36 - 3.36]</td>
 <td class="gt_row gt_left" headers="Episódico_p_valor">—</td>
-<td class="gt_row gt_right" headers="Sem transmissão_OR">9.04</td>
-<td class="gt_row gt_left" headers="Sem transmissão_IC95">[9.04 - 9.04]</td>
+<td class="gt_row gt_right" headers="Sem transmissão_OR">9.61</td>
+<td class="gt_row gt_left" headers="Sem transmissão_IC95">[9.61 - 9.61]</td>
 <td class="gt_row gt_left" headers="Sem transmissão_p_valor">—</td>
 <td class="gt_row gt_right" headers="Transmissão Persistente_OR">0.00</td>
 <td class="gt_row gt_left" headers="Transmissão Persistente_IC95">[0.00 - 0.00]</td>
@@ -2410,17 +2441,17 @@ This warning is displayed once every 8 hours.</code></pre>
 </tr>
 <tr class="odd">
 <td class="gt_row gt_left" headers="Variável">biomapantanal</td>
-<td class="gt_row gt_right" headers="Epidêmico_OR">5.81</td>
-<td class="gt_row gt_left" headers="Epidêmico_IC95">[5.81 - 5.81]</td>
+<td class="gt_row gt_right" headers="Epidêmico_OR">7.42</td>
+<td class="gt_row gt_left" headers="Epidêmico_IC95">[7.42 - 7.42]</td>
 <td class="gt_row gt_left" headers="Epidêmico_p_valor">—</td>
-<td class="gt_row gt_right" headers="Episódico_OR">3.16</td>
-<td class="gt_row gt_left" headers="Episódico_IC95">[3.16 - 3.16]</td>
+<td class="gt_row gt_right" headers="Episódico_OR">4.05</td>
+<td class="gt_row gt_left" headers="Episódico_IC95">[4.05 - 4.05]</td>
 <td class="gt_row gt_left" headers="Episódico_p_valor">—</td>
-<td class="gt_row gt_right" headers="Sem transmissão_OR">0.23</td>
-<td class="gt_row gt_left" headers="Sem transmissão_IC95">[0.23 - 0.23]</td>
+<td class="gt_row gt_right" headers="Sem transmissão_OR">0.73</td>
+<td class="gt_row gt_left" headers="Sem transmissão_IC95">[0.73 - 0.73]</td>
 <td class="gt_row gt_left" headers="Sem transmissão_p_valor">—</td>
-<td class="gt_row gt_right" headers="Transmissão Persistente_OR">0.29</td>
-<td class="gt_row gt_left" headers="Transmissão Persistente_IC95">[0.29 - 0.29]</td>
+<td class="gt_row gt_right" headers="Transmissão Persistente_OR">0.75</td>
+<td class="gt_row gt_left" headers="Transmissão Persistente_IC95">[0.75 - 0.75]</td>
 <td class="gt_row gt_left" headers="Transmissão Persistente_p_valor">—</td>
 </tr>
 <tr class="even">
@@ -2455,17 +2486,17 @@ This warning is displayed once every 8 hours.</code></pre>
 </tr>
 <tr class="even">
 <td class="gt_row gt_left" headers="Variável">thr_temp_umid_Autumn</td>
-<td class="gt_row gt_right" headers="Epidêmico_OR">0.97</td>
-<td class="gt_row gt_left" headers="Epidêmico_IC95">[0.97 - 0.97]</td>
+<td class="gt_row gt_right" headers="Epidêmico_OR">0.96</td>
+<td class="gt_row gt_left" headers="Epidêmico_IC95">[0.96 - 0.96]</td>
 <td class="gt_row gt_left" headers="Epidêmico_p_valor">—</td>
-<td class="gt_row gt_right" headers="Episódico_OR">1.00</td>
-<td class="gt_row gt_left" headers="Episódico_IC95">[1.00 - 1.00]</td>
+<td class="gt_row gt_right" headers="Episódico_OR">1.01</td>
+<td class="gt_row gt_left" headers="Episódico_IC95">[1.01 - 1.01]</td>
 <td class="gt_row gt_left" headers="Episódico_p_valor">—</td>
-<td class="gt_row gt_right" headers="Sem transmissão_OR">1.01</td>
-<td class="gt_row gt_left" headers="Sem transmissão_IC95">[1.00 - 1.01]</td>
+<td class="gt_row gt_right" headers="Sem transmissão_OR">1.02</td>
+<td class="gt_row gt_left" headers="Sem transmissão_IC95">[1.01 - 1.02]</td>
 <td class="gt_row gt_left" headers="Sem transmissão_p_valor">—</td>
-<td class="gt_row gt_right" headers="Transmissão Persistente_OR">0.91</td>
-<td class="gt_row gt_left" headers="Transmissão Persistente_IC95">[0.91 - 0.91]</td>
+<td class="gt_row gt_right" headers="Transmissão Persistente_OR">0.87</td>
+<td class="gt_row gt_left" headers="Transmissão Persistente_IC95">[0.87 - 0.87]</td>
 <td class="gt_row gt_left" headers="Transmissão Persistente_p_valor">—</td>
 </tr>
 <tr class="odd">
@@ -2480,19 +2511,49 @@ This warning is displayed once every 8 hours.</code></pre>
 <td class="gt_row gt_left" headers="Sem transmissão_IC95">[1.00 - 1.00]</td>
 <td class="gt_row gt_left" headers="Sem transmissão_p_valor">—</td>
 <td class="gt_row gt_right" headers="Transmissão Persistente_OR">1.00</td>
-<td class="gt_row gt_left" headers="Transmissão Persistente_IC95">[0.99 - 1.00]</td>
+<td class="gt_row gt_left" headers="Transmissão Persistente_IC95">[1.00 - 1.00]</td>
 <td class="gt_row gt_left" headers="Transmissão Persistente_p_valor">—</td>
 </tr>
 <tr class="even">
-<td class="gt_row gt_left" headers="Variável">thr_prec_Summer</td>
-<td class="gt_row gt_right" headers="Epidêmico_OR">1.02</td>
-<td class="gt_row gt_left" headers="Epidêmico_IC95">[1.02 - 1.02]</td>
+<td class="gt_row gt_left" headers="Variável">tipo_regiaometropolitana</td>
+<td class="gt_row gt_right" headers="Epidêmico_OR">0.60</td>
+<td class="gt_row gt_left" headers="Epidêmico_IC95">[0.60 - 0.60]</td>
 <td class="gt_row gt_left" headers="Epidêmico_p_valor">—</td>
-<td class="gt_row gt_right" headers="Episódico_OR">0.98</td>
-<td class="gt_row gt_left" headers="Episódico_IC95">[0.97 - 0.98]</td>
+<td class="gt_row gt_right" headers="Episódico_OR">0.61</td>
+<td class="gt_row gt_left" headers="Episódico_IC95">[0.61 - 0.61]</td>
 <td class="gt_row gt_left" headers="Episódico_p_valor">—</td>
-<td class="gt_row gt_right" headers="Sem transmissão_OR">0.98</td>
+<td class="gt_row gt_right" headers="Sem transmissão_OR">0.56</td>
+<td class="gt_row gt_left" headers="Sem transmissão_IC95">[0.56 - 0.56]</td>
+<td class="gt_row gt_left" headers="Sem transmissão_p_valor">—</td>
+<td class="gt_row gt_right" headers="Transmissão Persistente_OR">4.91</td>
+<td class="gt_row gt_left" headers="Transmissão Persistente_IC95">[4.91 - 4.91]</td>
+<td class="gt_row gt_left" headers="Transmissão Persistente_p_valor">—</td>
+</tr>
+<tr class="odd">
+<td class="gt_row gt_left" headers="Variável">thr_temp_umid_Summer</td>
+<td class="gt_row gt_right" headers="Epidêmico_OR">1.04</td>
+<td class="gt_row gt_left" headers="Epidêmico_IC95">[1.04 - 1.04]</td>
+<td class="gt_row gt_left" headers="Epidêmico_p_valor">—</td>
+<td class="gt_row gt_right" headers="Episódico_OR">0.99</td>
+<td class="gt_row gt_left" headers="Episódico_IC95">[0.99 - 0.99]</td>
+<td class="gt_row gt_left" headers="Episódico_p_valor">—</td>
+<td class="gt_row gt_right" headers="Sem transmissão_OR">0.99</td>
 <td class="gt_row gt_left" headers="Sem transmissão_IC95">[0.98 - 0.99]</td>
+<td class="gt_row gt_left" headers="Sem transmissão_p_valor">—</td>
+<td class="gt_row gt_right" headers="Transmissão Persistente_OR">1.13</td>
+<td class="gt_row gt_left" headers="Transmissão Persistente_IC95">[1.13 - 1.13]</td>
+<td class="gt_row gt_left" headers="Transmissão Persistente_p_valor">—</td>
+</tr>
+<tr class="even">
+<td class="gt_row gt_left" headers="Variável">precip_tot_Spring</td>
+<td class="gt_row gt_right" headers="Epidêmico_OR">1.00</td>
+<td class="gt_row gt_left" headers="Epidêmico_IC95">[1.00 - 1.00]</td>
+<td class="gt_row gt_left" headers="Epidêmico_p_valor">—</td>
+<td class="gt_row gt_right" headers="Episódico_OR">1.00</td>
+<td class="gt_row gt_left" headers="Episódico_IC95">[1.00 - 1.00]</td>
+<td class="gt_row gt_left" headers="Episódico_p_valor">—</td>
+<td class="gt_row gt_right" headers="Sem transmissão_OR">1.00</td>
+<td class="gt_row gt_left" headers="Sem transmissão_IC95">[1.00 - 1.00]</td>
 <td class="gt_row gt_left" headers="Sem transmissão_p_valor">—</td>
 <td class="gt_row gt_right" headers="Transmissão Persistente_OR">1.00</td>
 <td class="gt_row gt_left" headers="Transmissão Persistente_IC95">[1.00 - 1.00]</td>
