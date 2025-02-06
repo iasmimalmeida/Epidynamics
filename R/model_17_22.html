@@ -1,0 +1,2937 @@
+<!DOCTYPE html>
+<html xmlns="http://www.w3.org/1999/xhtml" lang="en" xml:lang="en"><head>
+
+<meta charset="utf-8">
+<meta name="generator" content="quarto-1.5.57">
+
+<meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=yes">
+
+
+<title>Análise Regressão Logística Multinomial A2 - 2017-2022</title>
+<style>
+code{white-space: pre-wrap;}
+span.smallcaps{font-variant: small-caps;}
+div.columns{display: flex; gap: min(4vw, 1.5em);}
+div.column{flex: auto; overflow-x: auto;}
+div.hanging-indent{margin-left: 1.5em; text-indent: -1.5em;}
+ul.task-list{list-style: none;}
+ul.task-list li input[type="checkbox"] {
+  width: 0.8em;
+  margin: 0 0.8em 0.2em -1em; /* quarto-specific, see https://github.com/quarto-dev/quarto-cli/issues/4556 */ 
+  vertical-align: middle;
+}
+/* CSS for syntax highlighting */
+pre > code.sourceCode { white-space: pre; position: relative; }
+pre > code.sourceCode > span { line-height: 1.25; }
+pre > code.sourceCode > span:empty { height: 1.2em; }
+.sourceCode { overflow: visible; }
+code.sourceCode > span { color: inherit; text-decoration: inherit; }
+div.sourceCode { margin: 1em 0; }
+pre.sourceCode { margin: 0; }
+@media screen {
+div.sourceCode { overflow: auto; }
+}
+@media print {
+pre > code.sourceCode { white-space: pre-wrap; }
+pre > code.sourceCode > span { display: inline-block; text-indent: -5em; padding-left: 5em; }
+}
+pre.numberSource code
+  { counter-reset: source-line 0; }
+pre.numberSource code > span
+  { position: relative; left: -4em; counter-increment: source-line; }
+pre.numberSource code > span > a:first-child::before
+  { content: counter(source-line);
+    position: relative; left: -1em; text-align: right; vertical-align: baseline;
+    border: none; display: inline-block;
+    -webkit-touch-callout: none; -webkit-user-select: none;
+    -khtml-user-select: none; -moz-user-select: none;
+    -ms-user-select: none; user-select: none;
+    padding: 0 4px; width: 4em;
+  }
+pre.numberSource { margin-left: 3em;  padding-left: 4px; }
+div.sourceCode
+  {   }
+@media screen {
+pre > code.sourceCode > span > a:first-child::before { text-decoration: underline; }
+}
+</style>
+
+
+<script src="model_17_22_files/libs/clipboard/clipboard.min.js"></script>
+<script src="model_17_22_files/libs/quarto-html/quarto.js"></script>
+<script src="model_17_22_files/libs/quarto-html/popper.min.js"></script>
+<script src="model_17_22_files/libs/quarto-html/tippy.umd.min.js"></script>
+<script src="model_17_22_files/libs/quarto-html/anchor.min.js"></script>
+<link href="model_17_22_files/libs/quarto-html/tippy.css" rel="stylesheet">
+<link href="model_17_22_files/libs/quarto-html/quarto-syntax-highlighting.css" rel="stylesheet" id="quarto-text-highlighting-styles">
+<script src="model_17_22_files/libs/bootstrap/bootstrap.min.js"></script>
+<link href="model_17_22_files/libs/bootstrap/bootstrap-icons.css" rel="stylesheet">
+<link href="model_17_22_files/libs/bootstrap/bootstrap.min.css" rel="stylesheet" id="quarto-bootstrap" data-mode="light">
+
+
+</head>
+
+<body class="fullcontent">
+
+<div id="quarto-content" class="page-columns page-rows-contents page-layout-article">
+
+<main class="content" id="quarto-document-content">
+
+<header id="title-block-header" class="quarto-title-block default">
+<div class="quarto-title">
+<h1 class="title">Análise Regressão Logística Multinomial A2 - 2017-2022</h1>
+</div>
+
+
+
+<div class="quarto-title-meta">
+
+    
+  
+    
+  </div>
+  
+
+
+</header>
+
+
+<section id="carregar-bibliotecas-necessárias" class="level2">
+<h2 class="anchored" data-anchor-id="carregar-bibliotecas-necessárias">Carregar bibliotecas necessárias</h2>
+</section>
+<section id="bancos" class="level2">
+<h2 class="anchored" data-anchor-id="bancos">Bancos</h2>
+<p>Juntando os bancos de cada período para as modelagens dos períodos.</p>
+<div class="cell">
+<div class="sourceCode cell-code" id="cb1"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb1-1"><a href="#cb1-1" aria-hidden="true" tabindex="-1"></a><span class="co">#Lendo</span></span>
+<span id="cb1-2"><a href="#cb1-2" aria-hidden="true" tabindex="-1"></a><span class="co">#banco_determinantes &lt;- read_csv2("Dados/Determinantes/banco_determinantes.csv")</span></span>
+<span id="cb1-3"><a href="#cb1-3" aria-hidden="true" tabindex="-1"></a>banco_determinantes <span class="ot">&lt;-</span> <span class="fu">read_csv2</span>(<span class="st">"banco_determinantes_patt.csv"</span>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output cell-output-stderr">
+<pre><code>ℹ Using "','" as decimal and "'.'" as grouping mark. Use `read_delim()` for more control.</code></pre>
+</div>
+<div class="cell-output cell-output-stderr">
+<pre><code>Rows: 5570 Columns: 11
+── Column specification ────────────────────────────────────────────────────────
+Delimiter: ";"
+chr (4): tipo_regiao, bioma, koppen, dengue_pattern_2010_2016
+dbl (7): muni_code, region, altitude, pop10, pop22, prop_residuo, prop_esgot
+
+ℹ Use `spec()` to retrieve the full column specification for this data.
+ℹ Specify the column types or set `show_col_types = FALSE` to quiet this message.</code></pre>
+</div>
+<div class="sourceCode cell-code" id="cb4"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb4-1"><a href="#cb4-1" aria-hidden="true" tabindex="-1"></a><span class="co">#2017-2022</span></span>
+<span id="cb4-2"><a href="#cb4-2" aria-hidden="true" tabindex="-1"></a><span class="co">#clima_org_model_17_22_season &lt;- read_csv("Dados/Determinantes/clima/clima_org_model_17_22_season.csv")</span></span>
+<span id="cb4-3"><a href="#cb4-3" aria-hidden="true" tabindex="-1"></a>clima_org_model_17_22_season <span class="ot">&lt;-</span> <span class="fu">read_csv</span>(<span class="st">"clima_org_model_17_22_season.csv"</span>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output cell-output-stderr">
+<pre><code>New names:
+Rows: 5570 Columns: 31
+── Column specification
+──────────────────────────────────────────────────────── Delimiter: "," chr
+(1): dengue_pattern dbl (30): ...1, geocode, temp_med_Autumn, umid_med_Autumn,
+precip_tot_Autumn...
+ℹ Use `spec()` to retrieve the full column specification for this data. ℹ
+Specify the column types or set `show_col_types = FALSE` to quiet this message.
+• `` -&gt; `...1`</code></pre>
+</div>
+<div class="sourceCode cell-code" id="cb6"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb6-1"><a href="#cb6-1" aria-hidden="true" tabindex="-1"></a>clima_org_model_17_22_season <span class="ot">&lt;-</span> clima_org_model_17_22_season[, <span class="sc">-</span><span class="dv">1</span>]  <span class="co"># Exclui a primeira coluna</span></span>
+<span id="cb6-2"><a href="#cb6-2" aria-hidden="true" tabindex="-1"></a><span class="fu">colnames</span>(clima_org_model_17_22_season)[<span class="dv">1</span>] <span class="ot">&lt;-</span> <span class="st">"muni_code"</span>  <span class="co"># Renomeia a nova primeira coluna</span></span>
+<span id="cb6-3"><a href="#cb6-3" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb6-4"><a href="#cb6-4" aria-hidden="true" tabindex="-1"></a><span class="co"># Juntando</span></span>
+<span id="cb6-5"><a href="#cb6-5" aria-hidden="true" tabindex="-1"></a>det_17_22 <span class="ot">&lt;-</span> <span class="fu">full_join</span>(banco_determinantes, clima_org_model_17_22_season , <span class="at">by =</span> <span class="st">"muni_code"</span>)</span>
+<span id="cb6-6"><a href="#cb6-6" aria-hidden="true" tabindex="-1"></a>det_17_22  <span class="ot">&lt;-</span> det_17_22 [, <span class="sc">!</span><span class="fu">names</span>(det_17_22) <span class="sc">%in%</span> <span class="fu">c</span>(<span class="st">"pop10"</span>)]</span>
+<span id="cb6-7"><a href="#cb6-7" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb6-8"><a href="#cb6-8" aria-hidden="true" tabindex="-1"></a><span class="do">## Removendo os bancos para a nálise ficar mais leve</span></span>
+<span id="cb6-9"><a href="#cb6-9" aria-hidden="true" tabindex="-1"></a><span class="fu">remove</span>(banco_determinantes)</span>
+<span id="cb6-10"><a href="#cb6-10" aria-hidden="true" tabindex="-1"></a><span class="fu">remove</span>(clima_org_model_17_22_season)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</div>
+</section>
+<section id="análise-2017-2022" class="level1">
+<h1>Análise 2017-2022</h1>
+<p>Análise do período de 2017-2022, primeira parte de uma série temporal da classificação de padrões de transmissão de todos os municípios brasileiros para dengue.</p>
+<section id="carregando-os-dados" class="level2">
+<h2 class="anchored" data-anchor-id="carregando-os-dados">1.Carregando os dados</h2>
+<div class="cell">
+<div class="sourceCode cell-code" id="cb7"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb7-1"><a href="#cb7-1" aria-hidden="true" tabindex="-1"></a><span class="co"># Converter variáveis numéricas com vírgula decimal e categorizar as variáveis de texto</span></span>
+<span id="cb7-2"><a href="#cb7-2" aria-hidden="true" tabindex="-1"></a>det_17_22 <span class="ot">&lt;-</span> det_17_22 <span class="sc">%&gt;%</span></span>
+<span id="cb7-3"><a href="#cb7-3" aria-hidden="true" tabindex="-1"></a>  <span class="fu">mutate</span>(</span>
+<span id="cb7-4"><a href="#cb7-4" aria-hidden="true" tabindex="-1"></a>    <span class="fu">across</span>(<span class="fu">where</span>(<span class="sc">~</span> <span class="fu">all</span>(<span class="fu">grepl</span>(<span class="st">"^[0-9,.]+$"</span>, .))), <span class="sc">~</span> <span class="fu">as.numeric</span>(<span class="fu">gsub</span>(<span class="st">","</span>, <span class="st">"."</span>, .))),</span>
+<span id="cb7-5"><a href="#cb7-5" aria-hidden="true" tabindex="-1"></a>    <span class="fu">across</span>(<span class="fu">where</span>(is.character), as.factor))</span>
+<span id="cb7-6"><a href="#cb7-6" aria-hidden="true" tabindex="-1"></a>    </span>
+<span id="cb7-7"><a href="#cb7-7" aria-hidden="true" tabindex="-1"></a>    </span>
+<span id="cb7-8"><a href="#cb7-8" aria-hidden="true" tabindex="-1"></a><span class="co"># Visão geral dos dados</span></span>
+<span id="cb7-9"><a href="#cb7-9" aria-hidden="true" tabindex="-1"></a><span class="fu">summary</span>(det_17_22)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output cell-output-stdout">
+<pre><code>   muni_code           region                 tipo_regiao  
+ Min.   :1100015   Min.   :1.000   metropolitana    : 445  
+ 1st Qu.:2512126   1st Qu.:2.000   nao metropolitana:5125  
+ Median :3146280   Median :3.000                           
+ Mean   :3253591   Mean   :2.898                           
+ 3rd Qu.:4119190   3rd Qu.:4.000                           
+ Max.   :5300108   Max.   :5.000                           
+                                                           
+            bioma         altitude           koppen         pop22         
+ amazonia      : 503   Min.   :   1.67   Aw     :1337   Min.   :     836  
+ caatinga      :1096   1st Qu.: 222.60   Cfa    :1138   1st Qu.:    5282  
+ cerrado       :1063   Median : 427.60   As     : 892   Median :   11096  
+ mata atlantica:2739   Mean   : 451.24   BSh    : 420   Mean   :   37298  
+ pampa         : 160   3rd Qu.: 650.83   Cwa    : 407   3rd Qu.:   24615  
+ pantanal      :   9   Max.   :1601.42   Cfb    : 405   Max.   :12200180  
+                                         (Other): 971                     
+  prop_residuo      prop_esgot                dengue_pattern_2010_2016
+ Min.   :  0.00   Min.   :  0.00   Epidêmico              : 642       
+ 1st Qu.: 54.33   1st Qu.: 12.85   Episódico              :1722       
+ Median : 74.08   Median : 38.03   Episódico/Epidêmico    :2907       
+ Mean   : 70.21   Mean   : 42.27   Sem transmissão        : 286       
+ 3rd Qu.: 89.22   3rd Qu.: 70.44   Transmissão Persistente:  13       
+ Max.   :100.00   Max.   :100.00                                      
+                                                                      
+                 dengue_pattern temp_med_Autumn umid_med_Autumn
+ Epidêmico              : 726   Min.   :13.31   Min.   :55.97  
+ Episódico              :1841   1st Qu.:19.60   1st Qu.:69.82  
+ Episódico/Epidêmico    :2821   Median :22.82   Median :76.33  
+ Sem transmissão        : 150   Mean   :22.26   Mean   :75.44  
+ Transmissão Persistente:  32   3rd Qu.:25.21   3rd Qu.:80.94  
+                                Max.   :27.54   Max.   :91.30  
+                                NA's   :3       NA's   :3      
+ precip_tot_Autumn thr_temp_Autumn thr_umid_Autumn thr_prec_Autumn
+ Min.   :   0.0    Min.   : 0.00   Min.   : 0.00   Min.   : 0.00  
+ 1st Qu.: 547.0    1st Qu.:42.88   1st Qu.:77.00   1st Qu.:13.17  
+ Median : 937.8    Median :83.00   Median :89.00   Median :21.50  
+ Mean   :1132.1    Mean   :68.07   Mean   :81.99   Mean   :25.03  
+ 3rd Qu.:1476.3    3rd Qu.:92.00   3rd Qu.:91.50   3rd Qu.:30.00  
+ Max.   :6371.6    Max.   :92.00   Max.   :92.00   Max.   :87.67  
+                                                                  
+ thr_temp_umid_Autumn temp_med_Spring umid_med_Spring precip_tot_Spring
+ Min.   : 0.00        Min.   :15.51   Min.   :44.44   Min.   :   0.0   
+ 1st Qu.:39.33        1st Qu.:21.99   1st Qu.:65.81   1st Qu.: 824.2   
+ Median :56.33        Median :24.86   Median :71.05   Median :1549.0   
+ Mean   :59.19        Mean   :24.38   Mean   :70.28   Mean   :1364.3   
+ 3rd Qu.:88.79        3rd Qu.:26.72   3rd Qu.:76.48   3rd Qu.:1850.6   
+ Max.   :92.00        Max.   :31.08   Max.   :89.49   Max.   :3225.9   
+                      NA's   :3       NA's   :3                        
+ thr_temp_Spring thr_umid_Spring thr_prec_Spring thr_temp_umid_Spring
+ Min.   : 0.00   Min.   : 0.00   Min.   : 0.00   Min.   : 0.00       
+ 1st Qu.:72.67   1st Qu.:60.83   1st Qu.:19.67   1st Qu.:46.00       
+ Median :90.00   Median :77.33   Median :31.42   Median :60.33       
+ Mean   :78.98   Mean   :70.80   Mean   :29.11   Mean   :59.21       
+ 3rd Qu.:91.00   3rd Qu.:89.33   3rd Qu.:38.83   3rd Qu.:76.00       
+ Max.   :91.00   Max.   :91.00   Max.   :79.50   Max.   :91.00       
+                                                                     
+ temp_med_Summer umid_med_Summer precip_tot_Summer thr_temp_Summer
+ Min.   :18.20   Min.   :57.99   Min.   :   0      Min.   : 0.00  
+ 1st Qu.:23.48   1st Qu.:73.76   1st Qu.:1308      1st Qu.:88.67  
+ Median :25.01   Median :77.34   Median :1846      Median :90.17  
+ Mean   :24.67   Mean   :76.98   Mean   :1934      Mean   :87.02  
+ 3rd Qu.:25.97   3rd Qu.:80.88   3rd Qu.:2449      3rd Qu.:90.17  
+ Max.   :28.75   Max.   :91.18   Max.   :6139      Max.   :90.17  
+ NA's   :3       NA's   :3                                        
+ thr_umid_Summer thr_prec_Summer thr_temp_umid_Summer temp_med_Winter
+ Min.   : 0.00   Min.   : 0.00   Min.   : 0.00        Min.   :11.63  
+ 1st Qu.:82.00   1st Qu.:30.00   1st Qu.:76.17        1st Qu.:18.50  
+ Median :87.83   Median :40.92   Median :85.00        Median :21.97  
+ Mean   :83.41   Mean   :42.17   Mean   :80.38        Mean   :21.71  
+ 3rd Qu.:90.00   3rd Qu.:52.17   3rd Qu.:89.67        3rd Qu.:25.19  
+ Max.   :90.17   Max.   :89.33   Max.   :90.17        Max.   :29.80  
+                                                      NA's   :3      
+ umid_med_Winter precip_tot_Winter thr_temp_Winter thr_umid_Winter
+ Min.   :37.88   Min.   :   0.0    Min.   : 0.00   Min.   : 0.00  
+ 1st Qu.:53.73   1st Qu.: 106.1    1st Qu.:23.21   1st Qu.:22.00  
+ Median :67.49   Median : 305.2    Median :76.83   Median :74.17  
+ Mean   :65.47   Mean   : 549.2    Mean   :60.58   Mean   :58.78  
+ 3rd Qu.:77.42   3rd Qu.: 874.3    3rd Qu.:92.00   3rd Qu.:90.67  
+ Max.   :89.34   Max.   :3263.7    Max.   :92.00   Max.   :92.00  
+ NA's   :3                                                        
+ thr_prec_Winter  thr_temp_umid_Winter
+ Min.   : 0.000   Min.   : 0.000      
+ 1st Qu.: 2.167   1st Qu.: 6.333      
+ Median : 7.000   Median :14.000      
+ Mean   :12.092   Mean   :30.753      
+ 3rd Qu.:20.500   3rd Qu.:52.667      
+ Max.   :78.667   Max.   :92.000      
+                                      </code></pre>
+</div>
+</div>
+</section>
+<section id="verificação-dos-pressupostos" class="level2">
+<h2 class="anchored" data-anchor-id="verificação-dos-pressupostos">2. Verificação dos pressupostos</h2>
+<section id="multicolinearidade" class="level3">
+<h3 class="anchored" data-anchor-id="multicolinearidade">2.1 Multicolinearidade</h3>
+<ol type="1">
+<li><strong>Cálculo do VIF (Variance Inflation Factor):</strong> O VIF foi calculado para cada variável preditora no modelo. Isso foi feito após a remoção de colinearidade redundante e tratamento das variáveis para garantir que todas estejam no formato correto (numérico ou categórico).</li>
+<li><strong>Variável dependente:</strong> dengue_pattern foi temporariamente convertida para numérica apenas para calcular o VIF. Esse ajuste é feito para facilitar a análise de multicolinearidade.</li>
+<li><strong>Detecção e remoção de colinearidade:</strong> Usamos o <em>findLinearCombos</em> para remover variáveis redundantes, evitando o problema de “aliasing” no modelo, o que ocorre quando variáveis altamente correlacionadas criam dependência linear.</li>
+</ol>
+<p><strong><em>Intrepretação:</em></strong></p>
+<ul>
+<li><strong>Valores de VIF &lt; 5:</strong> São considerados aceitáveis, indicando baixa multicolinearidade.</li>
+<li><strong>Valores de VIF entre 5 e 10:</strong> Indicariam alguma multicolinearidade, mas ainda podem ser aceitáveis dependendo do contexto.</li>
+<li><strong>Valores de VIF &gt; 10:</strong> Sugerem multicolinearidade.</li>
+</ul>
+<p><strong><em>Resultados:</em></strong></p>
+<p>Quando todas as variáveis em um cálculo do VIF (Variance Inflation Factor) estão muito acima de 10, isso indica alta multicolinearidade entre as variáveis no seu modelo de regressão. Multicolinearidade pode distorcer os coeficientes das variáveis no modelo, dificultando a interpretação e reduzindo a confiabilidade dos resultados.</p>
+<div class="cell">
+<div class="sourceCode cell-code" id="cb9"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb9-1"><a href="#cb9-1" aria-hidden="true" tabindex="-1"></a><span class="do">## Somente para variáveis numéricas então vamos retirar as categoricas</span></span>
+<span id="cb9-2"><a href="#cb9-2" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb9-3"><a href="#cb9-3" aria-hidden="true" tabindex="-1"></a><span class="co"># Remover colunas pelo nome</span></span>
+<span id="cb9-4"><a href="#cb9-4" aria-hidden="true" tabindex="-1"></a>data <span class="ot">&lt;-</span> det_17_22[, <span class="sc">!</span><span class="fu">names</span>(det_17_22) <span class="sc">%in%</span> <span class="fu">c</span>(<span class="st">"muni_code"</span>,<span class="st">"region"</span>, <span class="st">"tipo_regiao"</span>, <span class="st">"bioma"</span>, <span class="st">"koppen"</span>)]</span>
+<span id="cb9-5"><a href="#cb9-5" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb9-6"><a href="#cb9-6" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb9-7"><a href="#cb9-7" aria-hidden="true" tabindex="-1"></a><span class="co"># Verificando a presença de NAs em todas as variáveis do banco</span></span>
+<span id="cb9-8"><a href="#cb9-8" aria-hidden="true" tabindex="-1"></a><span class="fu">sapply</span>(data, <span class="cf">function</span>(x) <span class="fu">sum</span>(<span class="fu">is.na</span>(x))) <span class="co">#Tem 8 linhas</span></span>
+<span id="cb9-9"><a href="#cb9-9" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb9-10"><a href="#cb9-10" aria-hidden="true" tabindex="-1"></a><span class="co"># removendo as linhas com Na</span></span>
+<span id="cb9-11"><a href="#cb9-11" aria-hidden="true" tabindex="-1"></a>data_clean <span class="ot">&lt;-</span> data <span class="sc">%&gt;%</span> </span>
+<span id="cb9-12"><a href="#cb9-12" aria-hidden="true" tabindex="-1"></a>  <span class="fu">filter</span>(<span class="sc">!</span><span class="fu">if_any</span>(<span class="fu">where</span>(is.numeric), is.na))</span>
+<span id="cb9-13"><a href="#cb9-13" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb9-14"><a href="#cb9-14" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb9-15"><a href="#cb9-15" aria-hidden="true" tabindex="-1"></a><span class="co"># Identificar e remover variáveis altamente colineares</span></span>
+<span id="cb9-16"><a href="#cb9-16" aria-hidden="true" tabindex="-1"></a>combo_info <span class="ot">&lt;-</span> <span class="fu">findLinearCombos</span>(data_clean <span class="sc">%&gt;%</span> <span class="fu">select</span>(<span class="sc">-</span>dengue_pattern))</span>
+<span id="cb9-17"><a href="#cb9-17" aria-hidden="true" tabindex="-1"></a><span class="cf">if</span> (<span class="fu">length</span>(combo_info<span class="sc">$</span>remove) <span class="sc">&gt;</span> <span class="dv">0</span>) {</span>
+<span id="cb9-18"><a href="#cb9-18" aria-hidden="true" tabindex="-1"></a>  data_clean <span class="ot">&lt;-</span> data_clean[, <span class="sc">-</span>combo_info<span class="sc">$</span>remove]</span>
+<span id="cb9-19"><a href="#cb9-19" aria-hidden="true" tabindex="-1"></a>}</span>
+<span id="cb9-20"><a href="#cb9-20" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb9-21"><a href="#cb9-21" aria-hidden="true" tabindex="-1"></a><span class="co"># Calcular o VIF para as variáveis </span></span>
+<span id="cb9-22"><a href="#cb9-22" aria-hidden="true" tabindex="-1"></a>vif_values <span class="ot">&lt;-</span> <span class="fu">vif</span>(<span class="fu">lm</span>(<span class="fu">as.numeric</span>(dengue_pattern) <span class="sc">~</span> ., <span class="at">data =</span> data_clean))</span>
+<span id="cb9-23"><a href="#cb9-23" aria-hidden="true" tabindex="-1"></a>vif_values</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</div>
+</section>
+<section id="independência-das-observações" class="level3">
+<h3 class="anchored" data-anchor-id="independência-das-observações">2.2 Independência das observações</h3>
+<p>Intrepretação:</p>
+<p>O valor 0 indica que não foram encontradas linhas duplicadas em data_clean.</p>
+<div class="cell">
+<div class="sourceCode cell-code" id="cb10"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb10-1"><a href="#cb10-1" aria-hidden="true" tabindex="-1"></a><span class="co"># Verificar se há identificadores duplicados</span></span>
+<span id="cb10-2"><a href="#cb10-2" aria-hidden="true" tabindex="-1"></a>duplicated_rows <span class="ot">&lt;-</span> <span class="fu">sum</span>(<span class="fu">duplicated</span>(det_17_22))</span>
+<span id="cb10-3"><a href="#cb10-3" aria-hidden="true" tabindex="-1"></a>duplicated_rows</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</div>
+</section>
+<section id="tamanho-amostral-adequado" class="level3">
+<h3 class="anchored" data-anchor-id="tamanho-amostral-adequado">2.3 Tamanho amostral adequado</h3>
+<p>Interpretação:</p>
+<p>Em regressão logística multinomial, cada categoria da variável dependente precisa de um número suficiente de observações para garantir que o modelo possa estimar os parâmetros de forma confiável. Geralmente, recomenda-se pelo menos 10 a 20 observações por parâmetro estimado em cada categoria.</p>
+<p><strong>Resultados</strong> Sem transmissão - 150 Episódico - 1841 Episódico/Epidêmico - 2821 Epidêmico - 726 Transmissão Persistente - 32</p>
+<div class="cell">
+<div class="sourceCode cell-code" id="cb11"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb11-1"><a href="#cb11-1" aria-hidden="true" tabindex="-1"></a><span class="co"># Contagem de observações por categoria da variável dependente</span></span>
+<span id="cb11-2"><a href="#cb11-2" aria-hidden="true" tabindex="-1"></a><span class="fu">table</span>(det_17_22<span class="sc">$</span>dengue_pattern)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output cell-output-stdout">
+<pre><code>
+              Epidêmico               Episódico     Episódico/Epidêmico 
+                    726                    1841                    2821 
+        Sem transmissão Transmissão Persistente 
+                    150                      32 </code></pre>
+</div>
+</div>
+</section>
+<section id="outliers-influentes" class="level3">
+<h3 class="anchored" data-anchor-id="outliers-influentes">2.4 Outliers influentes</h3>
+<p>Interpretação:</p>
+<p>O código retornou valor 0 nas observações, indicando que não foram encontrados outliers com resíduos padronizados maiores que 2 ou menores que -2. Isso sugere que o modelo se ajustou bem aos dados e não há observações que se desviem significativamente do padrão previsto pelo modelo.</p>
+<div class="cell">
+<div class="sourceCode cell-code" id="cb13"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb13-1"><a href="#cb13-1" aria-hidden="true" tabindex="-1"></a><span class="co"># Ajustar o modelo multinomial</span></span>
+<span id="cb13-2"><a href="#cb13-2" aria-hidden="true" tabindex="-1"></a>multinom_model <span class="ot">&lt;-</span> <span class="fu">multinom</span>(dengue_pattern <span class="sc">~</span> ., <span class="at">data =</span> det_17_22)</span>
+<span id="cb13-3"><a href="#cb13-3" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb13-4"><a href="#cb13-4" aria-hidden="true" tabindex="-1"></a><span class="co"># Calcular resíduos padronizados</span></span>
+<span id="cb13-5"><a href="#cb13-5" aria-hidden="true" tabindex="-1"></a>residuals <span class="ot">&lt;-</span> <span class="fu">residuals</span>(multinom_model, <span class="at">type =</span> <span class="st">"pearson"</span>)</span>
+<span id="cb13-6"><a href="#cb13-6" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb13-7"><a href="#cb13-7" aria-hidden="true" tabindex="-1"></a><span class="co"># Identificar outliers com resíduos padronizados acima de 2 ou abaixo de -2</span></span>
+<span id="cb13-8"><a href="#cb13-8" aria-hidden="true" tabindex="-1"></a>outliers <span class="ot">&lt;-</span> <span class="fu">which</span>(<span class="fu">abs</span>(residuals) <span class="sc">&gt;</span> <span class="dv">2</span>)</span>
+<span id="cb13-9"><a href="#cb13-9" aria-hidden="true" tabindex="-1"></a><span class="fu">length</span>(outliers)</span>
+<span id="cb13-10"><a href="#cb13-10" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb13-11"><a href="#cb13-11" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb13-12"><a href="#cb13-12" aria-hidden="true" tabindex="-1"></a><span class="do">##OUTRO</span></span>
+<span id="cb13-13"><a href="#cb13-13" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb13-14"><a href="#cb13-14" aria-hidden="true" tabindex="-1"></a><span class="co"># Obter os resíduos deviance para cada observação</span></span>
+<span id="cb13-15"><a href="#cb13-15" aria-hidden="true" tabindex="-1"></a>deviance_residuals <span class="ot">&lt;-</span> <span class="fu">residuals</span>(multinom_model, <span class="at">type =</span> <span class="st">"deviance"</span>)</span>
+<span id="cb13-16"><a href="#cb13-16" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb13-17"><a href="#cb13-17" aria-hidden="true" tabindex="-1"></a><span class="co"># Ponto de corte padrão da literatura</span></span>
+<span id="cb13-18"><a href="#cb13-18" aria-hidden="true" tabindex="-1"></a>cutoff <span class="ot">&lt;-</span> <span class="fl">2.0</span></span>
+<span id="cb13-19"><a href="#cb13-19" aria-hidden="true" tabindex="-1"></a>influential_points <span class="ot">&lt;-</span> <span class="fu">which</span>(<span class="fu">abs</span>(deviance_residuals) <span class="sc">&gt;</span> cutoff)</span>
+<span id="cb13-20"><a href="#cb13-20" aria-hidden="true" tabindex="-1"></a><span class="fu">print</span>(data[influential_points, ])</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</div>
+</section>
+</section>
+<section id="ajuste-do-modelo-de-regressão-logística-multinomial" class="level2">
+<h2 class="anchored" data-anchor-id="ajuste-do-modelo-de-regressão-logística-multinomial">3. Ajuste do modelo de regressão logística multinomial</h2>
+<p>Interpretação:</p>
+<p>Para cada categoria (em relação à referência “Episódico/Epidêmico”), o modelo estima coeficientes (Coefficients) para cada variável preditora. Esses coeficientes representam o efeito de cada variável sobre a probabilidade de estar nas categorias Sem transmissão, Episódico, Epidêmico e Tranmissão Persistente, em comparação com Episódico/Epidêmico.</p>
+<div class="cell">
+<div class="sourceCode cell-code" id="cb14"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb14-1"><a href="#cb14-1" aria-hidden="true" tabindex="-1"></a><span class="co"># Remover colunas pelo nome</span></span>
+<span id="cb14-2"><a href="#cb14-2" aria-hidden="true" tabindex="-1"></a>det_17_22 <span class="ot">&lt;-</span> det_17_22[, <span class="sc">!</span><span class="fu">names</span>(det_17_22) <span class="sc">%in%</span> <span class="fu">c</span>(<span class="st">"muni_code"</span>)]</span>
+<span id="cb14-3"><a href="#cb14-3" aria-hidden="true" tabindex="-1"></a>det_17_22<span class="sc">$</span>region <span class="ot">&lt;-</span> <span class="fu">as.factor</span>(det_17_22<span class="sc">$</span>region)</span>
+<span id="cb14-4"><a href="#cb14-4" aria-hidden="true" tabindex="-1"></a><span class="co"># removendo as linhas com Na</span></span>
+<span id="cb14-5"><a href="#cb14-5" aria-hidden="true" tabindex="-1"></a>det_17_22 <span class="ot">&lt;-</span> det_17_22<span class="sc">%&gt;%</span> </span>
+<span id="cb14-6"><a href="#cb14-6" aria-hidden="true" tabindex="-1"></a>  <span class="fu">filter</span>(<span class="sc">!</span><span class="fu">if_any</span>(<span class="fu">where</span>(is.numeric), is.na))</span>
+<span id="cb14-7"><a href="#cb14-7" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb14-8"><a href="#cb14-8" aria-hidden="true" tabindex="-1"></a><span class="co"># Definir a categoria de referência para todas as variáveis categóricas</span></span>
+<span id="cb14-9"><a href="#cb14-9" aria-hidden="true" tabindex="-1"></a>det_17_22<span class="sc">$</span>dengue_pattern <span class="ot">&lt;-</span> <span class="fu">relevel</span>(det_17_22<span class="sc">$</span>dengue_pattern, <span class="at">ref =</span> <span class="st">"Episódico/Epidêmico"</span>) <span class="co"># variável dependente</span></span>
+<span id="cb14-10"><a href="#cb14-10" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb14-11"><a href="#cb14-11" aria-hidden="true" tabindex="-1"></a><span class="co"># Variáveis independentes</span></span>
+<span id="cb14-12"><a href="#cb14-12" aria-hidden="true" tabindex="-1"></a><span class="fu">summary</span>(det_17_22)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output cell-output-stdout">
+<pre><code> region              tipo_regiao              bioma         altitude      
+ 1: 450   metropolitana    : 442   amazonia      : 503   Min.   :   1.67  
+ 2:1791   nao metropolitana:5125   caatinga      :1096   1st Qu.: 222.93  
+ 3:1668                            cerrado       :1063   Median : 427.75  
+ 4:1191                            mata atlantica:2736   Mean   : 451.42  
+ 5: 467                            pampa         : 160   3rd Qu.: 650.94  
+                                   pantanal      :   9   Max.   :1601.42  
+                                                                          
+     koppen         pop22           prop_residuo      prop_esgot    
+ Aw     :1337   Min.   :     836   Min.   :  0.00   Min.   :  0.00  
+ Cfa    :1138   1st Qu.:    5282   1st Qu.: 54.33   1st Qu.: 12.84  
+ As     : 891   Median :   11095   Median : 74.06   Median : 38.02  
+ BSh    : 420   Mean   :   37311   Mean   : 70.21   Mean   : 42.27  
+ Cwa    : 407   3rd Qu.:   24636   3rd Qu.: 89.22   3rd Qu.: 70.46  
+ Cfb    : 405   Max.   :12200180   Max.   :100.00   Max.   :100.00  
+ (Other): 969                                                       
+            dengue_pattern_2010_2016                 dengue_pattern
+ Epidêmico              : 641        Episódico/Epidêmico    :2819  
+ Episódico              :1722        Epidêmico              : 725  
+ Episódico/Epidêmico    :2905        Episódico              :1841  
+ Sem transmissão        : 286        Sem transmissão        : 150  
+ Transmissão Persistente:  13        Transmissão Persistente:  32  
+                                                                   
+                                                                   
+ temp_med_Autumn umid_med_Autumn precip_tot_Autumn thr_temp_Autumn
+ Min.   :13.31   Min.   :55.97   Min.   : 236.7    Min.   : 0.00  
+ 1st Qu.:19.60   1st Qu.:69.82   1st Qu.: 547.6    1st Qu.:43.00  
+ Median :22.82   Median :76.33   Median : 938.4    Median :83.00  
+ Mean   :22.26   Mean   :75.44   Mean   :1132.7    Mean   :68.11  
+ 3rd Qu.:25.21   3rd Qu.:80.94   3rd Qu.:1476.5    3rd Qu.:92.00  
+ Max.   :27.54   Max.   :91.30   Max.   :6371.6    Max.   :92.00  
+                                                                  
+ thr_umid_Autumn thr_prec_Autumn thr_temp_umid_Autumn temp_med_Spring
+ Min.   :28.17   Min.   : 5.50   Min.   : 0.00        Min.   :15.51  
+ 1st Qu.:77.00   1st Qu.:13.17   1st Qu.:39.50        1st Qu.:21.99  
+ Median :89.00   Median :21.50   Median :56.33        Median :24.86  
+ Mean   :82.03   Mean   :25.04   Mean   :59.22        Mean   :24.38  
+ 3rd Qu.:91.50   3rd Qu.:30.00   3rd Qu.:88.83        3rd Qu.:26.72  
+ Max.   :92.00   Max.   :87.67   Max.   :92.00        Max.   :31.08  
+                                                                     
+ umid_med_Spring precip_tot_Spring thr_temp_Spring thr_umid_Spring 
+ Min.   :44.44   Min.   :  29.4    Min.   : 4.50   Min.   : 1.667  
+ 1st Qu.:65.81   1st Qu.: 825.6    1st Qu.:72.67   1st Qu.:60.833  
+ Median :71.05   Median :1549.3    Median :90.00   Median :77.333  
+ Mean   :70.28   Mean   :1365.1    Mean   :79.02   Mean   :70.841  
+ 3rd Qu.:76.48   3rd Qu.:1850.6    3rd Qu.:91.00   3rd Qu.:89.333  
+ Max.   :89.49   Max.   :3225.9    Max.   :91.00   Max.   :91.000  
+                                                                   
+ thr_prec_Spring thr_temp_umid_Spring temp_med_Summer umid_med_Summer
+ Min.   : 0.00   Min.   : 1.667       Min.   :18.20   Min.   :57.99  
+ 1st Qu.:19.75   1st Qu.:46.167       1st Qu.:23.48   1st Qu.:73.76  
+ Median :31.50   Median :60.333       Median :25.01   Median :77.34  
+ Mean   :29.12   Mean   :59.238       Mean   :24.67   Mean   :76.98  
+ 3rd Qu.:38.83   3rd Qu.:76.000       3rd Qu.:25.97   3rd Qu.:80.88  
+ Max.   :79.50   Max.   :91.000       Max.   :28.75   Max.   :91.18  
+                                                                     
+ precip_tot_Summer thr_temp_Summer thr_umid_Summer thr_prec_Summer 
+ Min.   : 301.5    Min.   :13.83   Min.   :34.50   Min.   : 7.833  
+ 1st Qu.:1309.1    1st Qu.:88.67   1st Qu.:82.00   1st Qu.:30.000  
+ Median :1847.1    Median :90.17   Median :87.83   Median :41.000  
+ Mean   :1935.4    Mean   :87.07   Mean   :83.45   Mean   :42.193  
+ 3rd Qu.:2449.3    3rd Qu.:90.17   3rd Qu.:90.00   3rd Qu.:52.167  
+ Max.   :6138.5    Max.   :90.17   Max.   :90.17   Max.   :89.333  
+                                                                   
+ thr_temp_umid_Summer temp_med_Winter umid_med_Winter precip_tot_Winter 
+ Min.   :13.83        Min.   :11.63   Min.   :37.88   Min.   :   4.765  
+ 1st Qu.:76.17        1st Qu.:18.50   1st Qu.:53.73   1st Qu.: 106.305  
+ Median :85.00        Median :21.97   Median :67.49   Median : 305.376  
+ Mean   :80.43        Mean   :21.71   Mean   :65.47   Mean   : 549.526  
+ 3rd Qu.:89.67        3rd Qu.:25.19   3rd Qu.:77.42   3rd Qu.: 874.515  
+ Max.   :90.17        Max.   :29.80   Max.   :89.34   Max.   :3263.720  
+                                                                        
+ thr_temp_Winter   thr_umid_Winter thr_prec_Winter  thr_temp_umid_Winter
+ Min.   : 0.3333   Min.   : 0.00   Min.   : 0.000   Min.   : 0.000      
+ 1st Qu.:23.3333   1st Qu.:22.00   1st Qu.: 2.167   1st Qu.: 6.333      
+ Median :76.8333   Median :74.17   Median : 7.000   Median :14.000      
+ Mean   :60.6095   Mean   :58.81   Mean   :12.099   Mean   :30.769      
+ 3rd Qu.:92.0000   3rd Qu.:90.67   3rd Qu.:20.500   3rd Qu.:52.667      
+ Max.   :92.0000   Max.   :92.00   Max.   :78.667   Max.   :92.000      
+                                                                        </code></pre>
+</div>
+<div class="sourceCode cell-code" id="cb16"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb16-1"><a href="#cb16-1" aria-hidden="true" tabindex="-1"></a>det_17_22<span class="sc">$</span>bioma <span class="ot">&lt;-</span> <span class="fu">relevel</span>(det_17_22<span class="sc">$</span>bioma, <span class="at">ref =</span> <span class="st">"mata atlantica"</span>)</span>
+<span id="cb16-2"><a href="#cb16-2" aria-hidden="true" tabindex="-1"></a>det_17_22<span class="sc">$</span>tipo_regiao <span class="ot">&lt;-</span> <span class="fu">relevel</span>(det_17_22<span class="sc">$</span>tipo_regiao , <span class="at">ref =</span> <span class="st">"nao metropolitana"</span>)</span>
+<span id="cb16-3"><a href="#cb16-3" aria-hidden="true" tabindex="-1"></a>det_17_22<span class="sc">$</span>koppen <span class="ot">&lt;-</span> <span class="fu">relevel</span>(det_17_22<span class="sc">$</span>koppen, <span class="at">ref =</span> <span class="st">"Aw"</span>)</span>
+<span id="cb16-4"><a href="#cb16-4" aria-hidden="true" tabindex="-1"></a><span class="fu">summary</span>(det_17_22)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output cell-output-stdout">
+<pre><code> region              tipo_regiao              bioma         altitude      
+ 1: 450   nao metropolitana:5125   mata atlantica:2736   Min.   :   1.67  
+ 2:1791   metropolitana    : 442   amazonia      : 503   1st Qu.: 222.93  
+ 3:1668                            caatinga      :1096   Median : 427.75  
+ 4:1191                            cerrado       :1063   Mean   : 451.42  
+ 5: 467                            pampa         : 160   3rd Qu.: 650.94  
+                                   pantanal      :   9   Max.   :1601.42  
+                                                                          
+     koppen         pop22           prop_residuo      prop_esgot    
+ Aw     :1337   Min.   :     836   Min.   :  0.00   Min.   :  0.00  
+ Cfa    :1138   1st Qu.:    5282   1st Qu.: 54.33   1st Qu.: 12.84  
+ As     : 891   Median :   11095   Median : 74.06   Median : 38.02  
+ BSh    : 420   Mean   :   37311   Mean   : 70.21   Mean   : 42.27  
+ Cwa    : 407   3rd Qu.:   24636   3rd Qu.: 89.22   3rd Qu.: 70.46  
+ Cfb    : 405   Max.   :12200180   Max.   :100.00   Max.   :100.00  
+ (Other): 969                                                       
+            dengue_pattern_2010_2016                 dengue_pattern
+ Epidêmico              : 641        Episódico/Epidêmico    :2819  
+ Episódico              :1722        Epidêmico              : 725  
+ Episódico/Epidêmico    :2905        Episódico              :1841  
+ Sem transmissão        : 286        Sem transmissão        : 150  
+ Transmissão Persistente:  13        Transmissão Persistente:  32  
+                                                                   
+                                                                   
+ temp_med_Autumn umid_med_Autumn precip_tot_Autumn thr_temp_Autumn
+ Min.   :13.31   Min.   :55.97   Min.   : 236.7    Min.   : 0.00  
+ 1st Qu.:19.60   1st Qu.:69.82   1st Qu.: 547.6    1st Qu.:43.00  
+ Median :22.82   Median :76.33   Median : 938.4    Median :83.00  
+ Mean   :22.26   Mean   :75.44   Mean   :1132.7    Mean   :68.11  
+ 3rd Qu.:25.21   3rd Qu.:80.94   3rd Qu.:1476.5    3rd Qu.:92.00  
+ Max.   :27.54   Max.   :91.30   Max.   :6371.6    Max.   :92.00  
+                                                                  
+ thr_umid_Autumn thr_prec_Autumn thr_temp_umid_Autumn temp_med_Spring
+ Min.   :28.17   Min.   : 5.50   Min.   : 0.00        Min.   :15.51  
+ 1st Qu.:77.00   1st Qu.:13.17   1st Qu.:39.50        1st Qu.:21.99  
+ Median :89.00   Median :21.50   Median :56.33        Median :24.86  
+ Mean   :82.03   Mean   :25.04   Mean   :59.22        Mean   :24.38  
+ 3rd Qu.:91.50   3rd Qu.:30.00   3rd Qu.:88.83        3rd Qu.:26.72  
+ Max.   :92.00   Max.   :87.67   Max.   :92.00        Max.   :31.08  
+                                                                     
+ umid_med_Spring precip_tot_Spring thr_temp_Spring thr_umid_Spring 
+ Min.   :44.44   Min.   :  29.4    Min.   : 4.50   Min.   : 1.667  
+ 1st Qu.:65.81   1st Qu.: 825.6    1st Qu.:72.67   1st Qu.:60.833  
+ Median :71.05   Median :1549.3    Median :90.00   Median :77.333  
+ Mean   :70.28   Mean   :1365.1    Mean   :79.02   Mean   :70.841  
+ 3rd Qu.:76.48   3rd Qu.:1850.6    3rd Qu.:91.00   3rd Qu.:89.333  
+ Max.   :89.49   Max.   :3225.9    Max.   :91.00   Max.   :91.000  
+                                                                   
+ thr_prec_Spring thr_temp_umid_Spring temp_med_Summer umid_med_Summer
+ Min.   : 0.00   Min.   : 1.667       Min.   :18.20   Min.   :57.99  
+ 1st Qu.:19.75   1st Qu.:46.167       1st Qu.:23.48   1st Qu.:73.76  
+ Median :31.50   Median :60.333       Median :25.01   Median :77.34  
+ Mean   :29.12   Mean   :59.238       Mean   :24.67   Mean   :76.98  
+ 3rd Qu.:38.83   3rd Qu.:76.000       3rd Qu.:25.97   3rd Qu.:80.88  
+ Max.   :79.50   Max.   :91.000       Max.   :28.75   Max.   :91.18  
+                                                                     
+ precip_tot_Summer thr_temp_Summer thr_umid_Summer thr_prec_Summer 
+ Min.   : 301.5    Min.   :13.83   Min.   :34.50   Min.   : 7.833  
+ 1st Qu.:1309.1    1st Qu.:88.67   1st Qu.:82.00   1st Qu.:30.000  
+ Median :1847.1    Median :90.17   Median :87.83   Median :41.000  
+ Mean   :1935.4    Mean   :87.07   Mean   :83.45   Mean   :42.193  
+ 3rd Qu.:2449.3    3rd Qu.:90.17   3rd Qu.:90.00   3rd Qu.:52.167  
+ Max.   :6138.5    Max.   :90.17   Max.   :90.17   Max.   :89.333  
+                                                                   
+ thr_temp_umid_Summer temp_med_Winter umid_med_Winter precip_tot_Winter 
+ Min.   :13.83        Min.   :11.63   Min.   :37.88   Min.   :   4.765  
+ 1st Qu.:76.17        1st Qu.:18.50   1st Qu.:53.73   1st Qu.: 106.305  
+ Median :85.00        Median :21.97   Median :67.49   Median : 305.376  
+ Mean   :80.43        Mean   :21.71   Mean   :65.47   Mean   : 549.526  
+ 3rd Qu.:89.67        3rd Qu.:25.19   3rd Qu.:77.42   3rd Qu.: 874.515  
+ Max.   :90.17        Max.   :29.80   Max.   :89.34   Max.   :3263.720  
+                                                                        
+ thr_temp_Winter   thr_umid_Winter thr_prec_Winter  thr_temp_umid_Winter
+ Min.   : 0.3333   Min.   : 0.00   Min.   : 0.000   Min.   : 0.000      
+ 1st Qu.:23.3333   1st Qu.:22.00   1st Qu.: 2.167   1st Qu.: 6.333      
+ Median :76.8333   Median :74.17   Median : 7.000   Median :14.000      
+ Mean   :60.6095   Mean   :58.81   Mean   :12.099   Mean   :30.769      
+ 3rd Qu.:92.0000   3rd Qu.:90.67   3rd Qu.:20.500   3rd Qu.:52.667      
+ Max.   :92.0000   Max.   :92.00   Max.   :78.667   Max.   :92.000      
+                                                                        </code></pre>
+</div>
+<div class="sourceCode cell-code" id="cb18"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb18-1"><a href="#cb18-1" aria-hidden="true" tabindex="-1"></a><span class="co"># Modelo com tudo</span></span>
+<span id="cb18-2"><a href="#cb18-2" aria-hidden="true" tabindex="-1"></a>multinom_model <span class="ot">&lt;-</span> <span class="fu">multinom</span>(dengue_pattern <span class="sc">~</span> ., <span class="at">data =</span> det_17_22)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output cell-output-stdout">
+<pre><code># weights:  280 (220 variable)
+initial  value 8959.740859 
+iter  10 value 6392.619146
+iter  20 value 5977.159155
+iter  30 value 5813.033637
+iter  40 value 5640.654785
+iter  50 value 5360.255387
+iter  60 value 5168.504319
+iter  70 value 4896.447242
+iter  80 value 4744.766753
+iter  90 value 4598.997945
+iter 100 value 4397.478924
+final  value 4397.478924 
+stopped after 100 iterations</code></pre>
+</div>
+<div class="sourceCode cell-code" id="cb20"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb20-1"><a href="#cb20-1" aria-hidden="true" tabindex="-1"></a><span class="fu">summary</span>(multinom_model)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output cell-output-stdout">
+<pre><code>Call:
+multinom(formula = dengue_pattern ~ ., data = det_17_22)
+
+Coefficients:
+                         (Intercept)   region2     region3      region4
+Epidêmico               -0.018027977 1.3675569  0.06838342  0.231289242
+Episódico                0.031018849 0.3745951 -0.39172734 -1.403803812
+Sem transmissão         -0.004523369 1.2259812  0.02031498 -0.114185691
+Transmissão Persistente  0.016330634 0.6507241 -0.51027526 -0.001637363
+                            region5 tipo_regiaometropolitana biomaamazonia
+Epidêmico                0.22339229                0.3780611     0.5001259
+Episódico               -0.72082922               -0.6276134    -0.3872854
+Sem transmissão          0.50245356               -0.4385340     0.4810764
+Transmissão Persistente -0.09540883               -0.4422029     0.1501330
+                        biomacaatinga biomacerrado biomapampa biomapantanal
+Epidêmico                  -0.7935014  -0.03188927 -1.3179529    0.50803151
+Episódico                  -0.3252587   0.29873903  0.1759736    0.01537118
+Sem transmissão            -0.4212965   0.05768213  0.6988316   -0.02838151
+Transmissão Persistente    -0.3599698   0.29715901  0.2170896    0.04369982
+                             altitude   koppenAf     koppenAm   koppenAs
+Epidêmico                2.867180e-03  0.3366224  0.226506480 -0.1383468
+Episódico               -1.566220e-03 -0.2535341  0.183180073 -0.3296705
+Sem transmissão          5.604469e-05 -0.4504094 -0.167851983 -0.1623096
+Transmissão Persistente  1.193582e-03  0.1102006 -0.006499182  0.1130333
+                         koppenBSh    koppenCfa   koppenCfb   koppenCwa
+Epidêmico               -0.6214318 -0.442780253 -0.52005336  0.31912209
+Episódico               -0.7686553 -0.407836700 -0.48023318 -0.06113989
+Sem transmissão         -0.5009487 -0.055513114 -0.09435469  0.44686524
+Transmissão Persistente -0.1389675 -0.007305022 -0.46881153  0.20252145
+                        koppenCwb         pop22 prop_residuo   prop_esgot
+Epidêmico               0.6188115  4.261951e-07  0.009599428 -0.008577995
+Episódico               0.2697928 -3.470000e-06  0.001849993 -0.007067229
+Sem transmissão         0.8921901  6.030291e-07 -0.001264657 -0.005010027
+Transmissão Persistente 0.6531866  1.102788e-06 -0.002122337  0.002246689
+                        dengue_pattern_2010_2016Episódico
+Epidêmico                                      -2.8766576
+Episódico                                       1.7283256
+Sem transmissão                                 0.3261054
+Transmissão Persistente                        -1.8683310
+                        dengue_pattern_2010_2016Episódico/Epidêmico
+Epidêmico                                                -3.2484700
+Episódico                                                -0.7284881
+Sem transmissão                                          -1.6558533
+Transmissão Persistente                                  -3.4059501
+                        dengue_pattern_2010_2016Sem transmissão
+Epidêmico                                             -1.035009
+Episódico                                              4.912930
+Sem transmissão                                        4.783679
+Transmissão Persistente                                2.795344
+                        dengue_pattern_2010_2016Transmissão Persistente
+Epidêmico                                                    -2.1720253
+Episódico                                                     0.4310416
+Sem transmissão                                               0.1792906
+Transmissão Persistente                                       1.3095218
+                        temp_med_Autumn umid_med_Autumn precip_tot_Autumn
+Epidêmico                    -0.3590029      0.03622527      1.949319e-05
+Episódico                     0.1592934      0.07863427      3.220330e-04
+Sem transmissão               0.1230731     -0.24940033     -6.095590e-04
+Transmissão Persistente       0.1894538     -0.07516782      8.164830e-04
+                        thr_temp_Autumn thr_umid_Autumn thr_prec_Autumn
+Epidêmico                  -0.096126172     -0.16088733     -0.03521223
+Episódico                   0.016376942      0.05093622     -0.03155931
+Sem transmissão            -0.009429541      0.02931862      0.09838097
+Transmissão Persistente    -0.089788303     -0.09693903     -0.03499175
+                        thr_temp_umid_Autumn temp_med_Spring umid_med_Spring
+Epidêmico                        0.093600795      0.23504175      0.21983682
+Episódico                       -0.055616493      0.54941178      0.10617381
+Sem transmissão                 -0.003820031      0.49353884      0.18175729
+Transmissão Persistente          0.133519301      0.07874462      0.07713525
+                        precip_tot_Spring thr_temp_Spring thr_umid_Spring
+Epidêmico                   -0.0006621664      0.16233186      0.07619138
+Episódico                    0.0007085816     -0.10480417     -0.07157042
+Sem transmissão             -0.0011576790      0.02575041      0.01095960
+Transmissão Persistente      0.0002590797     -0.24269176     -0.21849303
+                        thr_prec_Spring thr_temp_umid_Spring temp_med_Summer
+Epidêmico                   -0.03481583          -0.11820403       0.6217293
+Episódico                   -0.05280217           0.06883944      -0.6545719
+Sem transmissão              0.05665563          -0.06585495      -0.2431619
+Transmissão Persistente      0.01794896           0.17196990       0.1555810
+                        umid_med_Summer precip_tot_Summer thr_temp_Summer
+Epidêmico                   -0.09119267      0.0006926170    -0.306236277
+Episódico                   -0.07250584      0.0005853040     0.120550153
+Sem transmissão              0.04181056      0.0014061651     0.007880637
+Transmissão Persistente      0.16005082      0.0006958467     0.193298016
+                        thr_umid_Summer thr_prec_Summer thr_temp_umid_Summer
+Epidêmico                   -0.21404795      0.02115986           0.25013079
+Episódico                    0.09745639     -0.02969101          -0.10837086
+Sem transmissão              0.06113204     -0.11834446          -0.02590758
+Transmissão Persistente      0.19257419     -0.08455810          -0.20164322
+                        temp_med_Winter umid_med_Winter precip_tot_Winter
+Epidêmico                    0.02502503      0.03855718      0.0023798153
+Episódico                   -0.27883864     -0.07880844      0.0002535388
+Sem transmissão             -0.27310002     -0.09337739      0.0024324432
+Transmissão Persistente     -0.05343411     -0.11948524      0.0005580013
+                        thr_temp_Winter thr_umid_Winter thr_prec_Winter
+Epidêmico                  -0.005067831    0.0054909110    -0.084167881
+Episódico                   0.024945212    0.0008579443    -0.002719062
+Sem transmissão            -0.016189794    0.0102134015    -0.093467510
+Transmissão Persistente    -0.014116468    0.0306102026     0.005675895
+                        thr_temp_umid_Winter
+Epidêmico                       -0.009643703
+Episódico                        0.009375885
+Sem transmissão                  0.035477981
+Transmissão Persistente          0.007335188
+
+Std. Errors:
+                         (Intercept)      region2      region3      region4
+Epidêmico               1.978821e-06 3.452314e-06 1.046679e-05 2.813327e-06
+Episódico               5.008650e-06 4.549253e-06 5.135221e-06 9.718756e-06
+Sem transmissão         2.209775e-06 2.853887e-06 6.108130e-06 2.684406e-06
+Transmissão Persistente 2.254943e-06 3.078202e-06 5.173649e-06 9.708267e-07
+                             region5 tipo_regiaometropolitana biomaamazonia
+Epidêmico               5.694549e-06             7.533759e-07  1.659697e-06
+Episódico               3.887438e-06             3.569934e-07  4.238145e-06
+Sem transmissão         3.874629e-06             4.480462e-07  8.125423e-07
+Transmissão Persistente 3.291269e-06             2.364775e-07  6.769018e-07
+                        biomacaatinga biomacerrado   biomapampa biomapantanal
+Epidêmico                2.036130e-06 5.664374e-06 1.267473e-07  1.160964e-07
+Episódico                5.625793e-06 5.058161e-06 2.123622e-06  7.268459e-08
+Sem transmissão          3.021549e-06 5.747506e-06 1.293883e-06  2.578798e-08
+Transmissão Persistente  2.176929e-06 4.821349e-06 5.497873e-07  3.133721e-08
+                            altitude     koppenAf     koppenAm     koppenAs
+Epidêmico               0.0002023653 7.320015e-07 1.872126e-06 1.159024e-06
+Episódico               0.0001864255 2.971754e-06 4.264040e-06 1.012872e-06
+Sem transmissão         0.0002346741 6.717741e-07 8.930947e-07 1.007128e-06
+Transmissão Persistente 0.0002657850 3.401398e-07 4.847022e-07 1.073097e-06
+                           koppenBSh    koppenCfa    koppenCfb    koppenCwa
+Epidêmico               8.584621e-07 2.156285e-06 9.511128e-07 2.386045e-06
+Episódico               2.983221e-06 9.974799e-06 7.111099e-07 2.050678e-06
+Sem transmissão         1.425426e-06 2.758018e-06 1.271553e-06 1.527612e-06
+Transmissão Persistente 1.127946e-06 9.868830e-07 1.195307e-06 1.111075e-06
+                           koppenCwb        pop22 prop_residuo   prop_esgot
+Epidêmico               2.384486e-06 4.721612e-07 0.0005480378 0.0011735917
+Episódico               2.153188e-06 1.319281e-06 0.0005580731 0.0009588537
+Sem transmissão         2.862243e-06 6.606371e-07 0.0003171498 0.0007221145
+Transmissão Persistente 1.447115e-06 4.795442e-07 0.0002401581 0.0004885252
+                        dengue_pattern_2010_2016Episódico
+Epidêmico                                    1.296051e-06
+Episódico                                    7.828590e-06
+Sem transmissão                              2.182051e-06
+Transmissão Persistente                      8.836179e-07
+                        dengue_pattern_2010_2016Episódico/Epidêmico
+Epidêmico                                              2.790610e-06
+Episódico                                              4.016280e-06
+Sem transmissão                                        3.006553e-06
+Transmissão Persistente                                1.833458e-06
+                        dengue_pattern_2010_2016Sem transmissão
+Epidêmico                                          9.538109e-08
+Episódico                                          1.448567e-06
+Sem transmissão                                    1.038744e-06
+Transmissão Persistente                            5.316256e-07
+                        dengue_pattern_2010_2016Transmissão Persistente
+Epidêmico                                                  7.829340e-08
+Episódico                                                  3.239446e-09
+Sem transmissão                                            1.947576e-08
+Transmissão Persistente                                    4.778897e-08
+                        temp_med_Autumn umid_med_Autumn precip_tot_Autumn
+Epidêmico                  6.463509e-05    0.0001478224      0.0001525768
+Episódico                  8.541048e-05    0.0003838603      0.0001194982
+Sem transmissão            7.547717e-05    0.0001517518      0.0001660019
+Transmissão Persistente    7.445180e-05    0.0001510814      0.0001742776
+                        thr_temp_Autumn thr_umid_Autumn thr_prec_Autumn
+Epidêmico                  0.0003745386    0.0003281097    7.729889e-05
+Episódico                  0.0003955295    0.0006391852    1.449377e-04
+Sem transmissão            0.0004687242    0.0002926004    5.886047e-05
+Transmissão Persistente    0.0003983062    0.0002411748    3.085223e-05
+                        thr_temp_umid_Autumn temp_med_Spring umid_med_Spring
+Epidêmico                       0.0002567882    8.116502e-05    0.0001423614
+Episódico                       0.0001787309    1.201076e-04    0.0002097163
+Sem transmissão                 0.0002222411    9.023939e-05    0.0001621839
+Transmissão Persistente         0.0002464248    8.279378e-05    0.0001385846
+                        precip_tot_Spring thr_temp_Spring thr_umid_Spring
+Epidêmico                    0.0001523811    0.0002853723    0.0004439263
+Episódico                    0.0001165601    0.0002328542    0.0003855899
+Sem transmissão              0.0001886608    0.0003705305    0.0004806567
+Transmissão Persistente      0.0001893885    0.0003242170    0.0003043072
+                        thr_prec_Spring thr_temp_umid_Spring temp_med_Summer
+Epidêmico                  3.347890e-05         0.0003614995    6.595139e-05
+Episódico                  1.116958e-04         0.0005887927    1.275574e-04
+Sem transmissão            2.863587e-05         0.0003048366    7.165750e-05
+Transmissão Persistente    1.570902e-05         0.0002110735    7.041268e-05
+                        umid_med_Summer precip_tot_Summer thr_temp_Summer
+Epidêmico                  0.0001097891      0.0001302939    0.0002183728
+Episódico                  0.0002980021      0.0001069449    0.0004927037
+Sem transmissão            0.0001238267      0.0001605339    0.0002858303
+Transmissão Persistente    0.0001374445      0.0001619367    0.0002517741
+                        thr_umid_Summer thr_prec_Summer thr_temp_umid_Summer
+Epidêmico                  0.0001335639    4.756416e-05         0.0001409820
+Episódico                  0.0002794888    3.736705e-05         0.0003089994
+Sem transmissão            0.0001614581    2.892067e-05         0.0001818349
+Transmissão Persistente    0.0001506369    4.589241e-05         0.0001782513
+                        temp_med_Winter umid_med_Winter precip_tot_Winter
+Epidêmico                  7.582213e-05    0.0002341585      0.0002169418
+Episódico                  8.707243e-05    0.0003523863      0.0001824072
+Sem transmissão            8.868806e-05    0.0002507361      0.0002205304
+Transmissão Persistente    8.201877e-05    0.0002075407      0.0002401200
+                        thr_temp_Winter thr_umid_Winter thr_prec_Winter
+Epidêmico                  0.0004928062    0.0007632494    3.808481e-05
+Episódico                  0.0007174160    0.0006555400    2.105594e-04
+Sem transmissão            0.0005791881    0.0007739558    5.898636e-05
+Transmissão Persistente    0.0004736885    0.0005969046    1.992818e-05
+                        thr_temp_umid_Winter
+Epidêmico                       0.0004831597
+Episódico                       0.0008307427
+Sem transmissão                 0.0004285644
+Transmissão Persistente         0.0003327328
+
+Residual Deviance: 8794.958 
+AIC: 9234.958 </code></pre>
+</div>
+</div>
+</section>
+<section id="avaliação-do-ajuste-do-modelo" class="level2">
+<h2 class="anchored" data-anchor-id="avaliação-do-ajuste-do-modelo">4. Avaliação do ajuste do modelo</h2>
+<p>Interpretação do Pseudo R²:</p>
+<p>Interpretação do Teste de razão de verossimilhança:</p>
+<div class="cell">
+<div class="sourceCode cell-code" id="cb22"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb22-1"><a href="#cb22-1" aria-hidden="true" tabindex="-1"></a><span class="co"># Pseudo R²</span></span>
+<span id="cb22-2"><a href="#cb22-2" aria-hidden="true" tabindex="-1"></a><span class="fu">pR2</span>(multinom_model)</span>
+<span id="cb22-3"><a href="#cb22-3" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb22-4"><a href="#cb22-4" aria-hidden="true" tabindex="-1"></a><span class="co"># Teste de razão de verossimilhança</span></span>
+<span id="cb22-5"><a href="#cb22-5" aria-hidden="true" tabindex="-1"></a><span class="fu">lrtest</span>(multinom_model)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</div>
+</section>
+<section id="seleção-de-variáveis" class="level2">
+<h2 class="anchored" data-anchor-id="seleção-de-variáveis">5. Seleção de variáveis</h2>
+<p>Interpretação:</p>
+<div class="cell">
+<div class="sourceCode cell-code" id="cb23"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb23-1"><a href="#cb23-1" aria-hidden="true" tabindex="-1"></a><span class="co"># Seleção stepwise</span></span>
+<span id="cb23-2"><a href="#cb23-2" aria-hidden="true" tabindex="-1"></a><span class="co">#step_model &lt;- step(multinom_model, direction = "both")</span></span>
+<span id="cb23-3"><a href="#cb23-3" aria-hidden="true" tabindex="-1"></a><span class="co">#summary(step_model)</span></span>
+<span id="cb23-4"><a href="#cb23-4" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb23-5"><a href="#cb23-5" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb23-6"><a href="#cb23-6" aria-hidden="true" tabindex="-1"></a><span class="co"># Seleção stepwise a partir do modelo nulo</span></span>
+<span id="cb23-7"><a href="#cb23-7" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb23-8"><a href="#cb23-8" aria-hidden="true" tabindex="-1"></a><span class="co"># Criar o modelo inicial (nulo com region e pop22)</span></span>
+<span id="cb23-9"><a href="#cb23-9" aria-hidden="true" tabindex="-1"></a>null_model <span class="ot">&lt;-</span> <span class="fu">multinom</span>(dengue_pattern <span class="sc">~</span> region <span class="sc">+</span> pop22, <span class="at">data =</span> det_17_22)</span>
+<span id="cb23-10"><a href="#cb23-10" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb23-11"><a href="#cb23-11" aria-hidden="true" tabindex="-1"></a><span class="co"># Criar o modelo completo (com todas as variáveis preditoras adicionais)</span></span>
+<span id="cb23-12"><a href="#cb23-12" aria-hidden="true" tabindex="-1"></a>full_formula <span class="ot">&lt;-</span> <span class="fu">as.formula</span>(<span class="fu">paste</span>(<span class="st">"dengue_pattern ~ region + pop22 +"</span>, </span>
+<span id="cb23-13"><a href="#cb23-13" aria-hidden="true" tabindex="-1"></a>                                 <span class="fu">paste</span>(<span class="fu">setdiff</span>(<span class="fu">names</span>(det_17_22), <span class="fu">c</span>(<span class="st">"dengue_pattern"</span>, <span class="st">"region"</span>, <span class="st">"pop22"</span>)), </span>
+<span id="cb23-14"><a href="#cb23-14" aria-hidden="true" tabindex="-1"></a>                                       <span class="at">collapse =</span> <span class="st">" + "</span>)))</span>
+<span id="cb23-15"><a href="#cb23-15" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb23-16"><a href="#cb23-16" aria-hidden="true" tabindex="-1"></a>full_model <span class="ot">&lt;-</span> <span class="fu">multinom</span>(full_formula, <span class="at">data =</span> det_17_22)</span>
+<span id="cb23-17"><a href="#cb23-17" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb23-18"><a href="#cb23-18" aria-hidden="true" tabindex="-1"></a><span class="co"># Aplicar a seleção stepwise a partir do modelo nulo para o modelo completo</span></span>
+<span id="cb23-19"><a href="#cb23-19" aria-hidden="true" tabindex="-1"></a>step_model <span class="ot">&lt;-</span> <span class="fu">step</span>(null_model, <span class="at">scope =</span> <span class="fu">list</span>(<span class="at">lower =</span> null_model, <span class="at">upper =</span> full_model), <span class="at">direction =</span> <span class="st">"both"</span>, <span class="at">trace =</span> <span class="cn">TRUE</span>)</span>
+<span id="cb23-20"><a href="#cb23-20" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb23-21"><a href="#cb23-21" aria-hidden="true" tabindex="-1"></a><span class="co"># Resumo do modelo final selecionado</span></span>
+<span id="cb23-22"><a href="#cb23-22" aria-hidden="true" tabindex="-1"></a><span class="fu">summary</span>(step_model)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</div>
+<section id="matriz-de-confusão-do-stepwise" class="level3">
+<h3 class="anchored" data-anchor-id="matriz-de-confusão-do-stepwise">5.1 Matriz de confusão do stepwise</h3>
+<div class="cell">
+<div class="sourceCode cell-code" id="cb24"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb24-1"><a href="#cb24-1" aria-hidden="true" tabindex="-1"></a><span class="fu">class</span>(step_model)</span>
+<span id="cb24-2"><a href="#cb24-2" aria-hidden="true" tabindex="-1"></a>step_model <span class="ot">&lt;-</span> <span class="fu">na.omit</span>(step_model)</span>
+<span id="cb24-3"><a href="#cb24-3" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb24-4"><a href="#cb24-4" aria-hidden="true" tabindex="-1"></a><span class="co"># previsoes</span></span>
+<span id="cb24-5"><a href="#cb24-5" aria-hidden="true" tabindex="-1"></a>previsoes <span class="ot">&lt;-</span> <span class="fu">predict</span>(step_model, <span class="at">newdata =</span> det_17_22)</span>
+<span id="cb24-6"><a href="#cb24-6" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb24-7"><a href="#cb24-7" aria-hidden="true" tabindex="-1"></a><span class="co"># matriz de confusão comparando as previsões com os valores reais</span></span>
+<span id="cb24-8"><a href="#cb24-8" aria-hidden="true" tabindex="-1"></a>matriz_confusao <span class="ot">&lt;-</span> <span class="fu">confusionMatrix</span>(previsoes, det_17_22<span class="sc">$</span>dengue_pattern)</span>
+<span id="cb24-9"><a href="#cb24-9" aria-hidden="true" tabindex="-1"></a><span class="fu">print</span>(matriz_confusao)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</div>
+</section>
+</section>
+<section id="análise-de-resíduos" class="level2">
+<h2 class="anchored" data-anchor-id="análise-de-resíduos">6. Análise de resíduos</h2>
+<div class="cell">
+<div class="sourceCode cell-code" id="cb25"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb25-1"><a href="#cb25-1" aria-hidden="true" tabindex="-1"></a><span class="co"># Resíduos deviance</span></span>
+<span id="cb25-2"><a href="#cb25-2" aria-hidden="true" tabindex="-1"></a>residuals_deviance <span class="ot">&lt;-</span> <span class="fu">residuals</span>(step_model, <span class="at">type =</span> <span class="st">"deviance"</span>)</span>
+<span id="cb25-3"><a href="#cb25-3" aria-hidden="true" tabindex="-1"></a><span class="fu">plot</span>(residuals_deviance, <span class="at">main =</span> <span class="st">"Resíduos Deviance"</span>, <span class="at">ylab =</span> <span class="st">"Resíduos"</span>, <span class="at">xlab =</span> <span class="st">"Observações"</span>)</span>
+<span id="cb25-4"><a href="#cb25-4" aria-hidden="true" tabindex="-1"></a><span class="fu">abline</span>(<span class="at">h =</span> <span class="dv">0</span>, <span class="at">col =</span> <span class="st">"red"</span>)</span>
+<span id="cb25-5"><a href="#cb25-5" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb25-6"><a href="#cb25-6" aria-hidden="true" tabindex="-1"></a><span class="do">### OUTRO</span></span>
+<span id="cb25-7"><a href="#cb25-7" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb25-8"><a href="#cb25-8" aria-hidden="true" tabindex="-1"></a><span class="co"># Calcular os resíduos deviance</span></span>
+<span id="cb25-9"><a href="#cb25-9" aria-hidden="true" tabindex="-1"></a>residuals_deviance <span class="ot">&lt;-</span> <span class="fu">residuals</span>(step_model, <span class="at">type =</span> <span class="st">"deviance"</span>)</span>
+<span id="cb25-10"><a href="#cb25-10" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb25-11"><a href="#cb25-11" aria-hidden="true" tabindex="-1"></a><span class="co"># Função para gerar um QQ plot com envelope</span></span>
+<span id="cb25-12"><a href="#cb25-12" aria-hidden="true" tabindex="-1"></a><span class="fu">qqPlot</span>(residuals_deviance, </span>
+<span id="cb25-13"><a href="#cb25-13" aria-hidden="true" tabindex="-1"></a>       <span class="at">main =</span> <span class="st">"QQ Plot dos Resíduos com Envelope de Confiança"</span>,</span>
+<span id="cb25-14"><a href="#cb25-14" aria-hidden="true" tabindex="-1"></a>       <span class="at">xlab =</span> <span class="st">"Quantis Teóricos"</span>,</span>
+<span id="cb25-15"><a href="#cb25-15" aria-hidden="true" tabindex="-1"></a>       <span class="at">ylab =</span> <span class="st">"Resíduos"</span>,</span>
+<span id="cb25-16"><a href="#cb25-16" aria-hidden="true" tabindex="-1"></a>       <span class="at">id =</span> <span class="cn">FALSE</span>, <span class="co"># Desativar a identificação de pontos</span></span>
+<span id="cb25-17"><a href="#cb25-17" aria-hidden="true" tabindex="-1"></a>       <span class="at">envelope =</span> <span class="fl">0.95</span>) <span class="co"># Adicionar envelope de confiança de 95%</span></span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</div>
+</section>
+<section id="reanalizando-modelo-final" class="level2">
+<h2 class="anchored" data-anchor-id="reanalizando-modelo-final">Reanalizando modelo final</h2>
+<p>Nessa parte vamos olhar para o modelo final e rodar manualmente cada colocando variaveis em grupo e criar uma tabela de AIC e Acurácia, para ve se o modelo se enxuga. Depois gerar o gráfico de ODDS. Ratio.</p>
+<section id="modelo-final" class="level4">
+<h4 class="anchored" data-anchor-id="modelo-final">modelo final</h4>
+<div class="cell">
+<div class="sourceCode cell-code" id="cb26"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb26-1"><a href="#cb26-1" aria-hidden="true" tabindex="-1"></a>model_final <span class="ot">&lt;-</span> modelo <span class="ot">&lt;-</span> <span class="fu">multinom</span>(</span>
+<span id="cb26-2"><a href="#cb26-2" aria-hidden="true" tabindex="-1"></a>  <span class="at">formula =</span> dengue_pattern <span class="sc">~</span> region <span class="sc">+</span> pop22 <span class="sc">+</span> dengue_pattern_2010_2016 <span class="sc">+</span> </span>
+<span id="cb26-3"><a href="#cb26-3" aria-hidden="true" tabindex="-1"></a>    thr_temp_Spring <span class="sc">+</span> bioma <span class="sc">+</span> precip_tot_Autumn <span class="sc">+</span> altitude <span class="sc">+</span> </span>
+<span id="cb26-4"><a href="#cb26-4" aria-hidden="true" tabindex="-1"></a>    thr_temp_umid_Autumn <span class="sc">+</span> precip_tot_Winter <span class="sc">+</span> thr_prec_Summer, </span>
+<span id="cb26-5"><a href="#cb26-5" aria-hidden="true" tabindex="-1"></a>  <span class="at">data =</span> det_17_22</span>
+<span id="cb26-6"><a href="#cb26-6" aria-hidden="true" tabindex="-1"></a>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output cell-output-stdout">
+<pre><code># weights:  110 (84 variable)
+initial  value 8959.740859 
+iter  10 value 6510.575399
+iter  20 value 6155.441693
+iter  30 value 5648.372862
+iter  40 value 4176.339926
+iter  50 value 3782.370883
+iter  60 value 3566.601581
+iter  70 value 3450.825617
+iter  80 value 3372.943491
+iter  90 value 3354.458839
+iter 100 value 3336.567604
+final  value 3336.567604 
+stopped after 100 iterations</code></pre>
+</div>
+<div class="sourceCode cell-code" id="cb28"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb28-1"><a href="#cb28-1" aria-hidden="true" tabindex="-1"></a>model_final</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output cell-output-stdout">
+<pre><code>Call:
+multinom(formula = dengue_pattern ~ region + pop22 + dengue_pattern_2010_2016 + 
+    thr_temp_Spring + bioma + precip_tot_Autumn + altitude + 
+    thr_temp_umid_Autumn + precip_tot_Winter + thr_prec_Summer, 
+    data = det_17_22)
+
+Coefficients:
+                        (Intercept)    region2    region3   region4    region5
+Epidêmico                 -7.596216 -0.3754993  0.5993100  1.049989  0.5650511
+Episódico                  4.398781  1.0998924 -0.6300251 -1.867526 -0.9542474
+Sem transmissão            3.078713  1.1868354  0.1483456 -1.540349  0.8703817
+Transmissão Persistente  -33.117289 -7.6569511  2.5246683  4.259269  0.4166417
+                                pop22 dengue_pattern_2010_2016Episódico
+Epidêmico                1.907126e-05                         -4.252696
+Episódico               -6.598051e-05                          5.176576
+Sem transmissão         -1.598815e-04                          5.791823
+Transmissão Persistente  2.760074e-05                         -2.124897
+                        dengue_pattern_2010_2016Episódico/Epidêmico
+Epidêmico                                                 -2.553083
+Episódico                                                  3.318119
+Sem transmissão                                           -3.051737
+Transmissão Persistente                                   -7.812237
+                        dengue_pattern_2010_2016Sem transmissão
+Epidêmico                                            -21.161644
+Episódico                                              8.120157
+Sem transmissão                                       10.551452
+Transmissão Persistente                               -2.737901
+                        dengue_pattern_2010_2016Transmissão Persistente
+Epidêmico                                                    -0.6049778
+Episódico                                                    31.7966339
+Sem transmissão                                              44.5453819
+Transmissão Persistente                                       1.8229832
+                        thr_temp_Spring biomaamazonia biomacaatinga
+Epidêmico                    0.09774210     0.3517681     0.3669617
+Episódico                   -0.08580905     0.6559148    -0.8860303
+Sem transmissão             -0.15349112     3.5480004     1.9526568
+Transmissão Persistente      0.34765247   -30.2409569    -3.6423844
+                        biomacerrado biomapampa biomapantanal precip_tot_Autumn
+Epidêmico                -0.17447365  -5.232503      1.759368      -0.001234055
+Episódico                 0.33805732   1.142204      1.152114       0.000807756
+Sem transmissão           2.90882305   2.202110     -1.477424       0.001471012
+Transmissão Persistente   0.03070583 -23.928755     -1.241458       0.004272204
+                             altitude thr_temp_umid_Autumn precip_tot_Winter
+Epidêmico               -0.0003613074         -0.027958825      0.0016911104
+Episódico               -0.0012786862          0.001035445     -0.0009845205
+Sem transmissão         -0.0013969413          0.006920460     -0.0014151060
+Transmissão Persistente  0.0009009444         -0.099019037     -0.0032935787
+                        thr_prec_Summer
+Epidêmico                   0.023193369
+Episódico                  -0.022870933
+Sem transmissão            -0.015223228
+Transmissão Persistente    -0.004610835
+
+Residual Deviance: 6673.135 
+AIC: 6841.135 </code></pre>
+</div>
+<div class="sourceCode cell-code" id="cb30"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb30-1"><a href="#cb30-1" aria-hidden="true" tabindex="-1"></a>model_final <span class="ot">&lt;-</span> <span class="fu">na.omit</span>(model_final)</span>
+<span id="cb30-2"><a href="#cb30-2" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb30-3"><a href="#cb30-3" aria-hidden="true" tabindex="-1"></a><span class="co"># previsoes</span></span>
+<span id="cb30-4"><a href="#cb30-4" aria-hidden="true" tabindex="-1"></a>previsoes <span class="ot">&lt;-</span> <span class="fu">predict</span>(model_final, <span class="at">newdata =</span> det_17_22)</span>
+<span id="cb30-5"><a href="#cb30-5" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb30-6"><a href="#cb30-6" aria-hidden="true" tabindex="-1"></a><span class="co"># matriz de confusão comparando as previsões com os valores reais</span></span>
+<span id="cb30-7"><a href="#cb30-7" aria-hidden="true" tabindex="-1"></a>matriz_confusao <span class="ot">&lt;-</span> <span class="fu">confusionMatrix</span>(previsoes, det_17_22<span class="sc">$</span>dengue_pattern)</span>
+<span id="cb30-8"><a href="#cb30-8" aria-hidden="true" tabindex="-1"></a><span class="fu">print</span>(matriz_confusao)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output cell-output-stdout">
+<pre><code>Confusion Matrix and Statistics
+
+                         Reference
+Prediction                Episódico/Epidêmico Epidêmico Episódico
+  Episódico/Epidêmico                    2374       308       482
+  Epidêmico                                88       410         0
+  Episódico                               357         3      1342
+  Sem transmissão                           0         0        17
+  Transmissão Persistente                   0         4         0
+                         Reference
+Prediction                Sem transmissão Transmissão Persistente
+  Episódico/Epidêmico                   4                       0
+  Epidêmico                             0                      14
+  Episódico                           114                       0
+  Sem transmissão                      32                       0
+  Transmissão Persistente               0                      18
+
+Overall Statistics
+                                          
+               Accuracy : 0.7501          
+                 95% CI : (0.7385, 0.7615)
+    No Information Rate : 0.5064          
+    P-Value [Acc &gt; NIR] : &lt; 2.2e-16       
+                                          
+                  Kappa : 0.5777          
+                                          
+ Mcnemar's Test P-Value : NA              
+
+Statistics by Class:
+
+                     Class: Episódico/Epidêmico Class: Epidêmico
+Sensitivity                              0.8421          0.56552
+Specificity                              0.7111          0.97893
+Pos Pred Value                           0.7494          0.80078
+Neg Pred Value                           0.8145          0.93769
+Prevalence                               0.5064          0.13023
+Detection Rate                           0.4264          0.07365
+Detection Prevalence                     0.5691          0.09197
+Balanced Accuracy                        0.7766          0.77223
+                     Class: Episódico Class: Sem transmissão
+Sensitivity                    0.7290               0.213333
+Specificity                    0.8728               0.996862
+Pos Pred Value                 0.7390               0.653061
+Neg Pred Value                 0.8670               0.978615
+Prevalence                     0.3307               0.026944
+Detection Rate                 0.2411               0.005748
+Detection Prevalence           0.3262               0.008802
+Balanced Accuracy              0.8009               0.605098
+                     Class: Transmissão Persistente
+Sensitivity                                0.562500
+Specificity                                0.999277
+Pos Pred Value                             0.818182
+Neg Pred Value                             0.997475
+Prevalence                                 0.005748
+Detection Rate                             0.003233
+Detection Prevalence                       0.003952
+Balanced Accuracy                          0.780889</code></pre>
+</div>
+<div class="sourceCode cell-code" id="cb32"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb32-1"><a href="#cb32-1" aria-hidden="true" tabindex="-1"></a><span class="co"># Resíduos deviance</span></span>
+<span id="cb32-2"><a href="#cb32-2" aria-hidden="true" tabindex="-1"></a>residuals_deviance <span class="ot">&lt;-</span> <span class="fu">residuals</span>(model_final, <span class="at">type =</span> <span class="st">"deviance"</span>)</span>
+<span id="cb32-3"><a href="#cb32-3" aria-hidden="true" tabindex="-1"></a><span class="fu">plot</span>(residuals_deviance, <span class="at">main =</span> <span class="st">"Resíduos Deviance"</span>, <span class="at">ylab =</span> <span class="st">"Resíduos"</span>, <span class="at">xlab =</span> <span class="st">"Observações"</span>)</span>
+<span id="cb32-4"><a href="#cb32-4" aria-hidden="true" tabindex="-1"></a><span class="fu">abline</span>(<span class="at">h =</span> <span class="dv">0</span>, <span class="at">col =</span> <span class="st">"red"</span>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output-display">
+<div>
+<figure class="figure">
+<p><img src="model_17_22_files/figure-html/unnamed-chunk-12-1.png" class="img-fluid figure-img" width="672"></p>
+</figure>
+</div>
+</div>
+</div>
+</section>
+<section id="modelo-nulo" class="level4">
+<h4 class="anchored" data-anchor-id="modelo-nulo">Modelo nulo</h4>
+<div class="cell">
+<div class="sourceCode cell-code" id="cb33"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb33-1"><a href="#cb33-1" aria-hidden="true" tabindex="-1"></a><span class="do">## Modelo nulo</span></span>
+<span id="cb33-2"><a href="#cb33-2" aria-hidden="true" tabindex="-1"></a>m1 <span class="ot">&lt;-</span> <span class="fu">multinom</span>(<span class="at">formula =</span> dengue_pattern <span class="sc">~</span> region <span class="sc">+</span> pop22 , <span class="at">data =</span> det_17_22)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output cell-output-stdout">
+<pre><code># weights:  35 (24 variable)
+initial  value 8959.740859 
+iter  10 value 5653.084335
+iter  20 value 5350.371755
+iter  30 value 4947.538451
+iter  40 value 4903.853257
+iter  50 value 4867.727632
+iter  60 value 4867.537240
+iter  70 value 4867.465738
+final  value 4867.462969 
+converged</code></pre>
+</div>
+<div class="sourceCode cell-code" id="cb35"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb35-1"><a href="#cb35-1" aria-hidden="true" tabindex="-1"></a>m1</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output cell-output-stdout">
+<pre><code>Call:
+multinom(formula = dengue_pattern ~ region + pop22, data = det_17_22)
+
+Coefficients:
+                        (Intercept)     region2    region3   region4   region5
+Epidêmico                -2.6800214 -0.42008161  0.8030847 0.3961291  1.273559
+Episódico                 0.5944491  0.09624868 -0.8257567 0.4964552 -2.088328
+Sem transmissão          -0.8554420 -0.71777967 -1.6728143 0.8813872 -1.894224
+Transmissão Persistente  -9.6700248  0.20566315  3.8263962 3.2500740  4.176923
+                                pop22
+Epidêmico                2.081892e-05
+Episódico               -5.843170e-05
+Sem transmissão         -1.812704e-04
+Transmissão Persistente  2.475344e-05
+
+Residual Deviance: 9734.926 
+AIC: 9782.926 </code></pre>
+</div>
+<div class="sourceCode cell-code" id="cb37"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb37-1"><a href="#cb37-1" aria-hidden="true" tabindex="-1"></a>m1 <span class="ot">&lt;-</span> <span class="fu">na.omit</span>(m1)</span>
+<span id="cb37-2"><a href="#cb37-2" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb37-3"><a href="#cb37-3" aria-hidden="true" tabindex="-1"></a><span class="co"># previsoes</span></span>
+<span id="cb37-4"><a href="#cb37-4" aria-hidden="true" tabindex="-1"></a>previsoes_m1 <span class="ot">&lt;-</span> <span class="fu">predict</span>(m1, <span class="at">newdata =</span> det_17_22)</span>
+<span id="cb37-5"><a href="#cb37-5" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb37-6"><a href="#cb37-6" aria-hidden="true" tabindex="-1"></a><span class="co"># matriz de confusão comparando as previsões com os valores reais</span></span>
+<span id="cb37-7"><a href="#cb37-7" aria-hidden="true" tabindex="-1"></a>matriz_confusao_m1 <span class="ot">&lt;-</span> <span class="fu">confusionMatrix</span>(previsoes_m1, det_17_22<span class="sc">$</span>dengue_pattern)</span>
+<span id="cb37-8"><a href="#cb37-8" aria-hidden="true" tabindex="-1"></a><span class="fu">print</span>(matriz_confusao_m1)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output cell-output-stdout">
+<pre><code>Confusion Matrix and Statistics
+
+                         Reference
+Prediction                Episódico/Epidêmico Epidêmico Episódico
+  Episódico/Epidêmico                    2101       459       811
+  Epidêmico                                66       215         2
+  Episódico                               652        47      1028
+  Sem transmissão                           0         0         0
+  Transmissão Persistente                   0         4         0
+                         Reference
+Prediction                Sem transmissão Transmissão Persistente
+  Episódico/Epidêmico                  32                       0
+  Epidêmico                             0                      24
+  Episódico                           118                       0
+  Sem transmissão                       0                       0
+  Transmissão Persistente               0                       8
+
+Overall Statistics
+                                         
+               Accuracy : 0.6021         
+                 95% CI : (0.5891, 0.615)
+    No Information Rate : 0.5064         
+    P-Value [Acc &gt; NIR] : &lt; 2.2e-16      
+                                         
+                  Kappa : 0.3064         
+                                         
+ Mcnemar's Test P-Value : NA             
+
+Statistics by Class:
+
+                     Class: Episódico/Epidêmico Class: Epidêmico
+Sensitivity                              0.7453          0.29655
+Specificity                              0.5262          0.98100
+Pos Pred Value                           0.6174          0.70033
+Neg Pred Value                           0.6682          0.90304
+Prevalence                               0.5064          0.13023
+Detection Rate                           0.3774          0.03862
+Detection Prevalence                     0.6113          0.05515
+Balanced Accuracy                        0.6358          0.63878
+                     Class: Episódico Class: Sem transmissão
+Sensitivity                    0.5584                0.00000
+Specificity                    0.7807                1.00000
+Pos Pred Value                 0.5572                    NaN
+Neg Pred Value                 0.7816                0.97306
+Prevalence                     0.3307                0.02694
+Detection Rate                 0.1847                0.00000
+Detection Prevalence           0.3314                0.00000
+Balanced Accuracy              0.6696                0.50000
+                     Class: Transmissão Persistente
+Sensitivity                                0.250000
+Specificity                                0.999277
+Pos Pred Value                             0.666667
+Neg Pred Value                             0.995680
+Prevalence                                 0.005748
+Detection Rate                             0.001437
+Detection Prevalence                       0.002156
+Balanced Accuracy                          0.624639</code></pre>
+</div>
+<div class="sourceCode cell-code" id="cb39"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb39-1"><a href="#cb39-1" aria-hidden="true" tabindex="-1"></a><span class="co"># Resíduos deviance</span></span>
+<span id="cb39-2"><a href="#cb39-2" aria-hidden="true" tabindex="-1"></a>residuals_deviance_m1 <span class="ot">&lt;-</span> <span class="fu">residuals</span>(m1, <span class="at">type =</span> <span class="st">"deviance"</span>)</span>
+<span id="cb39-3"><a href="#cb39-3" aria-hidden="true" tabindex="-1"></a><span class="fu">plot</span>(residuals_deviance_m1, <span class="at">main =</span> <span class="st">"Resíduos Deviance"</span>, <span class="at">ylab =</span> <span class="st">"Resíduos"</span>, <span class="at">xlab =</span> <span class="st">"Observações"</span>)</span>
+<span id="cb39-4"><a href="#cb39-4" aria-hidden="true" tabindex="-1"></a><span class="fu">abline</span>(<span class="at">h =</span> <span class="dv">0</span>, <span class="at">col =</span> <span class="st">"red"</span>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output-display">
+<div>
+<figure class="figure">
+<p><img src="model_17_22_files/figure-html/unnamed-chunk-13-1.png" class="img-fluid figure-img" width="672"></p>
+</figure>
+</div>
+</div>
+</div>
+</section>
+<section id="modelo-nulo-regiao" class="level4">
+<h4 class="anchored" data-anchor-id="modelo-nulo-regiao">Modelo nulo + regiao</h4>
+<p>coloca uma a uma</p>
+<div class="cell">
+<div class="sourceCode cell-code" id="cb40"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb40-1"><a href="#cb40-1" aria-hidden="true" tabindex="-1"></a>m2 <span class="ot">&lt;-</span> <span class="fu">multinom</span>(<span class="at">formula =</span> dengue_pattern <span class="sc">~</span> region <span class="sc">+</span> pop22 <span class="sc">+</span> dengue_pattern_2010_2016 <span class="sc">+</span> </span>
+<span id="cb40-2"><a href="#cb40-2" aria-hidden="true" tabindex="-1"></a>    bioma <span class="sc">+</span> altitude, <span class="at">data =</span> det_17_22)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output cell-output-stdout">
+<pre><code># weights:  85 (64 variable)
+initial  value 8959.740859 
+iter  10 value 5717.326366
+iter  20 value 4725.918002
+iter  30 value 4007.251143
+iter  40 value 3858.328741
+iter  50 value 3751.162344
+iter  60 value 3690.196797
+iter  70 value 3674.788323
+iter  80 value 3665.878991
+iter  90 value 3660.097447
+iter 100 value 3658.426226
+final  value 3658.426226 
+stopped after 100 iterations</code></pre>
+</div>
+<div class="sourceCode cell-code" id="cb42"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb42-1"><a href="#cb42-1" aria-hidden="true" tabindex="-1"></a>m2</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output cell-output-stdout">
+<pre><code>Call:
+multinom(formula = dengue_pattern ~ region + pop22 + dengue_pattern_2010_2016 + 
+    bioma + altitude, data = det_17_22)
+
+Coefficients:
+                        (Intercept)    region2    region3    region4    region5
+Epidêmico                -0.3458842 -0.4490697  1.2472431  1.7124020  1.5169857
+Episódico                -3.7287442  1.1780161 -0.4264507 -0.1961246 -1.5021562
+Sem transmissão          -5.5243639  1.5114336 -0.4678522  0.5344664 -1.0166477
+Transmissão Persistente  -4.7978022 -4.5199199  1.6802706  3.9185381  0.4671219
+                                pop22 dengue_pattern_2010_2016Episódico
+Epidêmico                1.079663e-05                         -5.188773
+Episódico               -4.015249e-05                          4.945016
+Sem transmissão         -1.174598e-04                          2.444360
+Transmissão Persistente  1.509375e-05                         -8.621685
+                        dengue_pattern_2010_2016Episódico/Epidêmico
+Epidêmico                                                 -2.664746
+Episódico                                                  2.689281
+Sem transmissão                                           -2.383344
+Transmissão Persistente                                   -8.487057
+                        dengue_pattern_2010_2016Sem transmissão
+Epidêmico                                            -25.555625
+Episódico                                              8.443346
+Sem transmissão                                        7.985721
+Transmissão Persistente                              -12.383951
+                        dengue_pattern_2010_2016Transmissão Persistente
+Epidêmico                                                     -1.794212
+Episódico                                                     18.093202
+Sem transmissão                                               38.956688
+Transmissão Persistente                                        1.828868
+                        biomaamazonia biomacaatinga biomacerrado biomapampa
+Epidêmico                  -0.3954157    0.01498312   0.09874214 -12.190037
+Episódico                   0.7897979   -0.92349733  -0.09944696   1.348088
+Sem transmissão             3.6732242   -0.67685684   0.78967750   2.208712
+Transmissão Persistente   -23.4478078   -3.77411280   2.66248189 -53.432871
+                        biomapantanal      altitude
+Epidêmico                    1.499825 -0.0005806630
+Episódico                    1.339142  0.0001348925
+Sem transmissão             -1.618948  0.0019969060
+Transmissão Persistente     -1.129899 -0.0023364439
+
+Residual Deviance: 7316.852 
+AIC: 7444.852 </code></pre>
+</div>
+<div class="sourceCode cell-code" id="cb44"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb44-1"><a href="#cb44-1" aria-hidden="true" tabindex="-1"></a>m2 <span class="ot">&lt;-</span> <span class="fu">na.omit</span>(m2)</span>
+<span id="cb44-2"><a href="#cb44-2" aria-hidden="true" tabindex="-1"></a><span class="co"># previsoes</span></span>
+<span id="cb44-3"><a href="#cb44-3" aria-hidden="true" tabindex="-1"></a>previsoes_m2 <span class="ot">&lt;-</span> <span class="fu">predict</span>(m2, <span class="at">newdata =</span> det_17_22)</span>
+<span id="cb44-4"><a href="#cb44-4" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb44-5"><a href="#cb44-5" aria-hidden="true" tabindex="-1"></a><span class="co"># matriz de confusão comparando as previsões com os valores reais</span></span>
+<span id="cb44-6"><a href="#cb44-6" aria-hidden="true" tabindex="-1"></a>matriz_confusao_m2 <span class="ot">&lt;-</span> <span class="fu">confusionMatrix</span>(previsoes_m2, det_17_22<span class="sc">$</span>dengue_pattern)</span>
+<span id="cb44-7"><a href="#cb44-7" aria-hidden="true" tabindex="-1"></a><span class="fu">print</span>(matriz_confusao_m2)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output cell-output-stdout">
+<pre><code>Confusion Matrix and Statistics
+
+                         Reference
+Prediction                Episódico/Epidêmico Epidêmico Episódico
+  Episódico/Epidêmico                    2305       309       500
+  Epidêmico                                96       408         0
+  Episódico                               418         5      1333
+  Sem transmissão                           0         0         8
+  Transmissão Persistente                   0         3         0
+                         Reference
+Prediction                Sem transmissão Transmissão Persistente
+  Episódico/Epidêmico                   2                       0
+  Epidêmico                             0                      17
+  Episódico                           133                       0
+  Sem transmissão                      15                       0
+  Transmissão Persistente               0                      15
+
+Overall Statistics
+                                          
+               Accuracy : 0.7322          
+                 95% CI : (0.7203, 0.7438)
+    No Information Rate : 0.5064          
+    P-Value [Acc &gt; NIR] : &lt; 2.2e-16       
+                                          
+                  Kappa : 0.5476          
+                                          
+ Mcnemar's Test P-Value : NA              
+
+Statistics by Class:
+
+                     Class: Episódico/Epidêmico Class: Epidêmico
+Sensitivity                              0.8177          0.56276
+Specificity                              0.7049          0.97666
+Pos Pred Value                           0.7397          0.78311
+Neg Pred Value                           0.7903          0.93718
+Prevalence                               0.5064          0.13023
+Detection Rate                           0.4140          0.07329
+Detection Prevalence                     0.5597          0.09359
+Balanced Accuracy                        0.7613          0.76971
+                     Class: Episódico Class: Sem transmissão
+Sensitivity                    0.7241               0.100000
+Specificity                    0.8508               0.998523
+Pos Pred Value                 0.7057               0.652174
+Neg Pred Value                 0.8619               0.975649
+Prevalence                     0.3307               0.026944
+Detection Rate                 0.2394               0.002694
+Detection Prevalence           0.3393               0.004131
+Balanced Accuracy              0.7874               0.549262
+                     Class: Transmissão Persistente
+Sensitivity                                0.468750
+Specificity                                0.999458
+Pos Pred Value                             0.833333
+Neg Pred Value                             0.996936
+Prevalence                                 0.005748
+Detection Rate                             0.002694
+Detection Prevalence                       0.003233
+Balanced Accuracy                          0.734104</code></pre>
+</div>
+<div class="sourceCode cell-code" id="cb46"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb46-1"><a href="#cb46-1" aria-hidden="true" tabindex="-1"></a><span class="co"># Resíduos deviance</span></span>
+<span id="cb46-2"><a href="#cb46-2" aria-hidden="true" tabindex="-1"></a>residuals_deviance_m2 <span class="ot">&lt;-</span> <span class="fu">residuals</span>(m2, <span class="at">type =</span> <span class="st">"deviance"</span>)</span>
+<span id="cb46-3"><a href="#cb46-3" aria-hidden="true" tabindex="-1"></a><span class="fu">plot</span>(residuals_deviance_m2, <span class="at">main =</span> <span class="st">"Resíduos Deviance"</span>, <span class="at">ylab =</span> <span class="st">"Resíduos"</span>, <span class="at">xlab =</span> <span class="st">"Observações"</span>)</span>
+<span id="cb46-4"><a href="#cb46-4" aria-hidden="true" tabindex="-1"></a><span class="fu">abline</span>(<span class="at">h =</span> <span class="dv">0</span>, <span class="at">col =</span> <span class="st">"red"</span>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output-display">
+<div>
+<figure class="figure">
+<p><img src="model_17_22_files/figure-html/unnamed-chunk-14-1.png" class="img-fluid figure-img" width="672"></p>
+</figure>
+</div>
+</div>
+</div>
+<section id="modelo-nulo-clima" class="level5">
+<h5 class="anchored" data-anchor-id="modelo-nulo-clima">Modelo nulo + clima</h5>
+<div class="cell">
+<div class="sourceCode cell-code" id="cb47"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb47-1"><a href="#cb47-1" aria-hidden="true" tabindex="-1"></a>m3 <span class="ot">&lt;-</span> <span class="fu">multinom</span>(<span class="at">formula =</span> dengue_pattern <span class="sc">~</span> region <span class="sc">+</span> pop22 <span class="sc">+</span> <span class="sc">+</span> dengue_pattern_2010_2016 <span class="sc">+</span> thr_temp_Spring <span class="sc">+</span> precip_tot_Autumn <span class="sc">+</span>  thr_temp_umid_Autumn <span class="sc">+</span> precip_tot_Winter </span>
+<span id="cb47-2"><a href="#cb47-2" aria-hidden="true" tabindex="-1"></a>               <span class="sc">+</span> thr_prec_Summer, <span class="at">data =</span> det_17_22</span>
+<span id="cb47-3"><a href="#cb47-3" aria-hidden="true" tabindex="-1"></a>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output cell-output-stdout">
+<pre><code># weights:  80 (60 variable)
+initial  value 8959.740859 
+iter  10 value 7002.286094
+iter  20 value 6358.516537
+iter  30 value 4775.211712
+iter  40 value 3994.487233
+iter  50 value 3681.963922
+iter  60 value 3504.953867
+iter  70 value 3477.112451
+iter  80 value 3459.912198
+iter  90 value 3439.053244
+iter 100 value 3422.640560
+final  value 3422.640560 
+stopped after 100 iterations</code></pre>
+</div>
+<div class="sourceCode cell-code" id="cb49"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb49-1"><a href="#cb49-1" aria-hidden="true" tabindex="-1"></a>m3</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output cell-output-stdout">
+<pre><code>Call:
+multinom(formula = dengue_pattern ~ region + pop22 + +dengue_pattern_2010_2016 + 
+    thr_temp_Spring + precip_tot_Autumn + thr_temp_umid_Autumn + 
+    precip_tot_Winter + thr_prec_Summer, data = det_17_22)
+
+Coefficients:
+                        (Intercept)    region2     region3   region4    region5
+Epidêmico                -9.2021371 -0.2213616  0.73603924  1.265655  0.5749500
+Episódico                 0.4294145  0.7603414 -0.50805023 -1.509557 -0.7490032
+Sem transmissão           2.8431738  0.5915216 -1.24270686 -2.691561  1.0125134
+Transmissão Persistente -27.2860957 -1.7850643 -0.01428793  2.686835 -1.2194863
+                                pop22 dengue_pattern_2010_2016Episódico
+Epidêmico                1.914957e-05                         -4.231459
+Episódico               -5.677347e-05                          5.481195
+Sem transmissão         -1.367878e-04                          3.634168
+Transmissão Persistente  2.652138e-05                        -13.131489
+                        dengue_pattern_2010_2016Episódico/Epidêmico
+Epidêmico                                                -2.5876928
+Episódico                                                 3.5505001
+Sem transmissão                                          -0.5626212
+Transmissão Persistente                                 -17.5481311
+                        dengue_pattern_2010_2016Sem transmissão
+Epidêmico                                            -17.231487
+Episódico                                              8.805301
+Sem transmissão                                        8.847997
+Transmissão Persistente                               -4.774164
+                        dengue_pattern_2010_2016Transmissão Persistente
+Epidêmico                                                      4.917061
+Episódico                                                     13.236007
+Sem transmissão                                               75.693765
+Transmissão Persistente                                        6.283262
+                        thr_temp_Spring precip_tot_Autumn thr_temp_umid_Autumn
+Epidêmico                    0.10981880     -0.0009631967          -0.02467254
+Episódico                   -0.07090208      0.0007049000           0.01098124
+Sem transmissão             -0.13038215      0.0012764402           0.02777571
+Transmissão Persistente      0.30353895     -0.0051386035          -0.06199864
+                        precip_tot_Winter thr_prec_Summer
+Epidêmico                    0.0013878673    0.0231245344
+Episódico                   -0.0002849998   -0.0004629878
+Sem transmissão             -0.0007325284    0.0059373557
+Transmissão Persistente      0.0029080361    0.0598691975
+
+Residual Deviance: 6845.281 
+AIC: 6965.281 </code></pre>
+</div>
+<div class="sourceCode cell-code" id="cb51"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb51-1"><a href="#cb51-1" aria-hidden="true" tabindex="-1"></a>m3 <span class="ot">&lt;-</span> <span class="fu">na.omit</span>(m3)</span>
+<span id="cb51-2"><a href="#cb51-2" aria-hidden="true" tabindex="-1"></a><span class="co"># previsoes</span></span>
+<span id="cb51-3"><a href="#cb51-3" aria-hidden="true" tabindex="-1"></a>previsoes_m3 <span class="ot">&lt;-</span> <span class="fu">predict</span>(m3, <span class="at">newdata =</span> det_17_22)</span>
+<span id="cb51-4"><a href="#cb51-4" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb51-5"><a href="#cb51-5" aria-hidden="true" tabindex="-1"></a><span class="co"># matriz de confusão comparando as previsões com os valores reais</span></span>
+<span id="cb51-6"><a href="#cb51-6" aria-hidden="true" tabindex="-1"></a>matriz_confusao_m3 <span class="ot">&lt;-</span> <span class="fu">confusionMatrix</span>(previsoes_m3, det_17_22<span class="sc">$</span>dengue_pattern)</span>
+<span id="cb51-7"><a href="#cb51-7" aria-hidden="true" tabindex="-1"></a><span class="fu">print</span>(matriz_confusao_m3)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output cell-output-stdout">
+<pre><code>Confusion Matrix and Statistics
+
+                         Reference
+Prediction                Episódico/Epidêmico Epidêmico Episódico
+  Episódico/Epidêmico                    2359       316       518
+  Epidêmico                                86       403         0
+  Episódico                               374         3      1306
+  Sem transmissão                           0         0        17
+  Transmissão Persistente                   0         3         0
+                         Reference
+Prediction                Sem transmissão Transmissão Persistente
+  Episódico/Epidêmico                   4                       0
+  Epidêmico                             0                      17
+  Episódico                           114                       0
+  Sem transmissão                      32                       0
+  Transmissão Persistente               0                      15
+
+Overall Statistics
+                                          
+               Accuracy : 0.7392          
+                 95% CI : (0.7274, 0.7507)
+    No Information Rate : 0.5064          
+    P-Value [Acc &gt; NIR] : &lt; 2.2e-16       
+                                          
+                  Kappa : 0.5582          
+                                          
+ Mcnemar's Test P-Value : NA              
+
+Statistics by Class:
+
+                     Class: Episódico/Epidêmico Class: Epidêmico
+Sensitivity                              0.8368          0.55586
+Specificity                              0.6951          0.97873
+Pos Pred Value                           0.7379          0.79644
+Neg Pred Value                           0.8059          0.93638
+Prevalence                               0.5064          0.13023
+Detection Rate                           0.4237          0.07239
+Detection Prevalence                     0.5743          0.09089
+Balanced Accuracy                        0.7659          0.76729
+                     Class: Episódico Class: Sem transmissão
+Sensitivity                    0.7094               0.213333
+Specificity                    0.8682               0.996862
+Pos Pred Value                 0.7268               0.653061
+Neg Pred Value                 0.8581               0.978615
+Prevalence                     0.3307               0.026944
+Detection Rate                 0.2346               0.005748
+Detection Prevalence           0.3228               0.008802
+Balanced Accuracy              0.7888               0.605098
+                     Class: Transmissão Persistente
+Sensitivity                                0.468750
+Specificity                                0.999458
+Pos Pred Value                             0.833333
+Neg Pred Value                             0.996936
+Prevalence                                 0.005748
+Detection Rate                             0.002694
+Detection Prevalence                       0.003233
+Balanced Accuracy                          0.734104</code></pre>
+</div>
+<div class="sourceCode cell-code" id="cb53"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb53-1"><a href="#cb53-1" aria-hidden="true" tabindex="-1"></a><span class="co"># Resíduos deviance</span></span>
+<span id="cb53-2"><a href="#cb53-2" aria-hidden="true" tabindex="-1"></a>residuals_deviance_m3 <span class="ot">&lt;-</span> <span class="fu">residuals</span>(m3, <span class="at">type =</span> <span class="st">"deviance"</span>)</span>
+<span id="cb53-3"><a href="#cb53-3" aria-hidden="true" tabindex="-1"></a><span class="fu">plot</span>(residuals_deviance_m3, <span class="at">main =</span> <span class="st">"Resíduos Deviance"</span>, <span class="at">ylab =</span> <span class="st">"Resíduos"</span>, <span class="at">xlab =</span> <span class="st">"Observações"</span>)</span>
+<span id="cb53-4"><a href="#cb53-4" aria-hidden="true" tabindex="-1"></a><span class="fu">abline</span>(<span class="at">h =</span> <span class="dv">0</span>, <span class="at">col =</span> <span class="st">"red"</span>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output-display">
+<div>
+<figure class="figure">
+<p><img src="model_17_22_files/figure-html/unnamed-chunk-15-1.png" class="img-fluid figure-img" width="672"></p>
+</figure>
+</div>
+</div>
+</div>
+</section>
+</section>
+<section id="gerando-gráfico-odds-ratio" class="level3">
+<h3 class="anchored" data-anchor-id="gerando-gráfico-odds-ratio">Gerando gráfico Odds Ratio</h3>
+<p>Agora com modelo com melhor AIC e acurácia</p>
+</section>
+</section>
+<section id="or-e-ic95" class="level2">
+<h2 class="anchored" data-anchor-id="or-e-ic95">Or e IC95%</h2>
+<div class="cell">
+<div class="sourceCode cell-code" id="cb54"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb54-1"><a href="#cb54-1" aria-hidden="true" tabindex="-1"></a><span class="co"># Obter os coeficientes do modelo</span></span>
+<span id="cb54-2"><a href="#cb54-2" aria-hidden="true" tabindex="-1"></a>coeficientes <span class="ot">&lt;-</span> <span class="fu">summary</span>(model_final)<span class="sc">$</span>coefficients</span>
+<span id="cb54-3"><a href="#cb54-3" aria-hidden="true" tabindex="-1"></a>erro_padrao <span class="ot">&lt;-</span> <span class="fu">summary</span>(model_final)<span class="sc">$</span>standard.errors</span>
+<span id="cb54-4"><a href="#cb54-4" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb54-5"><a href="#cb54-5" aria-hidden="true" tabindex="-1"></a><span class="co"># Calcular OR, IC 95% e p-valores</span></span>
+<span id="cb54-6"><a href="#cb54-6" aria-hidden="true" tabindex="-1"></a>OR <span class="ot">&lt;-</span> <span class="fu">exp</span>(coeficientes)</span>
+<span id="cb54-7"><a href="#cb54-7" aria-hidden="true" tabindex="-1"></a>IC_inf <span class="ot">&lt;-</span> <span class="fu">exp</span>(coeficientes <span class="sc">-</span> <span class="fl">1.96</span> <span class="sc">*</span> erro_padrao)</span>
+<span id="cb54-8"><a href="#cb54-8" aria-hidden="true" tabindex="-1"></a>IC_sup <span class="ot">&lt;-</span> <span class="fu">exp</span>(coeficientes <span class="sc">+</span> <span class="fl">1.96</span> <span class="sc">*</span> erro_padrao)</span>
+<span id="cb54-9"><a href="#cb54-9" aria-hidden="true" tabindex="-1"></a>p_valor <span class="ot">&lt;-</span> <span class="dv">2</span> <span class="sc">*</span> (<span class="dv">1</span> <span class="sc">-</span> <span class="fu">pnorm</span>(<span class="fu">abs</span>(coeficientes <span class="sc">/</span> erro_padrao)))</span>
+<span id="cb54-10"><a href="#cb54-10" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb54-11"><a href="#cb54-11" aria-hidden="true" tabindex="-1"></a><span class="co"># Criar tabela com OR, IC 95% e p-valor</span></span>
+<span id="cb54-12"><a href="#cb54-12" aria-hidden="true" tabindex="-1"></a>tabela_resultado <span class="ot">&lt;-</span> <span class="fu">cbind</span>(OR, IC_inf, IC_sup, p_valor)</span>
+<span id="cb54-13"><a href="#cb54-13" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb54-14"><a href="#cb54-14" aria-hidden="true" tabindex="-1"></a><span class="co"># Arredondar para 2 casas decimais</span></span>
+<span id="cb54-15"><a href="#cb54-15" aria-hidden="true" tabindex="-1"></a>tabela_resultado <span class="ot">&lt;-</span> <span class="fu">round</span>(tabela_resultado, <span class="dv">2</span>)</span>
+<span id="cb54-16"><a href="#cb54-16" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb54-17"><a href="#cb54-17" aria-hidden="true" tabindex="-1"></a><span class="co"># Exibir a tabela</span></span>
+<span id="cb54-18"><a href="#cb54-18" aria-hidden="true" tabindex="-1"></a>tabela_resultado</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output cell-output-stdout">
+<pre><code>                        (Intercept) region2 region3 region4 region5 pop22
+Epidêmico                      0.00    0.69    1.82    2.86    1.76     1
+Episódico                     81.35    3.00    0.53    0.15    0.39     1
+Sem transmissão               21.73    3.28    1.16    0.21    2.39     1
+Transmissão Persistente        0.00    0.00   12.49   70.76    1.52     1
+                        dengue_pattern_2010_2016Episódico
+Epidêmico                                            0.01
+Episódico                                          177.08
+Sem transmissão                                    327.61
+Transmissão Persistente                              0.12
+                        dengue_pattern_2010_2016Episódico/Epidêmico
+Epidêmico                                                      0.08
+Episódico                                                     27.61
+Sem transmissão                                                0.05
+Transmissão Persistente                                        0.00
+                        dengue_pattern_2010_2016Sem transmissão
+Epidêmico                                                  0.00
+Episódico                                               3361.55
+Sem transmissão                                        38232.91
+Transmissão Persistente                                    0.06
+                        dengue_pattern_2010_2016Transmissão Persistente
+Epidêmico                                                  5.500000e-01
+Episódico                                                  6.443215e+13
+Sem transmissão                                            2.217244e+19
+Transmissão Persistente                                    6.190000e+00
+                        thr_temp_Spring biomaamazonia biomacaatinga
+Epidêmico                          1.10          1.42          1.44
+Episódico                          0.92          1.93          0.41
+Sem transmissão                    0.86         34.74          7.05
+Transmissão Persistente            1.42          0.00          0.03
+                        biomacerrado biomapampa biomapantanal precip_tot_Autumn
+Epidêmico                       0.84       0.01          5.81                 1
+Episódico                       1.40       3.13          3.16                 1
+Sem transmissão                18.34       9.04          0.23                 1
+Transmissão Persistente         1.03       0.00          0.29                 1
+                        altitude thr_temp_umid_Autumn precip_tot_Winter
+Epidêmico                      1                 0.97                 1
+Episódico                      1                 1.00                 1
+Sem transmissão                1                 1.01                 1
+Transmissão Persistente        1                 0.91                 1
+                        thr_prec_Summer (Intercept) region2 region3 region4
+Epidêmico                          1.02        0.00    0.69    1.82    2.86
+Episódico                          0.98       81.35    3.00    0.53    0.15
+Sem transmissão                    0.98       21.73    3.28    1.16    0.21
+Transmissão Persistente            1.00        0.00    0.00   12.49   70.76
+                        region5 pop22 dengue_pattern_2010_2016Episódico
+Epidêmico                  1.76     1                              0.01
+Episódico                  0.39     1                            177.07
+Sem transmissão            2.39     1                            327.60
+Transmissão Persistente    1.52     1                              0.12
+                        dengue_pattern_2010_2016Episódico/Epidêmico
+Epidêmico                                                      0.08
+Episódico                                                     27.61
+Sem transmissão                                                0.05
+Transmissão Persistente                                        0.00
+                        dengue_pattern_2010_2016Sem transmissão
+Epidêmico                                                  0.00
+Episódico                                               3361.52
+Sem transmissão                                        38232.58
+Transmissão Persistente                                    0.06
+                        dengue_pattern_2010_2016Transmissão Persistente
+Epidêmico                                                  5.500000e-01
+Episódico                                                  6.443215e+13
+Sem transmissão                                            2.217244e+19
+Transmissão Persistente                                    6.190000e+00
+                        thr_temp_Spring biomaamazonia biomacaatinga
+Epidêmico                          1.10          1.42          1.44
+Episódico                          0.92          1.93          0.41
+Sem transmissão                    0.85         34.74          7.05
+Transmissão Persistente            1.42          0.00          0.03
+                        biomacerrado biomapampa biomapantanal precip_tot_Autumn
+Epidêmico                       0.84       0.01          5.81                 1
+Episódico                       1.40       3.13          3.16                 1
+Sem transmissão                18.33       9.04          0.23                 1
+Transmissão Persistente         1.03       0.00          0.29                 1
+                        altitude thr_temp_umid_Autumn precip_tot_Winter
+Epidêmico                      1                 0.97              1.00
+Episódico                      1                 1.00              1.00
+Sem transmissão                1                 1.00              1.00
+Transmissão Persistente        1                 0.91              0.99
+                        thr_prec_Summer (Intercept) region2 region3 region4
+Epidêmico                          1.02        0.00    0.69    1.82    2.86
+Episódico                          0.97       81.35    3.00    0.53    0.15
+Sem transmissão                    0.98       21.73    3.28    1.16    0.21
+Transmissão Persistente            1.00        0.00    0.00   12.49   70.76
+                        region5 pop22 dengue_pattern_2010_2016Episódico
+Epidêmico                  1.76     1                              0.01
+Episódico                  0.39     1                            177.08
+Sem transmissão            2.39     1                            327.62
+Transmissão Persistente    1.52     1                              0.12
+                        dengue_pattern_2010_2016Episódico/Epidêmico
+Epidêmico                                                      0.08
+Episódico                                                     27.61
+Sem transmissão                                                0.05
+Transmissão Persistente                                        0.00
+                        dengue_pattern_2010_2016Sem transmissão
+Epidêmico                                                  0.00
+Episódico                                               3361.58
+Sem transmissão                                        38233.25
+Transmissão Persistente                                    0.06
+                        dengue_pattern_2010_2016Transmissão Persistente
+Epidêmico                                                  5.500000e-01
+Episódico                                                  6.443215e+13
+Sem transmissão                                            2.217244e+19
+Transmissão Persistente                                    6.190000e+00
+                        thr_temp_Spring biomaamazonia biomacaatinga
+Epidêmico                          1.11          1.42          1.44
+Episódico                          0.92          1.93          0.41
+Sem transmissão                    0.86         34.74          7.05
+Transmissão Persistente            1.42          0.00          0.03
+                        biomacerrado biomapampa biomapantanal precip_tot_Autumn
+Epidêmico                       0.84       0.01          5.81              1.00
+Episódico                       1.40       3.13          3.16              1.00
+Sem transmissão                18.34       9.04          0.23              1.00
+Transmissão Persistente         1.03       0.00          0.29              1.01
+                        altitude thr_temp_umid_Autumn precip_tot_Winter
+Epidêmico                      1                 0.97                 1
+Episódico                      1                 1.00                 1
+Sem transmissão                1                 1.01                 1
+Transmissão Persistente        1                 0.91                 1
+                        thr_prec_Summer (Intercept) region2 region3 region4
+Epidêmico                          1.02           0       0       0       0
+Episódico                          0.98           0       0       0       0
+Sem transmissão                    0.99           0       0       0       0
+Transmissão Persistente            1.00           0       0       0       0
+                        region5 pop22 dengue_pattern_2010_2016Episódico
+Epidêmico                     0     0                                 0
+Episódico                     0     0                                 0
+Sem transmissão               0     0                                 0
+Transmissão Persistente       0     0                                 0
+                        dengue_pattern_2010_2016Episódico/Epidêmico
+Epidêmico                                                         0
+Episódico                                                         0
+Sem transmissão                                                   0
+Transmissão Persistente                                           0
+                        dengue_pattern_2010_2016Sem transmissão
+Epidêmico                                                     0
+Episódico                                                     0
+Sem transmissão                                               0
+Transmissão Persistente                                       0
+                        dengue_pattern_2010_2016Transmissão Persistente
+Epidêmico                                                             0
+Episódico                                                             0
+Sem transmissão                                                       0
+Transmissão Persistente                                               0
+                        thr_temp_Spring biomaamazonia biomacaatinga
+Epidêmico                             0             0             0
+Episódico                             0             0             0
+Sem transmissão                       0             0             0
+Transmissão Persistente               0             0             0
+                        biomacerrado biomapampa biomapantanal precip_tot_Autumn
+Epidêmico                          0          0             0                 0
+Episódico                          0          0             0                 0
+Sem transmissão                    0          0             0                 0
+Transmissão Persistente            0          0             0                 0
+                        altitude thr_temp_umid_Autumn precip_tot_Winter
+Epidêmico                   0.12                 0.00                 0
+Episódico                   0.00                 0.27                 0
+Sem transmissão             0.00                 0.00                 0
+Transmissão Persistente     0.16                 0.00                 0
+                        thr_prec_Summer
+Epidêmico                             0
+Episódico                             0
+Sem transmissão                       0
+Transmissão Persistente               0</code></pre>
+</div>
+</div>
+</section>
+<section id="figura" class="level2">
+<h2 class="anchored" data-anchor-id="figura">Figura</h2>
+<div class="cell">
+<div class="sourceCode cell-code" id="cb56"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb56-1"><a href="#cb56-1" aria-hidden="true" tabindex="-1"></a><span class="co"># geral</span></span>
+<span id="cb56-2"><a href="#cb56-2" aria-hidden="true" tabindex="-1"></a><span class="co"># Extraindo os coeficientes do modelo multinomial com intervalo de confiança</span></span>
+<span id="cb56-3"><a href="#cb56-3" aria-hidden="true" tabindex="-1"></a>tidy_model <span class="ot">&lt;-</span> broom<span class="sc">::</span><span class="fu">tidy</span>(model_final, <span class="at">conf.int =</span> <span class="cn">TRUE</span>)</span>
+<span id="cb56-4"><a href="#cb56-4" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb56-5"><a href="#cb56-5" aria-hidden="true" tabindex="-1"></a><span class="co"># Filtrando apenas os coeficientes das variáveis preditoras (removendo a categoria base)</span></span>
+<span id="cb56-6"><a href="#cb56-6" aria-hidden="true" tabindex="-1"></a>tidy_model <span class="ot">&lt;-</span> tidy_model <span class="sc">%&gt;%</span></span>
+<span id="cb56-7"><a href="#cb56-7" aria-hidden="true" tabindex="-1"></a>  <span class="fu">filter</span>(term <span class="sc">!=</span> <span class="st">"(Intercept)"</span>)</span>
+<span id="cb56-8"><a href="#cb56-8" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb56-9"><a href="#cb56-9" aria-hidden="true" tabindex="-1"></a><span class="co"># Convertendo os coeficientes log-OR para OR e arredondando para 3 casas decimais</span></span>
+<span id="cb56-10"><a href="#cb56-10" aria-hidden="true" tabindex="-1"></a>tidy_model <span class="ot">&lt;-</span> tidy_model <span class="sc">%&gt;%</span></span>
+<span id="cb56-11"><a href="#cb56-11" aria-hidden="true" tabindex="-1"></a>  <span class="fu">mutate</span>(</span>
+<span id="cb56-12"><a href="#cb56-12" aria-hidden="true" tabindex="-1"></a>    <span class="at">estimate =</span> <span class="fu">round</span>(<span class="fu">pmin</span>(<span class="fu">exp</span>(estimate), <span class="dv">3</span>), <span class="dv">3</span>),   <span class="co"># Limita os valores acima de 3 para 3</span></span>
+<span id="cb56-13"><a href="#cb56-13" aria-hidden="true" tabindex="-1"></a>    <span class="at">conf.low =</span> <span class="fu">round</span>(<span class="fu">pmax</span>(<span class="fu">exp</span>(conf.low), <span class="dv">0</span>), <span class="dv">3</span>),   <span class="co"># Garante que conf.low nunca seja menor que 0</span></span>
+<span id="cb56-14"><a href="#cb56-14" aria-hidden="true" tabindex="-1"></a>    <span class="at">conf.high =</span> <span class="fu">round</span>(<span class="fu">pmin</span>(<span class="fu">exp</span>(conf.high), <span class="dv">3</span>), <span class="dv">3</span>)  <span class="co"># Limita os valores acima de 3 para 3</span></span>
+<span id="cb56-15"><a href="#cb56-15" aria-hidden="true" tabindex="-1"></a>  )</span>
+<span id="cb56-16"><a href="#cb56-16" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb56-17"><a href="#cb56-17" aria-hidden="true" tabindex="-1"></a><span class="co"># Definindo os valores fixos do eixo X</span></span>
+<span id="cb56-18"><a href="#cb56-18" aria-hidden="true" tabindex="-1"></a>x_breaks <span class="ot">&lt;-</span> <span class="fu">c</span>(<span class="dv">0</span>, <span class="fl">0.1</span>, <span class="dv">1</span>, <span class="dv">2</span>, <span class="dv">3</span>)  <span class="co"># Apenas 1 casa decimal</span></span>
+<span id="cb56-19"><a href="#cb56-19" aria-hidden="true" tabindex="-1"></a>x_labels <span class="ot">&lt;-</span> <span class="fu">format</span>(<span class="fu">round</span>(x_breaks, <span class="dv">1</span>), <span class="at">nsmall =</span> <span class="dv">1</span>)  <span class="co"># Formata com 1 casa decimal</span></span>
+<span id="cb56-20"><a href="#cb56-20" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb56-21"><a href="#cb56-21" aria-hidden="true" tabindex="-1"></a><span class="co"># Criando o gráfico de forest plot</span></span>
+<span id="cb56-22"><a href="#cb56-22" aria-hidden="true" tabindex="-1"></a><span class="fu">ggplot</span>(tidy_model, <span class="fu">aes</span>(<span class="at">x =</span> estimate, <span class="at">y =</span> term)) <span class="sc">+</span></span>
+<span id="cb56-23"><a href="#cb56-23" aria-hidden="true" tabindex="-1"></a>  <span class="fu">geom_point</span>(<span class="at">color =</span> <span class="st">"darkgreen"</span>, <span class="at">size =</span> <span class="dv">3</span>) <span class="sc">+</span>  <span class="co"># Pontos dos ORs</span></span>
+<span id="cb56-24"><a href="#cb56-24" aria-hidden="true" tabindex="-1"></a>  <span class="fu">geom_errorbarh</span>(<span class="fu">aes</span>(<span class="at">xmin =</span> conf.low, <span class="at">xmax =</span> conf.high), <span class="at">height =</span> <span class="fl">0.2</span>, <span class="at">color =</span> <span class="st">"darkgreen"</span>) <span class="sc">+</span>  <span class="co"># Barras de erro</span></span>
+<span id="cb56-25"><a href="#cb56-25" aria-hidden="true" tabindex="-1"></a>  <span class="fu">geom_vline</span>(<span class="at">xintercept =</span> <span class="dv">1</span>, <span class="at">linetype =</span> <span class="st">"dashed"</span>, <span class="at">color =</span> <span class="st">"gray"</span>) <span class="sc">+</span>  <span class="co"># Linha vertical em OR = 1</span></span>
+<span id="cb56-26"><a href="#cb56-26" aria-hidden="true" tabindex="-1"></a>  <span class="fu">scale_x_continuous</span>(</span>
+<span id="cb56-27"><a href="#cb56-27" aria-hidden="true" tabindex="-1"></a>    <span class="at">breaks =</span> x_breaks,</span>
+<span id="cb56-28"><a href="#cb56-28" aria-hidden="true" tabindex="-1"></a>    <span class="at">labels =</span> x_labels,</span>
+<span id="cb56-29"><a href="#cb56-29" aria-hidden="true" tabindex="-1"></a>    <span class="at">limits =</span> <span class="fu">c</span>(<span class="dv">0</span>, <span class="dv">3</span>)  <span class="co"># Limita a escala até 3</span></span>
+<span id="cb56-30"><a href="#cb56-30" aria-hidden="true" tabindex="-1"></a>  ) <span class="sc">+</span></span>
+<span id="cb56-31"><a href="#cb56-31" aria-hidden="true" tabindex="-1"></a>  <span class="fu">labs</span>(<span class="at">x =</span> <span class="st">"Odds Ratio (OR)"</span>, <span class="at">y =</span> <span class="st">""</span>, <span class="at">title =</span> <span class="st">"Forest Plot - Modelo Multinomial"</span>) <span class="sc">+</span></span>
+<span id="cb56-32"><a href="#cb56-32" aria-hidden="true" tabindex="-1"></a>  <span class="fu">theme_minimal</span>()</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output cell-output-stderr">
+<pre><code>Warning: Removed 19 rows containing missing values or values outside the scale range
+(`geom_errorbarh()`).</code></pre>
+</div>
+<div class="cell-output-display">
+<div>
+<figure class="figure">
+<p><img src="model_17_22_files/figure-html/unnamed-chunk-17-1.png" class="img-fluid figure-img" style="width:100.0%"></p>
+</figure>
+</div>
+</div>
+</div>
+</section>
+<section id="tabela-1---final" class="level2">
+<h2 class="anchored" data-anchor-id="tabela-1---final">Tabela 1 - Final</h2>
+<div class="cell">
+<div class="sourceCode cell-code" id="cb58"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb58-1"><a href="#cb58-1" aria-hidden="true" tabindex="-1"></a><span class="co"># Extrair coeficientes e intervalos de confiança (IC 95%)</span></span>
+<span id="cb58-2"><a href="#cb58-2" aria-hidden="true" tabindex="-1"></a>results <span class="ot">&lt;-</span> broom<span class="sc">::</span><span class="fu">tidy</span>(model_final, <span class="at">exponentiate =</span> <span class="cn">TRUE</span>, <span class="at">conf.int =</span> <span class="cn">TRUE</span>) <span class="sc">%&gt;%</span></span>
+<span id="cb58-3"><a href="#cb58-3" aria-hidden="true" tabindex="-1"></a>  <span class="fu">rename</span>(Variável <span class="ot">=</span> term, <span class="at">Categoria =</span> y.level, <span class="at">OR =</span> estimate, <span class="at">Lower_CI =</span> conf.low, <span class="at">Upper_CI =</span> conf.high) <span class="sc">%&gt;%</span></span>
+<span id="cb58-4"><a href="#cb58-4" aria-hidden="true" tabindex="-1"></a>  <span class="fu">filter</span>(Variável <span class="sc">!=</span> <span class="st">"(Intercept)"</span>)  <span class="co"># Remover intercepto para melhor visualização</span></span>
+<span id="cb58-5"><a href="#cb58-5" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb58-6"><a href="#cb58-6" aria-hidden="true" tabindex="-1"></a><span class="co"># Criar a coluna de intervalo de confiança (IC95%)</span></span>
+<span id="cb58-7"><a href="#cb58-7" aria-hidden="true" tabindex="-1"></a>results <span class="ot">&lt;-</span> results <span class="sc">%&gt;%</span></span>
+<span id="cb58-8"><a href="#cb58-8" aria-hidden="true" tabindex="-1"></a>  <span class="fu">mutate</span>(</span>
+<span id="cb58-9"><a href="#cb58-9" aria-hidden="true" tabindex="-1"></a>    <span class="at">IC95 =</span> <span class="fu">sprintf</span>(<span class="st">"[%.2f - %.2f]"</span>, Lower_CI, Upper_CI),  <span class="co"># Formatar IC95% com 2 casas decimais</span></span>
+<span id="cb58-10"><a href="#cb58-10" aria-hidden="true" tabindex="-1"></a>    <span class="at">OR =</span> <span class="fu">sprintf</span>(<span class="st">"%.2f"</span>, OR)  <span class="co"># Formatar OR com 2 casas decimais</span></span>
+<span id="cb58-11"><a href="#cb58-11" aria-hidden="true" tabindex="-1"></a>  ) <span class="sc">%&gt;%</span></span>
+<span id="cb58-12"><a href="#cb58-12" aria-hidden="true" tabindex="-1"></a>  <span class="fu">select</span>(Variável, Categoria, OR, IC95)  <span class="co"># Selecionar apenas colunas relevantes</span></span>
+<span id="cb58-13"><a href="#cb58-13" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb58-14"><a href="#cb58-14" aria-hidden="true" tabindex="-1"></a><span class="co"># Calcular p-valores manualmente a partir dos z-scores</span></span>
+<span id="cb58-15"><a href="#cb58-15" aria-hidden="true" tabindex="-1"></a>z_scores <span class="ot">&lt;-</span> <span class="fu">summary</span>(model_final)<span class="sc">$</span>coefficients <span class="sc">/</span> <span class="fu">summary</span>(model_final)<span class="sc">$</span>standard.errors</span>
+<span id="cb58-16"><a href="#cb58-16" aria-hidden="true" tabindex="-1"></a>p_values <span class="ot">&lt;-</span> <span class="dv">2</span> <span class="sc">*</span> (<span class="dv">1</span> <span class="sc">-</span> <span class="fu">pnorm</span>(<span class="fu">abs</span>(z_scores)))</span>
+<span id="cb58-17"><a href="#cb58-17" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb58-18"><a href="#cb58-18" aria-hidden="true" tabindex="-1"></a><span class="co"># Converter p-values em um dataframe formatado corretamente</span></span>
+<span id="cb58-19"><a href="#cb58-19" aria-hidden="true" tabindex="-1"></a>p_values_df <span class="ot">&lt;-</span> <span class="fu">as.data.frame</span>(p_values) <span class="sc">%&gt;%</span></span>
+<span id="cb58-20"><a href="#cb58-20" aria-hidden="true" tabindex="-1"></a>  tibble<span class="sc">::</span><span class="fu">rownames_to_column</span>(<span class="at">var =</span> <span class="st">"Variável"</span>) <span class="sc">%&gt;%</span></span>
+<span id="cb58-21"><a href="#cb58-21" aria-hidden="true" tabindex="-1"></a>  <span class="fu">pivot_longer</span>(<span class="at">cols =</span> <span class="sc">-</span>Variável, <span class="at">names_to =</span> <span class="st">"Categoria"</span>, <span class="at">values_to =</span> <span class="st">"p_valor"</span>) <span class="sc">%&gt;%</span></span>
+<span id="cb58-22"><a href="#cb58-22" aria-hidden="true" tabindex="-1"></a>  <span class="fu">mutate</span>(</span>
+<span id="cb58-23"><a href="#cb58-23" aria-hidden="true" tabindex="-1"></a>    <span class="at">p_valor =</span> <span class="fu">ifelse</span>(p_valor <span class="sc">&lt;</span> <span class="fl">0.001</span>, <span class="st">"&lt;0.001"</span>, <span class="fu">sprintf</span>(<span class="st">"%.3f"</span>, p_valor))  <span class="co"># Arredondar p-valor para 3 casas decimais sem notação científica</span></span>
+<span id="cb58-24"><a href="#cb58-24" aria-hidden="true" tabindex="-1"></a>  )</span>
+<span id="cb58-25"><a href="#cb58-25" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb58-26"><a href="#cb58-26" aria-hidden="true" tabindex="-1"></a><span class="co"># Juntar ORs, IC95% e p-valores</span></span>
+<span id="cb58-27"><a href="#cb58-27" aria-hidden="true" tabindex="-1"></a>final_results <span class="ot">&lt;-</span> results <span class="sc">%&gt;%</span></span>
+<span id="cb58-28"><a href="#cb58-28" aria-hidden="true" tabindex="-1"></a>  <span class="fu">left_join</span>(p_values_df, <span class="at">by =</span> <span class="fu">c</span>(<span class="st">"Variável"</span>, <span class="st">"Categoria"</span>))</span>
+<span id="cb58-29"><a href="#cb58-29" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb58-30"><a href="#cb58-30" aria-hidden="true" tabindex="-1"></a><span class="co"># **Reformatar os dados para que `dengue_pattern` fique como colunas**</span></span>
+<span id="cb58-31"><a href="#cb58-31" aria-hidden="true" tabindex="-1"></a>tabela_larga <span class="ot">&lt;-</span> final_results <span class="sc">%&gt;%</span></span>
+<span id="cb58-32"><a href="#cb58-32" aria-hidden="true" tabindex="-1"></a>  <span class="fu">pivot_wider</span>(</span>
+<span id="cb58-33"><a href="#cb58-33" aria-hidden="true" tabindex="-1"></a>    <span class="at">names_from =</span> Categoria,  <span class="co"># Transformar as categorias de dengue em colunas</span></span>
+<span id="cb58-34"><a href="#cb58-34" aria-hidden="true" tabindex="-1"></a>    <span class="at">values_from =</span> <span class="fu">c</span>(OR, IC95, p_valor),  <span class="co"># Usar OR, IC95% e p-valor como valores</span></span>
+<span id="cb58-35"><a href="#cb58-35" aria-hidden="true" tabindex="-1"></a>    <span class="at">names_glue =</span> <span class="st">"{Categoria}_{.value}"</span>  <span class="co"># Nome das colunas formatado corretamente</span></span>
+<span id="cb58-36"><a href="#cb58-36" aria-hidden="true" tabindex="-1"></a>  )</span>
+<span id="cb58-37"><a href="#cb58-37" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb58-38"><a href="#cb58-38" aria-hidden="true" tabindex="-1"></a><span class="co"># Exportar a tabela para CSV</span></span>
+<span id="cb58-39"><a href="#cb58-39" aria-hidden="true" tabindex="-1"></a><span class="fu">write.csv2</span>(tabela_larga, <span class="st">"table1_17_22.csv"</span>, <span class="at">row.names =</span> <span class="cn">FALSE</span>)</span>
+<span id="cb58-40"><a href="#cb58-40" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb58-41"><a href="#cb58-41" aria-hidden="true" tabindex="-1"></a><span class="co"># Criar tabela formatada com gt()</span></span>
+<span id="cb58-42"><a href="#cb58-42" aria-hidden="true" tabindex="-1"></a>tabela_larga <span class="sc">%&gt;%</span></span>
+<span id="cb58-43"><a href="#cb58-43" aria-hidden="true" tabindex="-1"></a>  <span class="fu">gt</span>() <span class="sc">%&gt;%</span></span>
+<span id="cb58-44"><a href="#cb58-44" aria-hidden="true" tabindex="-1"></a>  <span class="fu">tab_header</span>(<span class="at">title =</span> <span class="st">"Tabela 1: Modelo de Regressão Logística Multinomial"</span>,</span>
+<span id="cb58-45"><a href="#cb58-45" aria-hidden="true" tabindex="-1"></a>             <span class="at">subtitle =</span> <span class="st">"Odds Ratio, Intervalo de Confiança 95% e p-valor para dengue_pattern"</span>) <span class="sc">%&gt;%</span></span>
+<span id="cb58-46"><a href="#cb58-46" aria-hidden="true" tabindex="-1"></a>  <span class="fu">cols_label</span>(Variável <span class="ot">=</span> <span class="st">"Variável"</span>) <span class="sc">%&gt;%</span></span>
+<span id="cb58-47"><a href="#cb58-47" aria-hidden="true" tabindex="-1"></a>  <span class="fu">tab_spanner</span>(<span class="at">label =</span> <span class="st">"Epidêmico"</span>, <span class="at">columns =</span> <span class="fu">starts_with</span>(<span class="st">"Epidêmico_"</span>)) <span class="sc">%&gt;%</span></span>
+<span id="cb58-48"><a href="#cb58-48" aria-hidden="true" tabindex="-1"></a>  <span class="fu">tab_spanner</span>(<span class="at">label =</span> <span class="st">"Episódico"</span>, <span class="at">columns =</span> <span class="fu">starts_with</span>(<span class="st">"Episódico_"</span>)) <span class="sc">%&gt;%</span></span>
+<span id="cb58-49"><a href="#cb58-49" aria-hidden="true" tabindex="-1"></a>  <span class="fu">tab_spanner</span>(<span class="at">label =</span> <span class="st">"Sem transmissão"</span>, <span class="at">columns =</span> <span class="fu">starts_with</span>(<span class="st">"Sem transmissão_"</span>)) <span class="sc">%&gt;%</span></span>
+<span id="cb58-50"><a href="#cb58-50" aria-hidden="true" tabindex="-1"></a>  <span class="fu">tab_spanner</span>(<span class="at">label =</span> <span class="st">"Transmissão Persistente"</span>, <span class="at">columns =</span> <span class="fu">starts_with</span>(<span class="st">"Transmissão Persistente_"</span>)) <span class="sc">%&gt;%</span></span>
+<span id="cb58-51"><a href="#cb58-51" aria-hidden="true" tabindex="-1"></a>  <span class="fu">fmt_missing</span>(<span class="at">columns =</span> <span class="fu">everything</span>(), <span class="at">missing_text =</span> <span class="st">"—"</span>)  <span class="co"># Substituir valores ausentes por traço</span></span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output cell-output-stderr">
+<pre><code>Warning: Since gt v0.6.0 the `fmt_missing()` function is deprecated and will soon be
+removed.
+• Use the `sub_missing()` function instead.
+This warning is displayed once every 8 hours.</code></pre>
+</div>
+<div class="cell-output-display">
+<div id="qyhooftcpg" style="padding-left:0px;padding-right:0px;padding-top:10px;padding-bottom:10px;overflow-x:auto;overflow-y:auto;width:auto;height:auto;">
+<style>#qyhooftcpg table {
+  font-family: system-ui, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif, 'Apple Color Emoji', 'Segoe UI Emoji', 'Segoe UI Symbol', 'Noto Color Emoji';
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+}
+
+#qyhooftcpg thead, #qyhooftcpg tbody, #qyhooftcpg tfoot, #qyhooftcpg tr, #qyhooftcpg td, #qyhooftcpg th {
+  border-style: none;
+}
+
+#qyhooftcpg p {
+  margin: 0;
+  padding: 0;
+}
+
+#qyhooftcpg .gt_table {
+  display: table;
+  border-collapse: collapse;
+  line-height: normal;
+  margin-left: auto;
+  margin-right: auto;
+  color: #333333;
+  font-size: 16px;
+  font-weight: normal;
+  font-style: normal;
+  background-color: #FFFFFF;
+  width: auto;
+  border-top-style: solid;
+  border-top-width: 2px;
+  border-top-color: #A8A8A8;
+  border-right-style: none;
+  border-right-width: 2px;
+  border-right-color: #D3D3D3;
+  border-bottom-style: solid;
+  border-bottom-width: 2px;
+  border-bottom-color: #A8A8A8;
+  border-left-style: none;
+  border-left-width: 2px;
+  border-left-color: #D3D3D3;
+}
+
+#qyhooftcpg .gt_caption {
+  padding-top: 4px;
+  padding-bottom: 4px;
+}
+
+#qyhooftcpg .gt_title {
+  color: #333333;
+  font-size: 125%;
+  font-weight: initial;
+  padding-top: 4px;
+  padding-bottom: 4px;
+  padding-left: 5px;
+  padding-right: 5px;
+  border-bottom-color: #FFFFFF;
+  border-bottom-width: 0;
+}
+
+#qyhooftcpg .gt_subtitle {
+  color: #333333;
+  font-size: 85%;
+  font-weight: initial;
+  padding-top: 3px;
+  padding-bottom: 5px;
+  padding-left: 5px;
+  padding-right: 5px;
+  border-top-color: #FFFFFF;
+  border-top-width: 0;
+}
+
+#qyhooftcpg .gt_heading {
+  background-color: #FFFFFF;
+  text-align: center;
+  border-bottom-color: #FFFFFF;
+  border-left-style: none;
+  border-left-width: 1px;
+  border-left-color: #D3D3D3;
+  border-right-style: none;
+  border-right-width: 1px;
+  border-right-color: #D3D3D3;
+}
+
+#qyhooftcpg .gt_bottom_border {
+  border-bottom-style: solid;
+  border-bottom-width: 2px;
+  border-bottom-color: #D3D3D3;
+}
+
+#qyhooftcpg .gt_col_headings {
+  border-top-style: solid;
+  border-top-width: 2px;
+  border-top-color: #D3D3D3;
+  border-bottom-style: solid;
+  border-bottom-width: 2px;
+  border-bottom-color: #D3D3D3;
+  border-left-style: none;
+  border-left-width: 1px;
+  border-left-color: #D3D3D3;
+  border-right-style: none;
+  border-right-width: 1px;
+  border-right-color: #D3D3D3;
+}
+
+#qyhooftcpg .gt_col_heading {
+  color: #333333;
+  background-color: #FFFFFF;
+  font-size: 100%;
+  font-weight: normal;
+  text-transform: inherit;
+  border-left-style: none;
+  border-left-width: 1px;
+  border-left-color: #D3D3D3;
+  border-right-style: none;
+  border-right-width: 1px;
+  border-right-color: #D3D3D3;
+  vertical-align: bottom;
+  padding-top: 5px;
+  padding-bottom: 6px;
+  padding-left: 5px;
+  padding-right: 5px;
+  overflow-x: hidden;
+}
+
+#qyhooftcpg .gt_column_spanner_outer {
+  color: #333333;
+  background-color: #FFFFFF;
+  font-size: 100%;
+  font-weight: normal;
+  text-transform: inherit;
+  padding-top: 0;
+  padding-bottom: 0;
+  padding-left: 4px;
+  padding-right: 4px;
+}
+
+#qyhooftcpg .gt_column_spanner_outer:first-child {
+  padding-left: 0;
+}
+
+#qyhooftcpg .gt_column_spanner_outer:last-child {
+  padding-right: 0;
+}
+
+#qyhooftcpg .gt_column_spanner {
+  border-bottom-style: solid;
+  border-bottom-width: 2px;
+  border-bottom-color: #D3D3D3;
+  vertical-align: bottom;
+  padding-top: 5px;
+  padding-bottom: 5px;
+  overflow-x: hidden;
+  display: inline-block;
+  width: 100%;
+}
+
+#qyhooftcpg .gt_spanner_row {
+  border-bottom-style: hidden;
+}
+
+#qyhooftcpg .gt_group_heading {
+  padding-top: 8px;
+  padding-bottom: 8px;
+  padding-left: 5px;
+  padding-right: 5px;
+  color: #333333;
+  background-color: #FFFFFF;
+  font-size: 100%;
+  font-weight: initial;
+  text-transform: inherit;
+  border-top-style: solid;
+  border-top-width: 2px;
+  border-top-color: #D3D3D3;
+  border-bottom-style: solid;
+  border-bottom-width: 2px;
+  border-bottom-color: #D3D3D3;
+  border-left-style: none;
+  border-left-width: 1px;
+  border-left-color: #D3D3D3;
+  border-right-style: none;
+  border-right-width: 1px;
+  border-right-color: #D3D3D3;
+  vertical-align: middle;
+  text-align: left;
+}
+
+#qyhooftcpg .gt_empty_group_heading {
+  padding: 0.5px;
+  color: #333333;
+  background-color: #FFFFFF;
+  font-size: 100%;
+  font-weight: initial;
+  border-top-style: solid;
+  border-top-width: 2px;
+  border-top-color: #D3D3D3;
+  border-bottom-style: solid;
+  border-bottom-width: 2px;
+  border-bottom-color: #D3D3D3;
+  vertical-align: middle;
+}
+
+#qyhooftcpg .gt_from_md > :first-child {
+  margin-top: 0;
+}
+
+#qyhooftcpg .gt_from_md > :last-child {
+  margin-bottom: 0;
+}
+
+#qyhooftcpg .gt_row {
+  padding-top: 8px;
+  padding-bottom: 8px;
+  padding-left: 5px;
+  padding-right: 5px;
+  margin: 10px;
+  border-top-style: solid;
+  border-top-width: 1px;
+  border-top-color: #D3D3D3;
+  border-left-style: none;
+  border-left-width: 1px;
+  border-left-color: #D3D3D3;
+  border-right-style: none;
+  border-right-width: 1px;
+  border-right-color: #D3D3D3;
+  vertical-align: middle;
+  overflow-x: hidden;
+}
+
+#qyhooftcpg .gt_stub {
+  color: #333333;
+  background-color: #FFFFFF;
+  font-size: 100%;
+  font-weight: initial;
+  text-transform: inherit;
+  border-right-style: solid;
+  border-right-width: 2px;
+  border-right-color: #D3D3D3;
+  padding-left: 5px;
+  padding-right: 5px;
+}
+
+#qyhooftcpg .gt_stub_row_group {
+  color: #333333;
+  background-color: #FFFFFF;
+  font-size: 100%;
+  font-weight: initial;
+  text-transform: inherit;
+  border-right-style: solid;
+  border-right-width: 2px;
+  border-right-color: #D3D3D3;
+  padding-left: 5px;
+  padding-right: 5px;
+  vertical-align: top;
+}
+
+#qyhooftcpg .gt_row_group_first td {
+  border-top-width: 2px;
+}
+
+#qyhooftcpg .gt_row_group_first th {
+  border-top-width: 2px;
+}
+
+#qyhooftcpg .gt_summary_row {
+  color: #333333;
+  background-color: #FFFFFF;
+  text-transform: inherit;
+  padding-top: 8px;
+  padding-bottom: 8px;
+  padding-left: 5px;
+  padding-right: 5px;
+}
+
+#qyhooftcpg .gt_first_summary_row {
+  border-top-style: solid;
+  border-top-color: #D3D3D3;
+}
+
+#qyhooftcpg .gt_first_summary_row.thick {
+  border-top-width: 2px;
+}
+
+#qyhooftcpg .gt_last_summary_row {
+  padding-top: 8px;
+  padding-bottom: 8px;
+  padding-left: 5px;
+  padding-right: 5px;
+  border-bottom-style: solid;
+  border-bottom-width: 2px;
+  border-bottom-color: #D3D3D3;
+}
+
+#qyhooftcpg .gt_grand_summary_row {
+  color: #333333;
+  background-color: #FFFFFF;
+  text-transform: inherit;
+  padding-top: 8px;
+  padding-bottom: 8px;
+  padding-left: 5px;
+  padding-right: 5px;
+}
+
+#qyhooftcpg .gt_first_grand_summary_row {
+  padding-top: 8px;
+  padding-bottom: 8px;
+  padding-left: 5px;
+  padding-right: 5px;
+  border-top-style: double;
+  border-top-width: 6px;
+  border-top-color: #D3D3D3;
+}
+
+#qyhooftcpg .gt_last_grand_summary_row_top {
+  padding-top: 8px;
+  padding-bottom: 8px;
+  padding-left: 5px;
+  padding-right: 5px;
+  border-bottom-style: double;
+  border-bottom-width: 6px;
+  border-bottom-color: #D3D3D3;
+}
+
+#qyhooftcpg .gt_striped {
+  background-color: rgba(128, 128, 128, 0.05);
+}
+
+#qyhooftcpg .gt_table_body {
+  border-top-style: solid;
+  border-top-width: 2px;
+  border-top-color: #D3D3D3;
+  border-bottom-style: solid;
+  border-bottom-width: 2px;
+  border-bottom-color: #D3D3D3;
+}
+
+#qyhooftcpg .gt_footnotes {
+  color: #333333;
+  background-color: #FFFFFF;
+  border-bottom-style: none;
+  border-bottom-width: 2px;
+  border-bottom-color: #D3D3D3;
+  border-left-style: none;
+  border-left-width: 2px;
+  border-left-color: #D3D3D3;
+  border-right-style: none;
+  border-right-width: 2px;
+  border-right-color: #D3D3D3;
+}
+
+#qyhooftcpg .gt_footnote {
+  margin: 0px;
+  font-size: 90%;
+  padding-top: 4px;
+  padding-bottom: 4px;
+  padding-left: 5px;
+  padding-right: 5px;
+}
+
+#qyhooftcpg .gt_sourcenotes {
+  color: #333333;
+  background-color: #FFFFFF;
+  border-bottom-style: none;
+  border-bottom-width: 2px;
+  border-bottom-color: #D3D3D3;
+  border-left-style: none;
+  border-left-width: 2px;
+  border-left-color: #D3D3D3;
+  border-right-style: none;
+  border-right-width: 2px;
+  border-right-color: #D3D3D3;
+}
+
+#qyhooftcpg .gt_sourcenote {
+  font-size: 90%;
+  padding-top: 4px;
+  padding-bottom: 4px;
+  padding-left: 5px;
+  padding-right: 5px;
+}
+
+#qyhooftcpg .gt_left {
+  text-align: left;
+}
+
+#qyhooftcpg .gt_center {
+  text-align: center;
+}
+
+#qyhooftcpg .gt_right {
+  text-align: right;
+  font-variant-numeric: tabular-nums;
+}
+
+#qyhooftcpg .gt_font_normal {
+  font-weight: normal;
+}
+
+#qyhooftcpg .gt_font_bold {
+  font-weight: bold;
+}
+
+#qyhooftcpg .gt_font_italic {
+  font-style: italic;
+}
+
+#qyhooftcpg .gt_super {
+  font-size: 65%;
+}
+
+#qyhooftcpg .gt_footnote_marks {
+  font-size: 75%;
+  vertical-align: 0.4em;
+  position: initial;
+}
+
+#qyhooftcpg .gt_asterisk {
+  font-size: 100%;
+  vertical-align: 0;
+}
+
+#qyhooftcpg .gt_indent_1 {
+  text-indent: 5px;
+}
+
+#qyhooftcpg .gt_indent_2 {
+  text-indent: 10px;
+}
+
+#qyhooftcpg .gt_indent_3 {
+  text-indent: 15px;
+}
+
+#qyhooftcpg .gt_indent_4 {
+  text-indent: 20px;
+}
+
+#qyhooftcpg .gt_indent_5 {
+  text-indent: 25px;
+}
+</style>
+
+<table class="gt_table caption-top table table-sm table-striped small" data-quarto-postprocess="true" data-quarto-disable-processing="false" data-quarto-bootstrap="false">
+<thead>
+<tr class="header gt_heading">
+<th colspan="13" class="gt_heading gt_title gt_font_normal">Tabela 1: Modelo de Regressão Logística Multinomial</th>
+</tr>
+<tr class="odd gt_heading">
+<th colspan="13" class="gt_heading gt_subtitle gt_font_normal gt_bottom_border">Odds Ratio, Intervalo de Confiança 95% e p-valor para dengue_pattern</th>
+</tr>
+<tr class="header gt_col_headings gt_spanner_row">
+<th rowspan="2" id="Variável" class="gt_col_heading gt_columns_bottom_border gt_left" data-quarto-table-cell-role="th" scope="col">Variável</th>
+<th colspan="3" id="Epidêmico" class="gt_center gt_columns_top_border gt_column_spanner_outer" data-quarto-table-cell-role="th" scope="colgroup"><span class="gt_column_spanner">Epidêmico</span></th>
+<th colspan="3" id="Episódico" class="gt_center gt_columns_top_border gt_column_spanner_outer" data-quarto-table-cell-role="th" scope="colgroup"><span class="gt_column_spanner">Episódico</span></th>
+<th colspan="3" id="Sem transmissão" class="gt_center gt_columns_top_border gt_column_spanner_outer" data-quarto-table-cell-role="th" scope="colgroup"><span class="gt_column_spanner">Sem transmissão</span></th>
+<th colspan="3" id="Transmissão Persistente" class="gt_center gt_columns_top_border gt_column_spanner_outer" data-quarto-table-cell-role="th" scope="colgroup"><span class="gt_column_spanner">Transmissão Persistente</span></th>
+</tr>
+<tr class="odd gt_col_headings">
+<th id="Epidêmico_OR" class="gt_col_heading gt_columns_bottom_border gt_right" data-quarto-table-cell-role="th" scope="col">Epidêmico_OR</th>
+<th id="Epidêmico_IC95" class="gt_col_heading gt_columns_bottom_border gt_left" data-quarto-table-cell-role="th" scope="col">Epidêmico_IC95</th>
+<th id="Epidêmico_p_valor" class="gt_col_heading gt_columns_bottom_border gt_left" data-quarto-table-cell-role="th" scope="col">Epidêmico_p_valor</th>
+<th id="Episódico_OR" class="gt_col_heading gt_columns_bottom_border gt_right" data-quarto-table-cell-role="th" scope="col">Episódico_OR</th>
+<th id="Episódico_IC95" class="gt_col_heading gt_columns_bottom_border gt_left" data-quarto-table-cell-role="th" scope="col">Episódico_IC95</th>
+<th id="Episódico_p_valor" class="gt_col_heading gt_columns_bottom_border gt_left" data-quarto-table-cell-role="th" scope="col">Episódico_p_valor</th>
+<th id="Sem transmissão_OR" class="gt_col_heading gt_columns_bottom_border gt_right" data-quarto-table-cell-role="th" scope="col">Sem transmissão_OR</th>
+<th id="Sem transmissão_IC95" class="gt_col_heading gt_columns_bottom_border gt_left" data-quarto-table-cell-role="th" scope="col">Sem transmissão_IC95</th>
+<th id="Sem transmissão_p_valor" class="gt_col_heading gt_columns_bottom_border gt_left" data-quarto-table-cell-role="th" scope="col">Sem transmissão_p_valor</th>
+<th id="Transmissão Persistente_OR" class="gt_col_heading gt_columns_bottom_border gt_right" data-quarto-table-cell-role="th" scope="col">Transmissão Persistente_OR</th>
+<th id="Transmissão Persistente_IC95" class="gt_col_heading gt_columns_bottom_border gt_left" data-quarto-table-cell-role="th" scope="col">Transmissão Persistente_IC95</th>
+<th id="Transmissão Persistente_p_valor" class="gt_col_heading gt_columns_bottom_border gt_left" data-quarto-table-cell-role="th" scope="col">Transmissão Persistente_p_valor</th>
+</tr>
+</thead>
+<tbody class="gt_table_body">
+<tr class="odd">
+<td class="gt_row gt_left" headers="Variável">region2</td>
+<td class="gt_row gt_right" headers="Epidêmico_OR">0.69</td>
+<td class="gt_row gt_left" headers="Epidêmico_IC95">[0.69 - 0.69]</td>
+<td class="gt_row gt_left" headers="Epidêmico_p_valor">—</td>
+<td class="gt_row gt_right" headers="Episódico_OR">3.00</td>
+<td class="gt_row gt_left" headers="Episódico_IC95">[3.00 - 3.00]</td>
+<td class="gt_row gt_left" headers="Episódico_p_valor">—</td>
+<td class="gt_row gt_right" headers="Sem transmissão_OR">3.28</td>
+<td class="gt_row gt_left" headers="Sem transmissão_IC95">[3.28 - 3.28]</td>
+<td class="gt_row gt_left" headers="Sem transmissão_p_valor">—</td>
+<td class="gt_row gt_right" headers="Transmissão Persistente_OR">0.00</td>
+<td class="gt_row gt_left" headers="Transmissão Persistente_IC95">[0.00 - 0.00]</td>
+<td class="gt_row gt_left" headers="Transmissão Persistente_p_valor">—</td>
+</tr>
+<tr class="even">
+<td class="gt_row gt_left" headers="Variável">region3</td>
+<td class="gt_row gt_right" headers="Epidêmico_OR">1.82</td>
+<td class="gt_row gt_left" headers="Epidêmico_IC95">[1.82 - 1.82]</td>
+<td class="gt_row gt_left" headers="Epidêmico_p_valor">—</td>
+<td class="gt_row gt_right" headers="Episódico_OR">0.53</td>
+<td class="gt_row gt_left" headers="Episódico_IC95">[0.53 - 0.53]</td>
+<td class="gt_row gt_left" headers="Episódico_p_valor">—</td>
+<td class="gt_row gt_right" headers="Sem transmissão_OR">1.16</td>
+<td class="gt_row gt_left" headers="Sem transmissão_IC95">[1.16 - 1.16]</td>
+<td class="gt_row gt_left" headers="Sem transmissão_p_valor">—</td>
+<td class="gt_row gt_right" headers="Transmissão Persistente_OR">12.49</td>
+<td class="gt_row gt_left" headers="Transmissão Persistente_IC95">[12.49 - 12.49]</td>
+<td class="gt_row gt_left" headers="Transmissão Persistente_p_valor">—</td>
+</tr>
+<tr class="odd">
+<td class="gt_row gt_left" headers="Variável">region4</td>
+<td class="gt_row gt_right" headers="Epidêmico_OR">2.86</td>
+<td class="gt_row gt_left" headers="Epidêmico_IC95">[2.86 - 2.86]</td>
+<td class="gt_row gt_left" headers="Epidêmico_p_valor">—</td>
+<td class="gt_row gt_right" headers="Episódico_OR">0.15</td>
+<td class="gt_row gt_left" headers="Episódico_IC95">[0.15 - 0.15]</td>
+<td class="gt_row gt_left" headers="Episódico_p_valor">—</td>
+<td class="gt_row gt_right" headers="Sem transmissão_OR">0.21</td>
+<td class="gt_row gt_left" headers="Sem transmissão_IC95">[0.21 - 0.21]</td>
+<td class="gt_row gt_left" headers="Sem transmissão_p_valor">—</td>
+<td class="gt_row gt_right" headers="Transmissão Persistente_OR">70.76</td>
+<td class="gt_row gt_left" headers="Transmissão Persistente_IC95">[70.76 - 70.76]</td>
+<td class="gt_row gt_left" headers="Transmissão Persistente_p_valor">—</td>
+</tr>
+<tr class="even">
+<td class="gt_row gt_left" headers="Variável">region5</td>
+<td class="gt_row gt_right" headers="Epidêmico_OR">1.76</td>
+<td class="gt_row gt_left" headers="Epidêmico_IC95">[1.76 - 1.76]</td>
+<td class="gt_row gt_left" headers="Epidêmico_p_valor">—</td>
+<td class="gt_row gt_right" headers="Episódico_OR">0.39</td>
+<td class="gt_row gt_left" headers="Episódico_IC95">[0.39 - 0.39]</td>
+<td class="gt_row gt_left" headers="Episódico_p_valor">—</td>
+<td class="gt_row gt_right" headers="Sem transmissão_OR">2.39</td>
+<td class="gt_row gt_left" headers="Sem transmissão_IC95">[2.39 - 2.39]</td>
+<td class="gt_row gt_left" headers="Sem transmissão_p_valor">—</td>
+<td class="gt_row gt_right" headers="Transmissão Persistente_OR">1.52</td>
+<td class="gt_row gt_left" headers="Transmissão Persistente_IC95">[1.52 - 1.52]</td>
+<td class="gt_row gt_left" headers="Transmissão Persistente_p_valor">—</td>
+</tr>
+<tr class="odd">
+<td class="gt_row gt_left" headers="Variável">pop22</td>
+<td class="gt_row gt_right" headers="Epidêmico_OR">1.00</td>
+<td class="gt_row gt_left" headers="Epidêmico_IC95">[1.00 - 1.00]</td>
+<td class="gt_row gt_left" headers="Epidêmico_p_valor">—</td>
+<td class="gt_row gt_right" headers="Episódico_OR">1.00</td>
+<td class="gt_row gt_left" headers="Episódico_IC95">[1.00 - 1.00]</td>
+<td class="gt_row gt_left" headers="Episódico_p_valor">—</td>
+<td class="gt_row gt_right" headers="Sem transmissão_OR">1.00</td>
+<td class="gt_row gt_left" headers="Sem transmissão_IC95">[1.00 - 1.00]</td>
+<td class="gt_row gt_left" headers="Sem transmissão_p_valor">—</td>
+<td class="gt_row gt_right" headers="Transmissão Persistente_OR">1.00</td>
+<td class="gt_row gt_left" headers="Transmissão Persistente_IC95">[1.00 - 1.00]</td>
+<td class="gt_row gt_left" headers="Transmissão Persistente_p_valor">—</td>
+</tr>
+<tr class="even">
+<td class="gt_row gt_left" headers="Variável">dengue_pattern_2010_2016Episódico</td>
+<td class="gt_row gt_right" headers="Epidêmico_OR">0.01</td>
+<td class="gt_row gt_left" headers="Epidêmico_IC95">[0.01 - 0.01]</td>
+<td class="gt_row gt_left" headers="Epidêmico_p_valor">—</td>
+<td class="gt_row gt_right" headers="Episódico_OR">177.08</td>
+<td class="gt_row gt_left" headers="Episódico_IC95">[177.07 - 177.08]</td>
+<td class="gt_row gt_left" headers="Episódico_p_valor">—</td>
+<td class="gt_row gt_right" headers="Sem transmissão_OR">327.61</td>
+<td class="gt_row gt_left" headers="Sem transmissão_IC95">[327.60 - 327.62]</td>
+<td class="gt_row gt_left" headers="Sem transmissão_p_valor">—</td>
+<td class="gt_row gt_right" headers="Transmissão Persistente_OR">0.12</td>
+<td class="gt_row gt_left" headers="Transmissão Persistente_IC95">[0.12 - 0.12]</td>
+<td class="gt_row gt_left" headers="Transmissão Persistente_p_valor">—</td>
+</tr>
+<tr class="odd">
+<td class="gt_row gt_left" headers="Variável">dengue_pattern_2010_2016Episódico/Epidêmico</td>
+<td class="gt_row gt_right" headers="Epidêmico_OR">0.08</td>
+<td class="gt_row gt_left" headers="Epidêmico_IC95">[0.08 - 0.08]</td>
+<td class="gt_row gt_left" headers="Epidêmico_p_valor">—</td>
+<td class="gt_row gt_right" headers="Episódico_OR">27.61</td>
+<td class="gt_row gt_left" headers="Episódico_IC95">[27.61 - 27.61]</td>
+<td class="gt_row gt_left" headers="Episódico_p_valor">—</td>
+<td class="gt_row gt_right" headers="Sem transmissão_OR">0.05</td>
+<td class="gt_row gt_left" headers="Sem transmissão_IC95">[0.05 - 0.05]</td>
+<td class="gt_row gt_left" headers="Sem transmissão_p_valor">—</td>
+<td class="gt_row gt_right" headers="Transmissão Persistente_OR">0.00</td>
+<td class="gt_row gt_left" headers="Transmissão Persistente_IC95">[0.00 - 0.00]</td>
+<td class="gt_row gt_left" headers="Transmissão Persistente_p_valor">—</td>
+</tr>
+<tr class="even">
+<td class="gt_row gt_left" headers="Variável">dengue_pattern_2010_2016Sem transmissão</td>
+<td class="gt_row gt_right" headers="Epidêmico_OR">0.00</td>
+<td class="gt_row gt_left" headers="Epidêmico_IC95">[0.00 - 0.00]</td>
+<td class="gt_row gt_left" headers="Epidêmico_p_valor">—</td>
+<td class="gt_row gt_right" headers="Episódico_OR">3361.55</td>
+<td class="gt_row gt_left" headers="Episódico_IC95">[3361.52 - 3361.58]</td>
+<td class="gt_row gt_left" headers="Episódico_p_valor">—</td>
+<td class="gt_row gt_right" headers="Sem transmissão_OR">38232.91</td>
+<td class="gt_row gt_left" headers="Sem transmissão_IC95">[38232.58 - 38233.25]</td>
+<td class="gt_row gt_left" headers="Sem transmissão_p_valor">—</td>
+<td class="gt_row gt_right" headers="Transmissão Persistente_OR">0.06</td>
+<td class="gt_row gt_left" headers="Transmissão Persistente_IC95">[0.06 - 0.06]</td>
+<td class="gt_row gt_left" headers="Transmissão Persistente_p_valor">—</td>
+</tr>
+<tr class="odd">
+<td class="gt_row gt_left" headers="Variável">dengue_pattern_2010_2016Transmissão Persistente</td>
+<td class="gt_row gt_right" headers="Epidêmico_OR">0.55</td>
+<td class="gt_row gt_left" headers="Epidêmico_IC95">[0.55 - 0.55]</td>
+<td class="gt_row gt_left" headers="Epidêmico_p_valor">—</td>
+<td class="gt_row gt_right" headers="Episódico_OR">64432153632844.40</td>
+<td class="gt_row gt_left" headers="Episódico_IC95">[64432153632842.57 - 64432153632846.23]</td>
+<td class="gt_row gt_left" headers="Episódico_p_valor">—</td>
+<td class="gt_row gt_right" headers="Sem transmissão_OR">22172443706157191168.00</td>
+<td class="gt_row gt_left" headers="Sem transmissão_IC95">[22172443706157191168.00 - 22172443706157191168.00]</td>
+<td class="gt_row gt_left" headers="Sem transmissão_p_valor">—</td>
+<td class="gt_row gt_right" headers="Transmissão Persistente_OR">6.19</td>
+<td class="gt_row gt_left" headers="Transmissão Persistente_IC95">[6.19 - 6.19]</td>
+<td class="gt_row gt_left" headers="Transmissão Persistente_p_valor">—</td>
+</tr>
+<tr class="even">
+<td class="gt_row gt_left" headers="Variável">thr_temp_Spring</td>
+<td class="gt_row gt_right" headers="Epidêmico_OR">1.10</td>
+<td class="gt_row gt_left" headers="Epidêmico_IC95">[1.10 - 1.11]</td>
+<td class="gt_row gt_left" headers="Epidêmico_p_valor">—</td>
+<td class="gt_row gt_right" headers="Episódico_OR">0.92</td>
+<td class="gt_row gt_left" headers="Episódico_IC95">[0.92 - 0.92]</td>
+<td class="gt_row gt_left" headers="Episódico_p_valor">—</td>
+<td class="gt_row gt_right" headers="Sem transmissão_OR">0.86</td>
+<td class="gt_row gt_left" headers="Sem transmissão_IC95">[0.85 - 0.86]</td>
+<td class="gt_row gt_left" headers="Sem transmissão_p_valor">—</td>
+<td class="gt_row gt_right" headers="Transmissão Persistente_OR">1.42</td>
+<td class="gt_row gt_left" headers="Transmissão Persistente_IC95">[1.42 - 1.42]</td>
+<td class="gt_row gt_left" headers="Transmissão Persistente_p_valor">—</td>
+</tr>
+<tr class="odd">
+<td class="gt_row gt_left" headers="Variável">biomaamazonia</td>
+<td class="gt_row gt_right" headers="Epidêmico_OR">1.42</td>
+<td class="gt_row gt_left" headers="Epidêmico_IC95">[1.42 - 1.42]</td>
+<td class="gt_row gt_left" headers="Epidêmico_p_valor">—</td>
+<td class="gt_row gt_right" headers="Episódico_OR">1.93</td>
+<td class="gt_row gt_left" headers="Episódico_IC95">[1.93 - 1.93]</td>
+<td class="gt_row gt_left" headers="Episódico_p_valor">—</td>
+<td class="gt_row gt_right" headers="Sem transmissão_OR">34.74</td>
+<td class="gt_row gt_left" headers="Sem transmissão_IC95">[34.74 - 34.74]</td>
+<td class="gt_row gt_left" headers="Sem transmissão_p_valor">—</td>
+<td class="gt_row gt_right" headers="Transmissão Persistente_OR">0.00</td>
+<td class="gt_row gt_left" headers="Transmissão Persistente_IC95">[0.00 - 0.00]</td>
+<td class="gt_row gt_left" headers="Transmissão Persistente_p_valor">—</td>
+</tr>
+<tr class="even">
+<td class="gt_row gt_left" headers="Variável">biomacaatinga</td>
+<td class="gt_row gt_right" headers="Epidêmico_OR">1.44</td>
+<td class="gt_row gt_left" headers="Epidêmico_IC95">[1.44 - 1.44]</td>
+<td class="gt_row gt_left" headers="Epidêmico_p_valor">—</td>
+<td class="gt_row gt_right" headers="Episódico_OR">0.41</td>
+<td class="gt_row gt_left" headers="Episódico_IC95">[0.41 - 0.41]</td>
+<td class="gt_row gt_left" headers="Episódico_p_valor">—</td>
+<td class="gt_row gt_right" headers="Sem transmissão_OR">7.05</td>
+<td class="gt_row gt_left" headers="Sem transmissão_IC95">[7.05 - 7.05]</td>
+<td class="gt_row gt_left" headers="Sem transmissão_p_valor">—</td>
+<td class="gt_row gt_right" headers="Transmissão Persistente_OR">0.03</td>
+<td class="gt_row gt_left" headers="Transmissão Persistente_IC95">[0.03 - 0.03]</td>
+<td class="gt_row gt_left" headers="Transmissão Persistente_p_valor">—</td>
+</tr>
+<tr class="odd">
+<td class="gt_row gt_left" headers="Variável">biomacerrado</td>
+<td class="gt_row gt_right" headers="Epidêmico_OR">0.84</td>
+<td class="gt_row gt_left" headers="Epidêmico_IC95">[0.84 - 0.84]</td>
+<td class="gt_row gt_left" headers="Epidêmico_p_valor">—</td>
+<td class="gt_row gt_right" headers="Episódico_OR">1.40</td>
+<td class="gt_row gt_left" headers="Episódico_IC95">[1.40 - 1.40]</td>
+<td class="gt_row gt_left" headers="Episódico_p_valor">—</td>
+<td class="gt_row gt_right" headers="Sem transmissão_OR">18.34</td>
+<td class="gt_row gt_left" headers="Sem transmissão_IC95">[18.33 - 18.34]</td>
+<td class="gt_row gt_left" headers="Sem transmissão_p_valor">—</td>
+<td class="gt_row gt_right" headers="Transmissão Persistente_OR">1.03</td>
+<td class="gt_row gt_left" headers="Transmissão Persistente_IC95">[1.03 - 1.03]</td>
+<td class="gt_row gt_left" headers="Transmissão Persistente_p_valor">—</td>
+</tr>
+<tr class="even">
+<td class="gt_row gt_left" headers="Variável">biomapampa</td>
+<td class="gt_row gt_right" headers="Epidêmico_OR">0.01</td>
+<td class="gt_row gt_left" headers="Epidêmico_IC95">[0.01 - 0.01]</td>
+<td class="gt_row gt_left" headers="Epidêmico_p_valor">—</td>
+<td class="gt_row gt_right" headers="Episódico_OR">3.13</td>
+<td class="gt_row gt_left" headers="Episódico_IC95">[3.13 - 3.13]</td>
+<td class="gt_row gt_left" headers="Episódico_p_valor">—</td>
+<td class="gt_row gt_right" headers="Sem transmissão_OR">9.04</td>
+<td class="gt_row gt_left" headers="Sem transmissão_IC95">[9.04 - 9.04]</td>
+<td class="gt_row gt_left" headers="Sem transmissão_p_valor">—</td>
+<td class="gt_row gt_right" headers="Transmissão Persistente_OR">0.00</td>
+<td class="gt_row gt_left" headers="Transmissão Persistente_IC95">[0.00 - 0.00]</td>
+<td class="gt_row gt_left" headers="Transmissão Persistente_p_valor">—</td>
+</tr>
+<tr class="odd">
+<td class="gt_row gt_left" headers="Variável">biomapantanal</td>
+<td class="gt_row gt_right" headers="Epidêmico_OR">5.81</td>
+<td class="gt_row gt_left" headers="Epidêmico_IC95">[5.81 - 5.81]</td>
+<td class="gt_row gt_left" headers="Epidêmico_p_valor">—</td>
+<td class="gt_row gt_right" headers="Episódico_OR">3.16</td>
+<td class="gt_row gt_left" headers="Episódico_IC95">[3.16 - 3.16]</td>
+<td class="gt_row gt_left" headers="Episódico_p_valor">—</td>
+<td class="gt_row gt_right" headers="Sem transmissão_OR">0.23</td>
+<td class="gt_row gt_left" headers="Sem transmissão_IC95">[0.23 - 0.23]</td>
+<td class="gt_row gt_left" headers="Sem transmissão_p_valor">—</td>
+<td class="gt_row gt_right" headers="Transmissão Persistente_OR">0.29</td>
+<td class="gt_row gt_left" headers="Transmissão Persistente_IC95">[0.29 - 0.29]</td>
+<td class="gt_row gt_left" headers="Transmissão Persistente_p_valor">—</td>
+</tr>
+<tr class="even">
+<td class="gt_row gt_left" headers="Variável">precip_tot_Autumn</td>
+<td class="gt_row gt_right" headers="Epidêmico_OR">1.00</td>
+<td class="gt_row gt_left" headers="Epidêmico_IC95">[1.00 - 1.00]</td>
+<td class="gt_row gt_left" headers="Epidêmico_p_valor">—</td>
+<td class="gt_row gt_right" headers="Episódico_OR">1.00</td>
+<td class="gt_row gt_left" headers="Episódico_IC95">[1.00 - 1.00]</td>
+<td class="gt_row gt_left" headers="Episódico_p_valor">—</td>
+<td class="gt_row gt_right" headers="Sem transmissão_OR">1.00</td>
+<td class="gt_row gt_left" headers="Sem transmissão_IC95">[1.00 - 1.00]</td>
+<td class="gt_row gt_left" headers="Sem transmissão_p_valor">—</td>
+<td class="gt_row gt_right" headers="Transmissão Persistente_OR">1.00</td>
+<td class="gt_row gt_left" headers="Transmissão Persistente_IC95">[1.00 - 1.01]</td>
+<td class="gt_row gt_left" headers="Transmissão Persistente_p_valor">—</td>
+</tr>
+<tr class="odd">
+<td class="gt_row gt_left" headers="Variável">altitude</td>
+<td class="gt_row gt_right" headers="Epidêmico_OR">1.00</td>
+<td class="gt_row gt_left" headers="Epidêmico_IC95">[1.00 - 1.00]</td>
+<td class="gt_row gt_left" headers="Epidêmico_p_valor">—</td>
+<td class="gt_row gt_right" headers="Episódico_OR">1.00</td>
+<td class="gt_row gt_left" headers="Episódico_IC95">[1.00 - 1.00]</td>
+<td class="gt_row gt_left" headers="Episódico_p_valor">—</td>
+<td class="gt_row gt_right" headers="Sem transmissão_OR">1.00</td>
+<td class="gt_row gt_left" headers="Sem transmissão_IC95">[1.00 - 1.00]</td>
+<td class="gt_row gt_left" headers="Sem transmissão_p_valor">—</td>
+<td class="gt_row gt_right" headers="Transmissão Persistente_OR">1.00</td>
+<td class="gt_row gt_left" headers="Transmissão Persistente_IC95">[1.00 - 1.00]</td>
+<td class="gt_row gt_left" headers="Transmissão Persistente_p_valor">—</td>
+</tr>
+<tr class="even">
+<td class="gt_row gt_left" headers="Variável">thr_temp_umid_Autumn</td>
+<td class="gt_row gt_right" headers="Epidêmico_OR">0.97</td>
+<td class="gt_row gt_left" headers="Epidêmico_IC95">[0.97 - 0.97]</td>
+<td class="gt_row gt_left" headers="Epidêmico_p_valor">—</td>
+<td class="gt_row gt_right" headers="Episódico_OR">1.00</td>
+<td class="gt_row gt_left" headers="Episódico_IC95">[1.00 - 1.00]</td>
+<td class="gt_row gt_left" headers="Episódico_p_valor">—</td>
+<td class="gt_row gt_right" headers="Sem transmissão_OR">1.01</td>
+<td class="gt_row gt_left" headers="Sem transmissão_IC95">[1.00 - 1.01]</td>
+<td class="gt_row gt_left" headers="Sem transmissão_p_valor">—</td>
+<td class="gt_row gt_right" headers="Transmissão Persistente_OR">0.91</td>
+<td class="gt_row gt_left" headers="Transmissão Persistente_IC95">[0.91 - 0.91]</td>
+<td class="gt_row gt_left" headers="Transmissão Persistente_p_valor">—</td>
+</tr>
+<tr class="odd">
+<td class="gt_row gt_left" headers="Variável">precip_tot_Winter</td>
+<td class="gt_row gt_right" headers="Epidêmico_OR">1.00</td>
+<td class="gt_row gt_left" headers="Epidêmico_IC95">[1.00 - 1.00]</td>
+<td class="gt_row gt_left" headers="Epidêmico_p_valor">—</td>
+<td class="gt_row gt_right" headers="Episódico_OR">1.00</td>
+<td class="gt_row gt_left" headers="Episódico_IC95">[1.00 - 1.00]</td>
+<td class="gt_row gt_left" headers="Episódico_p_valor">—</td>
+<td class="gt_row gt_right" headers="Sem transmissão_OR">1.00</td>
+<td class="gt_row gt_left" headers="Sem transmissão_IC95">[1.00 - 1.00]</td>
+<td class="gt_row gt_left" headers="Sem transmissão_p_valor">—</td>
+<td class="gt_row gt_right" headers="Transmissão Persistente_OR">1.00</td>
+<td class="gt_row gt_left" headers="Transmissão Persistente_IC95">[0.99 - 1.00]</td>
+<td class="gt_row gt_left" headers="Transmissão Persistente_p_valor">—</td>
+</tr>
+<tr class="even">
+<td class="gt_row gt_left" headers="Variável">thr_prec_Summer</td>
+<td class="gt_row gt_right" headers="Epidêmico_OR">1.02</td>
+<td class="gt_row gt_left" headers="Epidêmico_IC95">[1.02 - 1.02]</td>
+<td class="gt_row gt_left" headers="Epidêmico_p_valor">—</td>
+<td class="gt_row gt_right" headers="Episódico_OR">0.98</td>
+<td class="gt_row gt_left" headers="Episódico_IC95">[0.97 - 0.98]</td>
+<td class="gt_row gt_left" headers="Episódico_p_valor">—</td>
+<td class="gt_row gt_right" headers="Sem transmissão_OR">0.98</td>
+<td class="gt_row gt_left" headers="Sem transmissão_IC95">[0.98 - 0.99]</td>
+<td class="gt_row gt_left" headers="Sem transmissão_p_valor">—</td>
+<td class="gt_row gt_right" headers="Transmissão Persistente_OR">1.00</td>
+<td class="gt_row gt_left" headers="Transmissão Persistente_IC95">[1.00 - 1.00]</td>
+<td class="gt_row gt_left" headers="Transmissão Persistente_p_valor">—</td>
+</tr>
+</tbody>
+</table>
+
+</div>
+</div>
+</div>
+</section>
+</section>
+
+</main>
+<!-- /main column -->
+<script id="quarto-html-after-body" type="application/javascript">
+window.document.addEventListener("DOMContentLoaded", function (event) {
+  const toggleBodyColorMode = (bsSheetEl) => {
+    const mode = bsSheetEl.getAttribute("data-mode");
+    const bodyEl = window.document.querySelector("body");
+    if (mode === "dark") {
+      bodyEl.classList.add("quarto-dark");
+      bodyEl.classList.remove("quarto-light");
+    } else {
+      bodyEl.classList.add("quarto-light");
+      bodyEl.classList.remove("quarto-dark");
+    }
+  }
+  const toggleBodyColorPrimary = () => {
+    const bsSheetEl = window.document.querySelector("link#quarto-bootstrap");
+    if (bsSheetEl) {
+      toggleBodyColorMode(bsSheetEl);
+    }
+  }
+  toggleBodyColorPrimary();  
+  const icon = "";
+  const anchorJS = new window.AnchorJS();
+  anchorJS.options = {
+    placement: 'right',
+    icon: icon
+  };
+  anchorJS.add('.anchored');
+  const isCodeAnnotation = (el) => {
+    for (const clz of el.classList) {
+      if (clz.startsWith('code-annotation-')) {                     
+        return true;
+      }
+    }
+    return false;
+  }
+  const onCopySuccess = function(e) {
+    // button target
+    const button = e.trigger;
+    // don't keep focus
+    button.blur();
+    // flash "checked"
+    button.classList.add('code-copy-button-checked');
+    var currentTitle = button.getAttribute("title");
+    button.setAttribute("title", "Copied!");
+    let tooltip;
+    if (window.bootstrap) {
+      button.setAttribute("data-bs-toggle", "tooltip");
+      button.setAttribute("data-bs-placement", "left");
+      button.setAttribute("data-bs-title", "Copied!");
+      tooltip = new bootstrap.Tooltip(button, 
+        { trigger: "manual", 
+          customClass: "code-copy-button-tooltip",
+          offset: [0, -8]});
+      tooltip.show();    
+    }
+    setTimeout(function() {
+      if (tooltip) {
+        tooltip.hide();
+        button.removeAttribute("data-bs-title");
+        button.removeAttribute("data-bs-toggle");
+        button.removeAttribute("data-bs-placement");
+      }
+      button.setAttribute("title", currentTitle);
+      button.classList.remove('code-copy-button-checked');
+    }, 1000);
+    // clear code selection
+    e.clearSelection();
+  }
+  const getTextToCopy = function(trigger) {
+      const codeEl = trigger.previousElementSibling.cloneNode(true);
+      for (const childEl of codeEl.children) {
+        if (isCodeAnnotation(childEl)) {
+          childEl.remove();
+        }
+      }
+      return codeEl.innerText;
+  }
+  const clipboard = new window.ClipboardJS('.code-copy-button:not([data-in-quarto-modal])', {
+    text: getTextToCopy
+  });
+  clipboard.on('success', onCopySuccess);
+  if (window.document.getElementById('quarto-embedded-source-code-modal')) {
+    // For code content inside modals, clipBoardJS needs to be initialized with a container option
+    // TODO: Check when it could be a function (https://github.com/zenorocha/clipboard.js/issues/860)
+    const clipboardModal = new window.ClipboardJS('.code-copy-button[data-in-quarto-modal]', {
+      text: getTextToCopy,
+      container: window.document.getElementById('quarto-embedded-source-code-modal')
+    });
+    clipboardModal.on('success', onCopySuccess);
+  }
+    var localhostRegex = new RegExp(/^(?:http|https):\/\/localhost\:?[0-9]*\//);
+    var mailtoRegex = new RegExp(/^mailto:/);
+      var filterRegex = new RegExp('/' + window.location.host + '/');
+    var isInternal = (href) => {
+        return filterRegex.test(href) || localhostRegex.test(href) || mailtoRegex.test(href);
+    }
+    // Inspect non-navigation links and adorn them if external
+ 	var links = window.document.querySelectorAll('a[href]:not(.nav-link):not(.navbar-brand):not(.toc-action):not(.sidebar-link):not(.sidebar-item-toggle):not(.pagination-link):not(.no-external):not([aria-hidden]):not(.dropdown-item):not(.quarto-navigation-tool):not(.about-link)');
+    for (var i=0; i<links.length; i++) {
+      const link = links[i];
+      if (!isInternal(link.href)) {
+        // undo the damage that might have been done by quarto-nav.js in the case of
+        // links that we want to consider external
+        if (link.dataset.originalHref !== undefined) {
+          link.href = link.dataset.originalHref;
+        }
+      }
+    }
+  function tippyHover(el, contentFn, onTriggerFn, onUntriggerFn) {
+    const config = {
+      allowHTML: true,
+      maxWidth: 500,
+      delay: 100,
+      arrow: false,
+      appendTo: function(el) {
+          return el.parentElement;
+      },
+      interactive: true,
+      interactiveBorder: 10,
+      theme: 'quarto',
+      placement: 'bottom-start',
+    };
+    if (contentFn) {
+      config.content = contentFn;
+    }
+    if (onTriggerFn) {
+      config.onTrigger = onTriggerFn;
+    }
+    if (onUntriggerFn) {
+      config.onUntrigger = onUntriggerFn;
+    }
+    window.tippy(el, config); 
+  }
+  const noterefs = window.document.querySelectorAll('a[role="doc-noteref"]');
+  for (var i=0; i<noterefs.length; i++) {
+    const ref = noterefs[i];
+    tippyHover(ref, function() {
+      // use id or data attribute instead here
+      let href = ref.getAttribute('data-footnote-href') || ref.getAttribute('href');
+      try { href = new URL(href).hash; } catch {}
+      const id = href.replace(/^#\/?/, "");
+      const note = window.document.getElementById(id);
+      if (note) {
+        return note.innerHTML;
+      } else {
+        return "";
+      }
+    });
+  }
+  const xrefs = window.document.querySelectorAll('a.quarto-xref');
+  const processXRef = (id, note) => {
+    // Strip column container classes
+    const stripColumnClz = (el) => {
+      el.classList.remove("page-full", "page-columns");
+      if (el.children) {
+        for (const child of el.children) {
+          stripColumnClz(child);
+        }
+      }
+    }
+    stripColumnClz(note)
+    if (id === null || id.startsWith('sec-')) {
+      // Special case sections, only their first couple elements
+      const container = document.createElement("div");
+      if (note.children && note.children.length > 2) {
+        container.appendChild(note.children[0].cloneNode(true));
+        for (let i = 1; i < note.children.length; i++) {
+          const child = note.children[i];
+          if (child.tagName === "P" && child.innerText === "") {
+            continue;
+          } else {
+            container.appendChild(child.cloneNode(true));
+            break;
+          }
+        }
+        if (window.Quarto?.typesetMath) {
+          window.Quarto.typesetMath(container);
+        }
+        return container.innerHTML
+      } else {
+        if (window.Quarto?.typesetMath) {
+          window.Quarto.typesetMath(note);
+        }
+        return note.innerHTML;
+      }
+    } else {
+      // Remove any anchor links if they are present
+      const anchorLink = note.querySelector('a.anchorjs-link');
+      if (anchorLink) {
+        anchorLink.remove();
+      }
+      if (window.Quarto?.typesetMath) {
+        window.Quarto.typesetMath(note);
+      }
+      // TODO in 1.5, we should make sure this works without a callout special case
+      if (note.classList.contains("callout")) {
+        return note.outerHTML;
+      } else {
+        return note.innerHTML;
+      }
+    }
+  }
+  for (var i=0; i<xrefs.length; i++) {
+    const xref = xrefs[i];
+    tippyHover(xref, undefined, function(instance) {
+      instance.disable();
+      let url = xref.getAttribute('href');
+      let hash = undefined; 
+      if (url.startsWith('#')) {
+        hash = url;
+      } else {
+        try { hash = new URL(url).hash; } catch {}
+      }
+      if (hash) {
+        const id = hash.replace(/^#\/?/, "");
+        const note = window.document.getElementById(id);
+        if (note !== null) {
+          try {
+            const html = processXRef(id, note.cloneNode(true));
+            instance.setContent(html);
+          } finally {
+            instance.enable();
+            instance.show();
+          }
+        } else {
+          // See if we can fetch this
+          fetch(url.split('#')[0])
+          .then(res => res.text())
+          .then(html => {
+            const parser = new DOMParser();
+            const htmlDoc = parser.parseFromString(html, "text/html");
+            const note = htmlDoc.getElementById(id);
+            if (note !== null) {
+              const html = processXRef(id, note);
+              instance.setContent(html);
+            } 
+          }).finally(() => {
+            instance.enable();
+            instance.show();
+          });
+        }
+      } else {
+        // See if we can fetch a full url (with no hash to target)
+        // This is a special case and we should probably do some content thinning / targeting
+        fetch(url)
+        .then(res => res.text())
+        .then(html => {
+          const parser = new DOMParser();
+          const htmlDoc = parser.parseFromString(html, "text/html");
+          const note = htmlDoc.querySelector('main.content');
+          if (note !== null) {
+            // This should only happen for chapter cross references
+            // (since there is no id in the URL)
+            // remove the first header
+            if (note.children.length > 0 && note.children[0].tagName === "HEADER") {
+              note.children[0].remove();
+            }
+            const html = processXRef(null, note);
+            instance.setContent(html);
+          } 
+        }).finally(() => {
+          instance.enable();
+          instance.show();
+        });
+      }
+    }, function(instance) {
+    });
+  }
+      let selectedAnnoteEl;
+      const selectorForAnnotation = ( cell, annotation) => {
+        let cellAttr = 'data-code-cell="' + cell + '"';
+        let lineAttr = 'data-code-annotation="' +  annotation + '"';
+        const selector = 'span[' + cellAttr + '][' + lineAttr + ']';
+        return selector;
+      }
+      const selectCodeLines = (annoteEl) => {
+        const doc = window.document;
+        const targetCell = annoteEl.getAttribute("data-target-cell");
+        const targetAnnotation = annoteEl.getAttribute("data-target-annotation");
+        const annoteSpan = window.document.querySelector(selectorForAnnotation(targetCell, targetAnnotation));
+        const lines = annoteSpan.getAttribute("data-code-lines").split(",");
+        const lineIds = lines.map((line) => {
+          return targetCell + "-" + line;
+        })
+        let top = null;
+        let height = null;
+        let parent = null;
+        if (lineIds.length > 0) {
+            //compute the position of the single el (top and bottom and make a div)
+            const el = window.document.getElementById(lineIds[0]);
+            top = el.offsetTop;
+            height = el.offsetHeight;
+            parent = el.parentElement.parentElement;
+          if (lineIds.length > 1) {
+            const lastEl = window.document.getElementById(lineIds[lineIds.length - 1]);
+            const bottom = lastEl.offsetTop + lastEl.offsetHeight;
+            height = bottom - top;
+          }
+          if (top !== null && height !== null && parent !== null) {
+            // cook up a div (if necessary) and position it 
+            let div = window.document.getElementById("code-annotation-line-highlight");
+            if (div === null) {
+              div = window.document.createElement("div");
+              div.setAttribute("id", "code-annotation-line-highlight");
+              div.style.position = 'absolute';
+              parent.appendChild(div);
+            }
+            div.style.top = top - 2 + "px";
+            div.style.height = height + 4 + "px";
+            div.style.left = 0;
+            let gutterDiv = window.document.getElementById("code-annotation-line-highlight-gutter");
+            if (gutterDiv === null) {
+              gutterDiv = window.document.createElement("div");
+              gutterDiv.setAttribute("id", "code-annotation-line-highlight-gutter");
+              gutterDiv.style.position = 'absolute';
+              const codeCell = window.document.getElementById(targetCell);
+              const gutter = codeCell.querySelector('.code-annotation-gutter');
+              gutter.appendChild(gutterDiv);
+            }
+            gutterDiv.style.top = top - 2 + "px";
+            gutterDiv.style.height = height + 4 + "px";
+          }
+          selectedAnnoteEl = annoteEl;
+        }
+      };
+      const unselectCodeLines = () => {
+        const elementsIds = ["code-annotation-line-highlight", "code-annotation-line-highlight-gutter"];
+        elementsIds.forEach((elId) => {
+          const div = window.document.getElementById(elId);
+          if (div) {
+            div.remove();
+          }
+        });
+        selectedAnnoteEl = undefined;
+      };
+        // Handle positioning of the toggle
+    window.addEventListener(
+      "resize",
+      throttle(() => {
+        elRect = undefined;
+        if (selectedAnnoteEl) {
+          selectCodeLines(selectedAnnoteEl);
+        }
+      }, 10)
+    );
+    function throttle(fn, ms) {
+    let throttle = false;
+    let timer;
+      return (...args) => {
+        if(!throttle) { // first call gets through
+            fn.apply(this, args);
+            throttle = true;
+        } else { // all the others get throttled
+            if(timer) clearTimeout(timer); // cancel #2
+            timer = setTimeout(() => {
+              fn.apply(this, args);
+              timer = throttle = false;
+            }, ms);
+        }
+      };
+    }
+      // Attach click handler to the DT
+      const annoteDls = window.document.querySelectorAll('dt[data-target-cell]');
+      for (const annoteDlNode of annoteDls) {
+        annoteDlNode.addEventListener('click', (event) => {
+          const clickedEl = event.target;
+          if (clickedEl !== selectedAnnoteEl) {
+            unselectCodeLines();
+            const activeEl = window.document.querySelector('dt[data-target-cell].code-annotation-active');
+            if (activeEl) {
+              activeEl.classList.remove('code-annotation-active');
+            }
+            selectCodeLines(clickedEl);
+            clickedEl.classList.add('code-annotation-active');
+          } else {
+            // Unselect the line
+            unselectCodeLines();
+            clickedEl.classList.remove('code-annotation-active');
+          }
+        });
+      }
+  const findCites = (el) => {
+    const parentEl = el.parentElement;
+    if (parentEl) {
+      const cites = parentEl.dataset.cites;
+      if (cites) {
+        return {
+          el,
+          cites: cites.split(' ')
+        };
+      } else {
+        return findCites(el.parentElement)
+      }
+    } else {
+      return undefined;
+    }
+  };
+  var bibliorefs = window.document.querySelectorAll('a[role="doc-biblioref"]');
+  for (var i=0; i<bibliorefs.length; i++) {
+    const ref = bibliorefs[i];
+    const citeInfo = findCites(ref);
+    if (citeInfo) {
+      tippyHover(citeInfo.el, function() {
+        var popup = window.document.createElement('div');
+        citeInfo.cites.forEach(function(cite) {
+          var citeDiv = window.document.createElement('div');
+          citeDiv.classList.add('hanging-indent');
+          citeDiv.classList.add('csl-entry');
+          var biblioDiv = window.document.getElementById('ref-' + cite);
+          if (biblioDiv) {
+            citeDiv.innerHTML = biblioDiv.innerHTML;
+          }
+          popup.appendChild(citeDiv);
+        });
+        return popup.innerHTML;
+      });
+    }
+  }
+});
+</script>
+</div> <!-- /content -->
+
+
+
+
+</body></html>
