@@ -1,0 +1,5 @@
+"Variable";"Test";"p_value"
+"d1$bioma";"Fisher (simulated)";9,99900009999e-05
+"d1$koppen";"Chi-squared";3,58824347397982e-22
+"d1$tipo_regiao";"Chi-squared";1,26417679964977e-42
+"d2$region";"Chi-squared";1,25940906190862e-52
