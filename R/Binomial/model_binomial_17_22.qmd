@@ -54,14 +54,11 @@ colnames(clima_org_model_17_22_season)[1] <- "muni_code"
 
 # Juntando
 det_17_22 <- full_join(banco_determinantes, clima_org_model_17_22_season , by = "muni_code")
-det_17_22 <- det_17_22[, !names(det_17_22) %in% c("pop22")]
+det_17_22 <- det_17_22[, !names(det_17_22) %in% c("pop10")]
 
 ## Removendo os bancos para a nálise ficar mais leve
 remove(banco_determinantes)
 remove(clima_org_model_17_22_season)
-
-colSums(is.na(det_17_22))
-
 ```
 
 # Análise 2017-2022
@@ -92,7 +89,7 @@ summary(det_17_22)
 
 Valores ausentes podem comprometer a análise, pois a regressão binomial não lida bem com dados incompletos. Se houver muitas ausências em uma variável, pode ser necessário removê-la ou imputar valores. Caso haja poucos valores faltantes, a remoção de linhas (`na.omit()`) pode ser suficiente. A ausência de `NA` indica que o banco está pronto para a modelagem.
 
-Interpretação: Foram retiradas 8 linhas ou seja 8 municípios, são eles: xxxxxxxx
+Interpretação: Foram retiradas 3 linhas ou seja 3 municípios, são eles: xxxxxxxx
 
 ### **2. Análise de multicolinearidade com VIF**
 
@@ -170,7 +167,7 @@ ggplot(det_17_22  , aes(x = 1:nrow(det_17_22), y = residuos)) +
   geom_point() +
   geom_hline(yintercept = c(-3, 3), linetype = "dashed", color = "red") +
   labs(title = "Verificação de Outliers", x = "Índice", y = "Resíduos Padronizados")
-colSums(is.na(det_17_22))
+
 
 ```
 
@@ -212,14 +209,14 @@ O stepwise é um método automatizado de seleção de variáveis em modelos esta
 
 ```{r, message=FALSE, warning=FALSE}
 
-# Criar o modelo inicial (nulo com region e pop10)
-null_model <- glm(dengue_pattern_17_22 ~ region + pop10, 
+# Criar o modelo inicial (nulo com region e pop22)
+null_model <- glm(dengue_pattern_17_22 ~ region + pop22, 
                   data = det_17_22, 
                   family = binomial)
 
 # Criar o modelo completo (com todas as variáveis preditoras adicionais)
-full_formula <- as.formula(paste("dengue_pattern_17_22 ~ region + pop10 +", 
-                                 paste(setdiff(names(det_17_22), c("dengue_pattern_17_22_17_22", "region", "pop10")), 
+full_formula <- as.formula(paste("dengue_pattern_17_22 ~ region + pop22 +", 
+                                 paste(setdiff(names(det_17_22), c("dengue_pattern_17_22_17_22", "region", "pop22")), 
                                        collapse = " + ")))
 
 full_model <- glm(full_formula, data = det_17_22, family = binomial)
@@ -245,9 +242,7 @@ print(summary(step_model))
 
 2.  Teste de Verossimilhança (Likelihood Ratio Test - LRT): Compara um modelo com e sem variáveis explicativas para ver se o modelo ajustado é significativamente melhor do que um modelo nulo. Se o p-valor for baixo (\< 0.05), rejeitamos o modelo nulo, indicando que as variáveis explicativas contribuem para a predição.
 
-3.  Teste de Hosmer-Lemeshow : Avalia se as probabilidades previstas pelo modelo são bem ajustadas aos dados observados. Interpretação: p-valor \> 0.05 → Indica bom ajuste p-valor \< 0.05 → Indica que o modelo pode não estar ajustando bem.
-
-4.  Curva ROC e AUC (Área Sob a Curva) : Mede a capacidade do modelo de discriminar entre as classes (0 e 1).
+3.  Curva ROC e AUC (Área Sob a Curva) : Mede a capacidade do modelo de discriminar entre as classes (0 e 1).
 
     -   AUC = 0.5 → Modelo sem discriminação
 
@@ -255,7 +250,7 @@ print(summary(step_model))
 
     -   AUC acima de 0.8 → Excelente modelo
 
-5.  Matriz de Confusão e Acurácia : Avalia o desempenho do modelo na predição correta das classes.
+4.  Matriz de Confusão e Acurácia : Avalia o desempenho do modelo na predição correta das classes.
 
     -   Acurácia = (TP + TN) / (TP + TN + FP + FN)
 
@@ -265,7 +260,6 @@ Resumindo:
 |------------------------------|------------------------------------------|
 | Pseudo R² (Nagelkerke, McFadden) | Mede a proporção da variância explicada. Quanto maior, melhor. |
 | LRT (Teste de Verossimilhança) | Verifica se o modelo ajustado é significativamente melhor que um modelo nulo. |
-| Hosmer-Lemeshow | Testa se as previsões do modelo correspondem às observações reais. |
 | Curva ROC e AUC | Mede a capacidade preditiva do modelo (valores \> 0.8 indicam ótimo desempenho). |
 | Matriz de Confusão | Avalia a acurácia da classificação do modelo. |
 

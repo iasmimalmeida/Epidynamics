@@ -138,39 +138,11 @@ pre > code.sourceCode > span > a:first-child::before { text-decoration: underlin
 <span id="cb3-11"><a href="#cb3-11" aria-hidden="true" tabindex="-1"></a></span>
 <span id="cb3-12"><a href="#cb3-12" aria-hidden="true" tabindex="-1"></a><span class="co"># Juntando</span></span>
 <span id="cb3-13"><a href="#cb3-13" aria-hidden="true" tabindex="-1"></a>det_17_22 <span class="ot">&lt;-</span> <span class="fu">full_join</span>(banco_determinantes, clima_org_model_17_22_season , <span class="at">by =</span> <span class="st">"muni_code"</span>)</span>
-<span id="cb3-14"><a href="#cb3-14" aria-hidden="true" tabindex="-1"></a>det_17_22 <span class="ot">&lt;-</span> det_17_22[, <span class="sc">!</span><span class="fu">names</span>(det_17_22) <span class="sc">%in%</span> <span class="fu">c</span>(<span class="st">"pop22"</span>)]</span>
+<span id="cb3-14"><a href="#cb3-14" aria-hidden="true" tabindex="-1"></a>det_17_22 <span class="ot">&lt;-</span> det_17_22[, <span class="sc">!</span><span class="fu">names</span>(det_17_22) <span class="sc">%in%</span> <span class="fu">c</span>(<span class="st">"pop10"</span>)]</span>
 <span id="cb3-15"><a href="#cb3-15" aria-hidden="true" tabindex="-1"></a></span>
 <span id="cb3-16"><a href="#cb3-16" aria-hidden="true" tabindex="-1"></a><span class="do">## Removendo os bancos para a nálise ficar mais leve</span></span>
 <span id="cb3-17"><a href="#cb3-17" aria-hidden="true" tabindex="-1"></a><span class="fu">remove</span>(banco_determinantes)</span>
-<span id="cb3-18"><a href="#cb3-18" aria-hidden="true" tabindex="-1"></a><span class="fu">remove</span>(clima_org_model_17_22_season)</span>
-<span id="cb3-19"><a href="#cb3-19" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb3-20"><a href="#cb3-20" aria-hidden="true" tabindex="-1"></a><span class="fu">colSums</span>(<span class="fu">is.na</span>(det_17_22))</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
-<div class="cell-output cell-output-stdout">
-<pre><code>           muni_code               region          tipo_regiao 
-                   0                    0                    0 
-              koppen                pop10         prop_residuo 
-                   0                    5                    0 
-          prop_esgot                bioma dengue_pattern_10_16 
-                   0                    0                    0 
-dengue_pattern_17_22      temp_med_Autumn      umid_med_Autumn 
-                   0                    3                    3 
-   precip_tot_Autumn      thr_temp_Autumn      thr_umid_Autumn 
-                   0                    0                    0 
-     thr_prec_Autumn      temp_med_Spring      umid_med_Spring 
-                   0                    3                    3 
-   precip_tot_Spring      thr_temp_Spring      thr_prec_Spring 
-                   0                    0                    0 
-thr_temp_umid_Spring      temp_med_Summer      umid_med_Summer 
-                   0                    3                    3 
-   precip_tot_Summer      thr_temp_Summer      thr_umid_Summer 
-                   0                    0                    0 
-     thr_prec_Summer thr_temp_umid_Summer      temp_med_Winter 
-                   0                    0                    3 
-     umid_med_Winter    precip_tot_Winter      thr_temp_Winter 
-                   3                    0                    0 
-     thr_umid_Winter      thr_prec_Winter thr_temp_umid_Winter 
-                   0                    0                    0 </code></pre>
-</div>
+<span id="cb3-18"><a href="#cb3-18" aria-hidden="true" tabindex="-1"></a><span class="fu">remove</span>(clima_org_model_17_22_season)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 </div>
 </section>
 <section id="análise-2017-2022" class="level1">
@@ -179,17 +151,17 @@ thr_temp_umid_Spring      temp_med_Summer      umid_med_Summer
 <section id="arrumando-variáveis" class="level2">
 <h2 class="anchored" data-anchor-id="arrumando-variáveis">1. Arrumando variáveis</h2>
 <div class="cell">
-<div class="sourceCode cell-code" id="cb5"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb5-1"><a href="#cb5-1" aria-hidden="true" tabindex="-1"></a><span class="co"># Converter variáveis numéricas com vírgula decimal e categorizar as variáveis de texto</span></span>
-<span id="cb5-2"><a href="#cb5-2" aria-hidden="true" tabindex="-1"></a>det_17_22 <span class="ot">&lt;-</span> det_17_22 <span class="sc">%&gt;%</span></span>
-<span id="cb5-3"><a href="#cb5-3" aria-hidden="true" tabindex="-1"></a>  <span class="fu">mutate</span>(</span>
-<span id="cb5-4"><a href="#cb5-4" aria-hidden="true" tabindex="-1"></a>    <span class="fu">across</span>(<span class="fu">where</span>(<span class="sc">~</span> <span class="fu">all</span>(<span class="fu">grepl</span>(<span class="st">"^[0-9,.]+$"</span>, .))), <span class="sc">~</span> <span class="fu">as.numeric</span>(<span class="fu">gsub</span>(<span class="st">","</span>, <span class="st">"."</span>, .))),</span>
-<span id="cb5-5"><a href="#cb5-5" aria-hidden="true" tabindex="-1"></a>    <span class="fu">across</span>(<span class="fu">where</span>(is.character), as.factor))</span>
-<span id="cb5-6"><a href="#cb5-6" aria-hidden="true" tabindex="-1"></a>    </span>
-<span id="cb5-7"><a href="#cb5-7" aria-hidden="true" tabindex="-1"></a>det_17_22<span class="sc">$</span>dengue_pattern_17_22 <span class="ot">&lt;-</span> <span class="fu">as.factor</span>(det_17_22<span class="sc">$</span>dengue_pattern_17_22)</span>
-<span id="cb5-8"><a href="#cb5-8" aria-hidden="true" tabindex="-1"></a>det_17_22<span class="sc">$</span>dengue_pattern_10_16 <span class="ot">&lt;-</span> <span class="fu">as.factor</span>(det_17_22<span class="sc">$</span>dengue_pattern_10_16)</span>
-<span id="cb5-9"><a href="#cb5-9" aria-hidden="true" tabindex="-1"></a>    </span>
-<span id="cb5-10"><a href="#cb5-10" aria-hidden="true" tabindex="-1"></a><span class="co"># Visão geral dos dados</span></span>
-<span id="cb5-11"><a href="#cb5-11" aria-hidden="true" tabindex="-1"></a><span class="fu">summary</span>(det_17_22)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="sourceCode cell-code" id="cb4"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb4-1"><a href="#cb4-1" aria-hidden="true" tabindex="-1"></a><span class="co"># Converter variáveis numéricas com vírgula decimal e categorizar as variáveis de texto</span></span>
+<span id="cb4-2"><a href="#cb4-2" aria-hidden="true" tabindex="-1"></a>det_17_22 <span class="ot">&lt;-</span> det_17_22 <span class="sc">%&gt;%</span></span>
+<span id="cb4-3"><a href="#cb4-3" aria-hidden="true" tabindex="-1"></a>  <span class="fu">mutate</span>(</span>
+<span id="cb4-4"><a href="#cb4-4" aria-hidden="true" tabindex="-1"></a>    <span class="fu">across</span>(<span class="fu">where</span>(<span class="sc">~</span> <span class="fu">all</span>(<span class="fu">grepl</span>(<span class="st">"^[0-9,.]+$"</span>, .))), <span class="sc">~</span> <span class="fu">as.numeric</span>(<span class="fu">gsub</span>(<span class="st">","</span>, <span class="st">"."</span>, .))),</span>
+<span id="cb4-5"><a href="#cb4-5" aria-hidden="true" tabindex="-1"></a>    <span class="fu">across</span>(<span class="fu">where</span>(is.character), as.factor))</span>
+<span id="cb4-6"><a href="#cb4-6" aria-hidden="true" tabindex="-1"></a>    </span>
+<span id="cb4-7"><a href="#cb4-7" aria-hidden="true" tabindex="-1"></a>det_17_22<span class="sc">$</span>dengue_pattern_17_22 <span class="ot">&lt;-</span> <span class="fu">as.factor</span>(det_17_22<span class="sc">$</span>dengue_pattern_17_22)</span>
+<span id="cb4-8"><a href="#cb4-8" aria-hidden="true" tabindex="-1"></a>det_17_22<span class="sc">$</span>dengue_pattern_10_16 <span class="ot">&lt;-</span> <span class="fu">as.factor</span>(det_17_22<span class="sc">$</span>dengue_pattern_10_16)</span>
+<span id="cb4-9"><a href="#cb4-9" aria-hidden="true" tabindex="-1"></a>    </span>
+<span id="cb4-10"><a href="#cb4-10" aria-hidden="true" tabindex="-1"></a><span class="co"># Visão geral dos dados</span></span>
+<span id="cb4-11"><a href="#cb4-11" aria-hidden="true" tabindex="-1"></a><span class="fu">summary</span>(det_17_22)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 <div class="cell-output cell-output-stdout">
 <pre><code>   muni_code           region                 tipo_regiao       koppen    
  Min.   :1100015   Min.   :1.000   metropolitana    : 445   Aw     :1337  
@@ -199,14 +171,14 @@ thr_temp_umid_Spring      temp_med_Summer      umid_med_Summer
  3rd Qu.:4119190   3rd Qu.:4.000                            Cwa    : 407  
  Max.   :5300108   Max.   :5.000                            Cfb    : 405  
                                                             (Other): 971  
-     pop10           prop_residuo      prop_esgot                bioma     
- Min.   :     805   Min.   :  0.00   Min.   :  0.00   Amazonia      : 503  
- 1st Qu.:    5235   1st Qu.: 54.33   1st Qu.: 12.85   Caatinga      :1095  
- Median :   10934   Median : 74.08   Median : 38.03   Cerrado       :1062  
- Mean   :   34278   Mean   : 70.21   Mean   : 42.27   Mata Atlantica:2741  
- 3rd Qu.:   23424   3rd Qu.: 89.22   3rd Qu.: 70.44   Pampa         : 160  
- Max.   :11253503   Max.   :100.00   Max.   :100.00   Pantanal      :   9  
- NA's   :5                                                                 
+     pop22           prop_residuo      prop_esgot                bioma     
+ Min.   :     836   Min.   :  0.00   Min.   :  0.00   Amazonia      : 503  
+ 1st Qu.:    5282   1st Qu.: 54.33   1st Qu.: 12.85   Caatinga      :1095  
+ Median :   11096   Median : 74.08   Median : 38.03   Cerrado       :1062  
+ Mean   :   37298   Mean   : 70.21   Mean   : 42.27   Mata Atlantica:2741  
+ 3rd Qu.:   24615   3rd Qu.: 89.22   3rd Qu.: 70.44   Pampa         : 160  
+ Max.   :12200180   Max.   :100.00   Max.   :100.00   Pantanal      :   9  
+                                                                           
  dengue_pattern_10_16 dengue_pattern_17_22 temp_med_Autumn umid_med_Autumn
  0:4915               0:4812               Min.   :13.31   Min.   :55.97  
  1: 655               1: 758               1st Qu.:19.60   1st Qu.:69.82  
@@ -271,7 +243,7 @@ thr_temp_umid_Spring      temp_med_Summer      umid_med_Summer
 <section id="verificação-de-valores-ausentes-na" class="level3">
 <h3 class="anchored" data-anchor-id="verificação-de-valores-ausentes-na"><strong>1. Verificação de valores ausentes (NA)</strong></h3>
 <p>Valores ausentes podem comprometer a análise, pois a regressão binomial não lida bem com dados incompletos. Se houver muitas ausências em uma variável, pode ser necessário removê-la ou imputar valores. Caso haja poucos valores faltantes, a remoção de linhas (<code>na.omit()</code>) pode ser suficiente. A ausência de <code>NA</code> indica que o banco está pronto para a modelagem.</p>
-<p>Interpretação: Foram retiradas 8 linhas ou seja 8 municípios, são eles: xxxxxxxx</p>
+<p>Interpretação: Foram retiradas 3 linhas ou seja 3 municípios, são eles: xxxxxxxx</p>
 </section>
 <section id="análise-de-multicolinearidade-com-vif" class="level3">
 <h3 class="anchored" data-anchor-id="análise-de-multicolinearidade-com-vif"><strong>2. Análise de multicolinearidade com VIF</strong></h3>
@@ -283,22 +255,22 @@ thr_temp_umid_Spring      temp_med_Summer      umid_med_Summer
 <p>Outliers podem distorcer os coeficientes da regressão binomial e afetar a qualidade da predição. A análise dos resíduos padronizados permite identificar observações extremas, geralmente consideradas problemáticas quando estão fora do intervalo de -3 a 3. Se houver muitos outliers, pode ser necessário revisar a entrada de dados ou aplicar transformações.</p>
 <p>Interpretação: Foram retiradas 9 linhas ou seja 9 municípios com 4 de categoria 0 e 5 de categoria 1. Todos com intervalos acima de -3 e 3. Presentes na tabela outliers_binomial_model_17_22.csv.</p>
 <div class="cell">
-<div class="sourceCode cell-code" id="cb7"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb7-1"><a href="#cb7-1" aria-hidden="true" tabindex="-1"></a><span class="co"># 1. Verificação de valores ausentes</span></span>
-<span id="cb7-2"><a href="#cb7-2" aria-hidden="true" tabindex="-1"></a><span class="fu">cat</span>(<span class="st">"Valores ausentes por variável:</span><span class="sc">\n</span><span class="st">"</span>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="sourceCode cell-code" id="cb6"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb6-1"><a href="#cb6-1" aria-hidden="true" tabindex="-1"></a><span class="co"># 1. Verificação de valores ausentes</span></span>
+<span id="cb6-2"><a href="#cb6-2" aria-hidden="true" tabindex="-1"></a><span class="fu">cat</span>(<span class="st">"Valores ausentes por variável:</span><span class="sc">\n</span><span class="st">"</span>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 <div class="cell-output cell-output-stdout">
 <pre><code>Valores ausentes por variável:</code></pre>
 </div>
-<div class="sourceCode cell-code" id="cb9"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb9-1"><a href="#cb9-1" aria-hidden="true" tabindex="-1"></a><span class="co">#print(colSums(is.na(det_17_22)))</span></span>
-<span id="cb9-2"><a href="#cb9-2" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb9-3"><a href="#cb9-3" aria-hidden="true" tabindex="-1"></a><span class="co"># Remover linhas com NA (se necessário)</span></span>
-<span id="cb9-4"><a href="#cb9-4" aria-hidden="true" tabindex="-1"></a>det_17_22 <span class="ot">&lt;-</span> <span class="fu">na.omit</span>(det_17_22)</span>
-<span id="cb9-5"><a href="#cb9-5" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb9-6"><a href="#cb9-6" aria-hidden="true" tabindex="-1"></a><span class="co"># modelo geral sem categoria de referência</span></span>
-<span id="cb9-7"><a href="#cb9-7" aria-hidden="true" tabindex="-1"></a>binomial_model <span class="ot">&lt;-</span> <span class="fu">glm</span>(dengue_pattern_17_22 <span class="sc">~</span> ., <span class="at">data =</span> det_17_22 , <span class="at">family =</span> binomial)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="sourceCode cell-code" id="cb8"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb8-1"><a href="#cb8-1" aria-hidden="true" tabindex="-1"></a><span class="co">#print(colSums(is.na(det_17_22)))</span></span>
+<span id="cb8-2"><a href="#cb8-2" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb8-3"><a href="#cb8-3" aria-hidden="true" tabindex="-1"></a><span class="co"># Remover linhas com NA (se necessário)</span></span>
+<span id="cb8-4"><a href="#cb8-4" aria-hidden="true" tabindex="-1"></a>det_17_22 <span class="ot">&lt;-</span> <span class="fu">na.omit</span>(det_17_22)</span>
+<span id="cb8-5"><a href="#cb8-5" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb8-6"><a href="#cb8-6" aria-hidden="true" tabindex="-1"></a><span class="co"># modelo geral sem categoria de referência</span></span>
+<span id="cb8-7"><a href="#cb8-7" aria-hidden="true" tabindex="-1"></a>binomial_model <span class="ot">&lt;-</span> <span class="fu">glm</span>(dengue_pattern_17_22 <span class="sc">~</span> ., <span class="at">data =</span> det_17_22 , <span class="at">family =</span> binomial)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 <div class="cell-output cell-output-stderr">
 <pre><code>Warning: glm.fit: probabilidades ajustadas numericamente 0 ou 1 ocorreu</code></pre>
 </div>
-<div class="sourceCode cell-code" id="cb11"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb11-1"><a href="#cb11-1" aria-hidden="true" tabindex="-1"></a><span class="fu">summary</span>(binomial_model)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="sourceCode cell-code" id="cb10"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb10-1"><a href="#cb10-1" aria-hidden="true" tabindex="-1"></a><span class="fu">summary</span>(binomial_model)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 <div class="cell-output cell-output-stdout">
 <pre><code>
 Call:
@@ -306,139 +278,139 @@ glm(formula = dengue_pattern_17_22 ~ ., family = binomial, data = det_17_22)
 
 Coefficients:
                                Estimate Std. Error z value Pr(&gt;|z|)    
-(Intercept)                  -2.170e+02  1.236e+02  -1.756 0.079076 .  
-muni_code                    -7.918e-07  4.493e-07  -1.762 0.078027 .  
-region                        6.877e-01  4.018e-01   1.712 0.086923 .  
-tipo_regiaonao metropolitana  1.947e-01  2.622e-01   0.743 0.457641    
-koppenAm                     -2.277e-01  4.357e-01  -0.523 0.601319    
-koppenAs                      3.453e-01  5.497e-01   0.628 0.529875    
-koppenAw                     -1.040e-01  4.513e-01  -0.230 0.817813    
-koppenBSh                     9.938e-01  6.756e-01   1.471 0.141269    
-koppenCfa                     2.481e-01  5.131e-01   0.484 0.628683    
-koppenCfb                     1.133e-01  7.948e-01   0.143 0.886596    
-koppenCwa                    -1.087e-01  5.284e-01  -0.206 0.837040    
-koppenCwb                    -4.188e-01  7.023e-01  -0.596 0.550958    
-pop10                         3.098e-05  2.503e-06  12.375  &lt; 2e-16 ***
-prop_residuo                  1.291e-03  4.309e-03   0.300 0.764467    
-prop_esgot                   -2.214e-03  2.870e-03  -0.772 0.440392    
-biomaCaatinga                 2.195e-01  6.797e-01   0.323 0.746704    
-biomaCerrado                 -4.992e-01  4.997e-01  -0.999 0.317825    
-biomaMata Atlantica          -5.214e-01  5.721e-01  -0.911 0.362152    
-biomaPampa                   -1.891e+01  3.255e+02  -0.058 0.953659    
-biomaPantanal                 9.435e-01  9.728e-01   0.970 0.332120    
-dengue_pattern_10_161         2.837e+00  1.639e-01  17.316  &lt; 2e-16 ***
-temp_med_Autumn              -1.761e-01  4.199e-01  -0.419 0.674890    
-umid_med_Autumn              -1.716e-01  9.442e-02  -1.817 0.069167 .  
-precip_tot_Autumn            -6.478e-04  4.943e-04  -1.311 0.190021    
-thr_temp_Autumn              -6.058e-02  2.805e-02  -2.160 0.030770 *  
-thr_umid_Autumn              -4.697e-02  2.119e-02  -2.216 0.026668 *  
-thr_prec_Autumn               5.100e-02  3.267e-02   1.561 0.118449    
-temp_med_Spring               1.116e+00  4.718e-01   2.366 0.017985 *  
-umid_med_Spring               4.113e-01  9.236e-02   4.453 8.45e-06 ***
-precip_tot_Spring            -5.846e-04  5.168e-04  -1.131 0.257995    
-thr_temp_Spring               1.433e-01  3.656e-02   3.920 8.85e-05 ***
-thr_prec_Spring              -5.556e-04  3.060e-02  -0.018 0.985515    
-thr_temp_umid_Spring         -6.303e-02  1.749e-02  -3.604 0.000314 ***
-temp_med_Summer               1.032e-03  3.318e-01   0.003 0.997519    
-umid_med_Summer              -2.483e-02  9.174e-02  -0.271 0.786641    
-precip_tot_Summer            -5.303e-04  3.580e-04  -1.481 0.138552    
-thr_temp_Summer               2.116e+00  1.391e+00   1.521 0.128148    
-thr_umid_Summer               2.048e+00  1.380e+00   1.484 0.137937    
-thr_prec_Summer               2.077e-02  2.811e-02   0.739 0.459938    
-thr_temp_umid_Summer         -1.977e+00  1.380e+00  -1.432 0.152137    
-temp_med_Winter              -8.774e-01  4.417e-01  -1.986 0.046990 *  
-umid_med_Winter              -2.247e-02  7.380e-02  -0.305 0.760743    
-precip_tot_Winter             1.412e-03  8.645e-04   1.633 0.102486    
-thr_temp_Winter               2.217e-02  2.957e-02   0.750 0.453407    
-thr_umid_Winter              -5.841e-03  2.218e-02  -0.263 0.792277    
-thr_prec_Winter              -8.796e-02  3.282e-02  -2.680 0.007356 ** 
-thr_temp_umid_Winter          6.682e-03  2.508e-02   0.266 0.789927    
+(Intercept)                  -1.910e+02  1.246e+02  -1.532 0.125439    
+muni_code                    -8.344e-07  4.525e-07  -1.844 0.065201 .  
+region                        7.063e-01  4.050e-01   1.744 0.081154 .  
+tipo_regiaonao metropolitana  3.587e-01  2.729e-01   1.315 0.188669    
+koppenAm                     -2.803e-01  4.391e-01  -0.638 0.523191    
+koppenAs                      2.498e-01  5.519e-01   0.453 0.650829    
+koppenAw                     -1.680e-01  4.531e-01  -0.371 0.710811    
+koppenBSh                     8.835e-01  6.765e-01   1.306 0.191585    
+koppenCfa                     1.578e-01  5.137e-01   0.307 0.758727    
+koppenCfb                    -4.704e-02  8.225e-01  -0.057 0.954390    
+koppenCwa                    -1.252e-01  5.296e-01  -0.236 0.813189    
+koppenCwb                    -4.102e-01  7.047e-01  -0.582 0.560514    
+pop22                         2.842e-05  2.258e-06  12.585  &lt; 2e-16 ***
+prop_residuo                  1.904e-03  4.346e-03   0.438 0.661369    
+prop_esgot                   -2.249e-03  2.878e-03  -0.782 0.434498    
+biomaCaatinga                 2.640e-01  6.909e-01   0.382 0.702390    
+biomaCerrado                 -4.391e-01  5.109e-01  -0.859 0.390126    
+biomaMata Atlantica          -4.321e-01  5.837e-01  -0.740 0.459127    
+biomaPampa                   -1.829e+01  3.351e+02  -0.055 0.956484    
+biomaPantanal                 1.133e+00  9.839e-01   1.151 0.249663    
+dengue_pattern_10_161         2.819e+00  1.641e-01  17.181  &lt; 2e-16 ***
+temp_med_Autumn              -2.315e-01  4.266e-01  -0.543 0.587451    
+umid_med_Autumn              -1.474e-01  9.562e-02  -1.542 0.123123    
+precip_tot_Autumn            -8.649e-04  5.062e-04  -1.709 0.087538 .  
+thr_temp_Autumn              -6.387e-02  2.823e-02  -2.262 0.023667 *  
+thr_umid_Autumn              -4.981e-02  2.138e-02  -2.330 0.019799 *  
+thr_prec_Autumn               5.355e-02  3.317e-02   1.614 0.106473    
+temp_med_Spring               1.127e+00  4.745e-01   2.375 0.017558 *  
+umid_med_Spring               4.006e-01  9.248e-02   4.332 1.48e-05 ***
+precip_tot_Spring            -6.077e-04  5.230e-04  -1.162 0.245266    
+thr_temp_Spring               1.513e-01  3.722e-02   4.064 4.83e-05 ***
+thr_prec_Spring               1.245e-03  3.086e-02   0.040 0.967803    
+thr_temp_umid_Spring         -5.966e-02  1.750e-02  -3.409 0.000653 ***
+temp_med_Summer              -8.156e-03  3.356e-01  -0.024 0.980609    
+umid_med_Summer              -3.771e-02  9.246e-02  -0.408 0.683391    
+precip_tot_Summer            -4.427e-04  3.619e-04  -1.223 0.221219    
+thr_temp_Summer               1.818e+00  1.403e+00   1.296 0.195080    
+thr_umid_Summer               1.747e+00  1.392e+00   1.255 0.209457    
+thr_prec_Summer               1.597e-02  2.821e-02   0.566 0.571216    
+thr_temp_umid_Summer         -1.677e+00  1.392e+00  -1.204 0.228403    
+temp_med_Winter              -8.198e-01  4.490e-01  -1.826 0.067916 .  
+umid_med_Winter              -2.521e-02  7.511e-02  -0.336 0.737133    
+precip_tot_Winter             1.485e-03  8.814e-04   1.684 0.092132 .  
+thr_temp_Winter               2.817e-02  2.993e-02   0.941 0.346675    
+thr_umid_Winter               1.329e-03  2.244e-02   0.059 0.952776    
+thr_prec_Winter              -8.611e-02  3.308e-02  -2.603 0.009240 ** 
+thr_temp_umid_Winter         -5.202e-04  2.541e-02  -0.020 0.983667    
 ---
 Signif. codes:  0 '***' 0.001 '**' 0.01 '*' 0.05 '.' 0.1 ' ' 1
 
 (Dispersion parameter for binomial family taken to be 1)
 
-    Null deviance: 4425.4  on 5561  degrees of freedom
-Residual deviance: 2056.0  on 5515  degrees of freedom
-AIC: 2150
+    Null deviance: 4426.9  on 5566  degrees of freedom
+Residual deviance: 2034.0  on 5520  degrees of freedom
+AIC: 2128
 
 Number of Fisher Scoring iterations: 17</code></pre>
 </div>
-<div class="sourceCode cell-code" id="cb13"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb13-1"><a href="#cb13-1" aria-hidden="true" tabindex="-1"></a><span class="co"># 2. Verificação de Multicolinearidade (VIF) </span></span>
-<span id="cb13-2"><a href="#cb13-2" aria-hidden="true" tabindex="-1"></a><span class="co"># VIF só pode ser calculado em variáveis numéricas, então convertemos as categóricas para dummies</span></span>
-<span id="cb13-3"><a href="#cb13-3" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb13-4"><a href="#cb13-4" aria-hidden="true" tabindex="-1"></a><span class="co"># Calcular os valores de VIF</span></span>
-<span id="cb13-5"><a href="#cb13-5" aria-hidden="true" tabindex="-1"></a>vif_values <span class="ot">&lt;-</span> <span class="fu">vif</span>(binomial_model) </span>
-<span id="cb13-6"><a href="#cb13-6" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb13-7"><a href="#cb13-7" aria-hidden="true" tabindex="-1"></a><span class="co"># Converter VIF para um dataframe, extraindo a coluna correta</span></span>
-<span id="cb13-8"><a href="#cb13-8" aria-hidden="true" tabindex="-1"></a>vif_df <span class="ot">&lt;-</span> <span class="fu">as.data.frame</span>(vif_values)</span>
-<span id="cb13-9"><a href="#cb13-9" aria-hidden="true" tabindex="-1"></a><span class="fu">colnames</span>(vif_df) <span class="ot">&lt;-</span> <span class="fu">c</span>(<span class="st">"GVIF"</span>, <span class="st">"Df"</span>, <span class="st">"GVIF_ajustado"</span>)</span>
-<span id="cb13-10"><a href="#cb13-10" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb13-11"><a href="#cb13-11" aria-hidden="true" tabindex="-1"></a><span class="co"># Exibir os valores de VIF ajustados</span></span>
-<span id="cb13-12"><a href="#cb13-12" aria-hidden="true" tabindex="-1"></a><span class="fu">cat</span>(<span class="st">"</span><span class="sc">\n</span><span class="st">Valores de VIF ajustados:</span><span class="sc">\n</span><span class="st">"</span>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="sourceCode cell-code" id="cb12"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb12-1"><a href="#cb12-1" aria-hidden="true" tabindex="-1"></a><span class="co"># 2. Verificação de Multicolinearidade (VIF) </span></span>
+<span id="cb12-2"><a href="#cb12-2" aria-hidden="true" tabindex="-1"></a><span class="co"># VIF só pode ser calculado em variáveis numéricas, então convertemos as categóricas para dummies</span></span>
+<span id="cb12-3"><a href="#cb12-3" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb12-4"><a href="#cb12-4" aria-hidden="true" tabindex="-1"></a><span class="co"># Calcular os valores de VIF</span></span>
+<span id="cb12-5"><a href="#cb12-5" aria-hidden="true" tabindex="-1"></a>vif_values <span class="ot">&lt;-</span> <span class="fu">vif</span>(binomial_model) </span>
+<span id="cb12-6"><a href="#cb12-6" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb12-7"><a href="#cb12-7" aria-hidden="true" tabindex="-1"></a><span class="co"># Converter VIF para um dataframe, extraindo a coluna correta</span></span>
+<span id="cb12-8"><a href="#cb12-8" aria-hidden="true" tabindex="-1"></a>vif_df <span class="ot">&lt;-</span> <span class="fu">as.data.frame</span>(vif_values)</span>
+<span id="cb12-9"><a href="#cb12-9" aria-hidden="true" tabindex="-1"></a><span class="fu">colnames</span>(vif_df) <span class="ot">&lt;-</span> <span class="fu">c</span>(<span class="st">"GVIF"</span>, <span class="st">"Df"</span>, <span class="st">"GVIF_ajustado"</span>)</span>
+<span id="cb12-10"><a href="#cb12-10" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb12-11"><a href="#cb12-11" aria-hidden="true" tabindex="-1"></a><span class="co"># Exibir os valores de VIF ajustados</span></span>
+<span id="cb12-12"><a href="#cb12-12" aria-hidden="true" tabindex="-1"></a><span class="fu">cat</span>(<span class="st">"</span><span class="sc">\n</span><span class="st">Valores de VIF ajustados:</span><span class="sc">\n</span><span class="st">"</span>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 <div class="cell-output cell-output-stdout">
 <pre><code>
 Valores de VIF ajustados:</code></pre>
 </div>
-<div class="sourceCode cell-code" id="cb15"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb15-1"><a href="#cb15-1" aria-hidden="true" tabindex="-1"></a><span class="fu">print</span>(vif_df)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="sourceCode cell-code" id="cb14"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb14-1"><a href="#cb14-1" aria-hidden="true" tabindex="-1"></a><span class="fu">print</span>(vif_df)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 <div class="cell-output cell-output-stdout">
 <pre><code>                             GVIF Df GVIF_ajustado
-muni_code               60.523213  1      7.779667
-region                  60.424127  1      7.773296
-tipo_regiao              1.466636  1      1.211048
-koppen                1649.870620  8      1.588878
-pop10                    2.206075  1      1.485286
-prop_residuo             1.989170  1      1.410379
-prop_esgot               2.729343  1      1.652072
-bioma                  119.154815  5      1.612914
-dengue_pattern_10_16     1.534800  1      1.238870
-temp_med_Autumn        252.630326  1     15.894349
-umid_med_Autumn        143.056860  1     11.960638
-precip_tot_Autumn       31.235627  1      5.588884
-thr_temp_Autumn         84.050900  1      9.167928
-thr_umid_Autumn         31.248020  1      5.589993
-thr_prec_Autumn         63.849983  1      7.990618
-temp_med_Spring        269.721366  1     16.423196
-umid_med_Spring        130.401977  1     11.419368
-precip_tot_Spring       23.921880  1      4.891000
-thr_temp_Spring         37.130454  1      6.093476
-thr_prec_Spring         44.150542  1      6.644587
-thr_temp_umid_Spring    23.999569  1      4.898936
-temp_med_Summer         55.723691  1      7.464830
-umid_med_Summer         64.243788  1      8.015222
-precip_tot_Summer       19.578758  1      4.424789
-thr_temp_Summer       3739.291063  1     61.149743
-thr_umid_Summer      32611.671032  1    180.587018
-thr_prec_Summer         48.318597  1      6.951158
-thr_temp_umid_Summer 33374.895899  1    182.687974
-temp_med_Winter        499.560421  1     22.350848
-umid_med_Winter        257.284531  1     16.040091
-precip_tot_Winter       34.831712  1      5.901840
-thr_temp_Winter        163.816649  1     12.799088
-thr_umid_Winter        153.634297  1     12.394930
-thr_prec_Winter         31.765633  1      5.636101
-thr_temp_umid_Winter   150.697441  1     12.275889</code></pre>
+muni_code               60.220629  1      7.760195
+region                  60.240760  1      7.761492
+tipo_regiao              1.488115  1      1.219883
+koppen                1580.315109  8      1.584607
+pop22                    2.322953  1      1.524124
+prop_residuo             1.992176  1      1.411445
+prop_esgot               2.717101  1      1.648363
+bioma                  120.268010  5      1.614414
+dengue_pattern_10_16     1.515823  1      1.231188
+temp_med_Autumn        253.035966  1     15.907104
+umid_med_Autumn        144.018937  1     12.000789
+precip_tot_Autumn       31.119768  1      5.578509
+thr_temp_Autumn         82.083076  1      9.059971
+thr_umid_Autumn         31.547066  1      5.616677
+thr_prec_Autumn         63.713528  1      7.982075
+temp_med_Spring        264.218825  1     16.254809
+umid_med_Spring        128.790211  1     11.348577
+precip_tot_Spring       24.383298  1      4.937945
+thr_temp_Spring         35.560691  1      5.963279
+thr_prec_Spring         44.482201  1      6.669498
+thr_temp_umid_Spring    23.820643  1      4.880640
+temp_med_Summer         55.445607  1      7.446181
+umid_med_Summer         63.950841  1      7.996927
+precip_tot_Summer       19.562244  1      4.422923
+thr_temp_Summer       3372.891820  1     58.076603
+thr_umid_Summer      32969.989988  1    181.576403
+thr_prec_Summer         47.684861  1      6.905423
+thr_temp_umid_Summer 33557.144932  1    183.186094
+temp_med_Winter        500.291179  1     22.367190
+umid_med_Winter        261.178330  1     16.161013
+precip_tot_Winter       35.100895  1      5.924601
+thr_temp_Winter        162.870526  1     12.762074
+thr_umid_Winter        154.730739  1     12.439081
+thr_prec_Winter         31.469064  1      5.609729
+thr_temp_umid_Winter   152.933476  1     12.366628</code></pre>
 </div>
-<div class="sourceCode cell-code" id="cb17"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb17-1"><a href="#cb17-1" aria-hidden="true" tabindex="-1"></a><span class="co"># Criar um dataframe com variáveis que possuem VIF ≥ 10</span></span>
-<span id="cb17-2"><a href="#cb17-2" aria-hidden="true" tabindex="-1"></a>high_vif_vars <span class="ot">&lt;-</span> <span class="fu">rownames</span>(vif_df[vif_df<span class="sc">$</span>GVIF_ajustado <span class="sc">&gt;=</span> <span class="dv">10</span>, ])</span>
-<span id="cb17-3"><a href="#cb17-3" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb17-4"><a href="#cb17-4" aria-hidden="true" tabindex="-1"></a><span class="co"># Salvar as variáveis com alto VIF em um arquivo CSV</span></span>
-<span id="cb17-5"><a href="#cb17-5" aria-hidden="true" tabindex="-1"></a><span class="fu">write.csv</span>(<span class="fu">data.frame</span>(<span class="at">Variavel =</span> high_vif_vars, <span class="at">VIF_Ajustado =</span> vif_df<span class="sc">$</span>GVIF_ajustado[high_vif_vars]), </span>
-<span id="cb17-6"><a href="#cb17-6" aria-hidden="true" tabindex="-1"></a>          <span class="st">"vif_binomial_model_17_22.csv"</span>, <span class="at">row.names =</span> <span class="cn">FALSE</span>)</span>
-<span id="cb17-7"><a href="#cb17-7" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb17-8"><a href="#cb17-8" aria-hidden="true" tabindex="-1"></a><span class="co"># Remover variáveis com VIF ≥ 10 do banco de dados</span></span>
-<span id="cb17-9"><a href="#cb17-9" aria-hidden="true" tabindex="-1"></a>det_17_22 <span class="ot">&lt;-</span> det_17_22[, <span class="sc">!</span>(<span class="fu">names</span>(det_17_22) <span class="sc">%in%</span> high_vif_vars)]</span>
-<span id="cb17-10"><a href="#cb17-10" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb17-11"><a href="#cb17-11" aria-hidden="true" tabindex="-1"></a><span class="co"># Exibir as colunas restantes no banco de dados atualizado</span></span>
-<span id="cb17-12"><a href="#cb17-12" aria-hidden="true" tabindex="-1"></a><span class="fu">cat</span>(<span class="st">"</span><span class="sc">\n</span><span class="st">Colunas restantes após remoção de variáveis com alto VIF:</span><span class="sc">\n</span><span class="st">"</span>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="sourceCode cell-code" id="cb16"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb16-1"><a href="#cb16-1" aria-hidden="true" tabindex="-1"></a><span class="co"># Criar um dataframe com variáveis que possuem VIF ≥ 10</span></span>
+<span id="cb16-2"><a href="#cb16-2" aria-hidden="true" tabindex="-1"></a>high_vif_vars <span class="ot">&lt;-</span> <span class="fu">rownames</span>(vif_df[vif_df<span class="sc">$</span>GVIF_ajustado <span class="sc">&gt;=</span> <span class="dv">10</span>, ])</span>
+<span id="cb16-3"><a href="#cb16-3" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb16-4"><a href="#cb16-4" aria-hidden="true" tabindex="-1"></a><span class="co"># Salvar as variáveis com alto VIF em um arquivo CSV</span></span>
+<span id="cb16-5"><a href="#cb16-5" aria-hidden="true" tabindex="-1"></a><span class="fu">write.csv</span>(<span class="fu">data.frame</span>(<span class="at">Variavel =</span> high_vif_vars, <span class="at">VIF_Ajustado =</span> vif_df<span class="sc">$</span>GVIF_ajustado[high_vif_vars]), </span>
+<span id="cb16-6"><a href="#cb16-6" aria-hidden="true" tabindex="-1"></a>          <span class="st">"vif_binomial_model_17_22.csv"</span>, <span class="at">row.names =</span> <span class="cn">FALSE</span>)</span>
+<span id="cb16-7"><a href="#cb16-7" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb16-8"><a href="#cb16-8" aria-hidden="true" tabindex="-1"></a><span class="co"># Remover variáveis com VIF ≥ 10 do banco de dados</span></span>
+<span id="cb16-9"><a href="#cb16-9" aria-hidden="true" tabindex="-1"></a>det_17_22 <span class="ot">&lt;-</span> det_17_22[, <span class="sc">!</span>(<span class="fu">names</span>(det_17_22) <span class="sc">%in%</span> high_vif_vars)]</span>
+<span id="cb16-10"><a href="#cb16-10" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb16-11"><a href="#cb16-11" aria-hidden="true" tabindex="-1"></a><span class="co"># Exibir as colunas restantes no banco de dados atualizado</span></span>
+<span id="cb16-12"><a href="#cb16-12" aria-hidden="true" tabindex="-1"></a><span class="fu">cat</span>(<span class="st">"</span><span class="sc">\n</span><span class="st">Colunas restantes após remoção de variáveis com alto VIF:</span><span class="sc">\n</span><span class="st">"</span>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 <div class="cell-output cell-output-stdout">
 <pre><code>
 Colunas restantes após remoção de variáveis com alto VIF:</code></pre>
 </div>
-<div class="sourceCode cell-code" id="cb19"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb19-1"><a href="#cb19-1" aria-hidden="true" tabindex="-1"></a><span class="fu">print</span>(<span class="fu">names</span>(det_17_22))</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="sourceCode cell-code" id="cb18"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb18-1"><a href="#cb18-1" aria-hidden="true" tabindex="-1"></a><span class="fu">print</span>(<span class="fu">names</span>(det_17_22))</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 <div class="cell-output cell-output-stdout">
 <pre><code> [1] "muni_code"            "region"               "tipo_regiao"         
- [4] "koppen"               "pop10"                "prop_residuo"        
+ [4] "koppen"               "pop22"                "prop_residuo"        
  [7] "prop_esgot"           "bioma"                "dengue_pattern_10_16"
 [10] "dengue_pattern_17_22" "precip_tot_Autumn"    "thr_temp_Autumn"     
 [13] "thr_umid_Autumn"      "thr_prec_Autumn"      "precip_tot_Spring"   
@@ -446,29 +418,29 @@ Colunas restantes após remoção de variáveis com alto VIF:</code></pre>
 [19] "temp_med_Summer"      "umid_med_Summer"      "precip_tot_Summer"   
 [22] "thr_prec_Summer"      "precip_tot_Winter"    "thr_prec_Winter"     </code></pre>
 </div>
-<div class="sourceCode cell-code" id="cb21"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb21-1"><a href="#cb21-1" aria-hidden="true" tabindex="-1"></a><span class="co"># 3. Verificação de Outliers com Resíduos Padronizados</span></span>
-<span id="cb21-2"><a href="#cb21-2" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb21-3"><a href="#cb21-3" aria-hidden="true" tabindex="-1"></a><span class="co"># Criar uma coluna de resíduos padronizados</span></span>
-<span id="cb21-4"><a href="#cb21-4" aria-hidden="true" tabindex="-1"></a>det_17_22<span class="sc">$</span>residuos <span class="ot">&lt;-</span> <span class="fu">rstandard</span>(binomial_model)</span>
-<span id="cb21-5"><a href="#cb21-5" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb21-6"><a href="#cb21-6" aria-hidden="true" tabindex="-1"></a><span class="co"># Filtrar apenas os outliers (resíduos &lt;= -3 ou &gt;= 3)</span></span>
-<span id="cb21-7"><a href="#cb21-7" aria-hidden="true" tabindex="-1"></a>outliers <span class="ot">&lt;-</span> det_17_22 <span class="sc">%&gt;%</span> <span class="fu">filter</span>(residuos <span class="sc">&lt;=</span> <span class="sc">-</span><span class="dv">3</span> <span class="sc">|</span> residuos <span class="sc">&gt;=</span> <span class="dv">3</span>)</span>
-<span id="cb21-8"><a href="#cb21-8" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb21-9"><a href="#cb21-9" aria-hidden="true" tabindex="-1"></a><span class="co"># Verificar o novo banco de dados com os outliers</span></span>
-<span id="cb21-10"><a href="#cb21-10" aria-hidden="true" tabindex="-1"></a><span class="fu">print</span>(outliers)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="sourceCode cell-code" id="cb20"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb20-1"><a href="#cb20-1" aria-hidden="true" tabindex="-1"></a><span class="co"># 3. Verificação de Outliers com Resíduos Padronizados</span></span>
+<span id="cb20-2"><a href="#cb20-2" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb20-3"><a href="#cb20-3" aria-hidden="true" tabindex="-1"></a><span class="co"># Criar uma coluna de resíduos padronizados</span></span>
+<span id="cb20-4"><a href="#cb20-4" aria-hidden="true" tabindex="-1"></a>det_17_22<span class="sc">$</span>residuos <span class="ot">&lt;-</span> <span class="fu">rstandard</span>(binomial_model)</span>
+<span id="cb20-5"><a href="#cb20-5" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb20-6"><a href="#cb20-6" aria-hidden="true" tabindex="-1"></a><span class="co"># Filtrar apenas os outliers (resíduos &lt;= -3 ou &gt;= 3)</span></span>
+<span id="cb20-7"><a href="#cb20-7" aria-hidden="true" tabindex="-1"></a>outliers <span class="ot">&lt;-</span> det_17_22 <span class="sc">%&gt;%</span> <span class="fu">filter</span>(residuos <span class="sc">&lt;=</span> <span class="sc">-</span><span class="dv">3</span> <span class="sc">|</span> residuos <span class="sc">&gt;=</span> <span class="dv">3</span>)</span>
+<span id="cb20-8"><a href="#cb20-8" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb20-9"><a href="#cb20-9" aria-hidden="true" tabindex="-1"></a><span class="co"># Verificar o novo banco de dados com os outliers</span></span>
+<span id="cb20-10"><a href="#cb20-10" aria-hidden="true" tabindex="-1"></a><span class="fu">print</span>(outliers)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 <div class="cell-output cell-output-stdout">
 <pre><code># A tibble: 9 × 25
-  muni_code region tipo_regiao       koppen  pop10 prop_residuo prop_esgot bioma
+  muni_code region tipo_regiao       koppen  pop22 prop_residuo prop_esgot bioma
       &lt;dbl&gt;  &lt;dbl&gt; &lt;fct&gt;             &lt;fct&gt;   &lt;dbl&gt;        &lt;dbl&gt;      &lt;dbl&gt; &lt;fct&gt;
-1   1303536      1 metropolitana     Af      27175         67.0      37.5  Amaz…
-2   2105302      2 nao metropolitana Aw     247505         21.1       3.05 Cerr…
-3   2307007      2 nao metropolitana As      32236         40.1      38.3  Caat…
-4   2307254      2 nao metropolitana As      17002         94.2      47.7  Caat…
-5   3132404      3 nao metropolitana Cwb     90658         61.9      56.8  Mata…
-6   3302502      3 metropolitana     Am     227322         97.8      78.3  Mata…
-7   3303807      3 nao metropolitana Cfb     37533         88.9      57.7  Mata…
-8   3303906      3 nao metropolitana Cfb    295917         98.0      91.8  Mata…
-9   3510609      3 metropolitana     Cfb    369584         94.4      87.7  Mata…
+1   1303536      1 metropolitana     Af      30762         67.0      37.5  Amaz…
+2   2105302      2 nao metropolitana Aw     273027         21.1       3.05 Cerr…
+3   2307007      2 nao metropolitana As      30181         40.1      38.3  Caat…
+4   2307254      2 nao metropolitana As      29472         94.2      47.7  Caat…
+5   3132404      3 nao metropolitana Cwb     90776         61.9      56.8  Mata…
+6   3302502      3 metropolitana     Am     248208         97.8      78.3  Mata…
+7   3303807      3 nao metropolitana Cfb     50592         88.9      57.7  Mata…
+8   3303906      3 nao metropolitana Cfb    304758         98.0      91.8  Mata…
+9   3510609      3 metropolitana     Cfb    406221         94.4      87.7  Mata…
 # ℹ 17 more variables: dengue_pattern_10_16 &lt;fct&gt;, dengue_pattern_17_22 &lt;fct&gt;,
 #   precip_tot_Autumn &lt;dbl&gt;, thr_temp_Autumn &lt;dbl&gt;, thr_umid_Autumn &lt;dbl&gt;,
 #   thr_prec_Autumn &lt;dbl&gt;, precip_tot_Spring &lt;dbl&gt;, thr_temp_Spring &lt;dbl&gt;,
@@ -476,44 +448,23 @@ Colunas restantes após remoção de variáveis com alto VIF:</code></pre>
 #   umid_med_Summer &lt;dbl&gt;, precip_tot_Summer &lt;dbl&gt;, thr_prec_Summer &lt;dbl&gt;,
 #   precip_tot_Winter &lt;dbl&gt;, thr_prec_Winter &lt;dbl&gt;, residuos &lt;dbl&gt;</code></pre>
 </div>
-<div class="sourceCode cell-code" id="cb23"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb23-1"><a href="#cb23-1" aria-hidden="true" tabindex="-1"></a><span class="co"># Salvando banco</span></span>
-<span id="cb23-2"><a href="#cb23-2" aria-hidden="true" tabindex="-1"></a><span class="fu">write.csv</span>(outliers, <span class="st">"outliers_binomial_model_17_22.csv"</span>, <span class="at">row.names =</span> <span class="cn">FALSE</span>)</span>
-<span id="cb23-3"><a href="#cb23-3" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb23-4"><a href="#cb23-4" aria-hidden="true" tabindex="-1"></a><span class="co"># Removendo as observações que eram outliers (≤ -3 ou ≥ 3).</span></span>
-<span id="cb23-5"><a href="#cb23-5" aria-hidden="true" tabindex="-1"></a>det_17_22<span class="ot">&lt;-</span> det_17_22 <span class="sc">%&gt;%</span> <span class="fu">filter</span>(residuos <span class="sc">&gt;</span> <span class="sc">-</span><span class="dv">3</span> <span class="sc">&amp;</span> residuos <span class="sc">&lt;</span> <span class="dv">3</span>)</span>
-<span id="cb23-6"><a href="#cb23-6" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb23-7"><a href="#cb23-7" aria-hidden="true" tabindex="-1"></a><span class="co">#Visualization</span></span>
-<span id="cb23-8"><a href="#cb23-8" aria-hidden="true" tabindex="-1"></a><span class="fu">ggplot</span>(det_17_22  , <span class="fu">aes</span>(<span class="at">x =</span> <span class="dv">1</span><span class="sc">:</span><span class="fu">nrow</span>(det_17_22), <span class="at">y =</span> residuos)) <span class="sc">+</span></span>
-<span id="cb23-9"><a href="#cb23-9" aria-hidden="true" tabindex="-1"></a>  <span class="fu">geom_point</span>() <span class="sc">+</span></span>
-<span id="cb23-10"><a href="#cb23-10" aria-hidden="true" tabindex="-1"></a>  <span class="fu">geom_hline</span>(<span class="at">yintercept =</span> <span class="fu">c</span>(<span class="sc">-</span><span class="dv">3</span>, <span class="dv">3</span>), <span class="at">linetype =</span> <span class="st">"dashed"</span>, <span class="at">color =</span> <span class="st">"red"</span>) <span class="sc">+</span></span>
-<span id="cb23-11"><a href="#cb23-11" aria-hidden="true" tabindex="-1"></a>  <span class="fu">labs</span>(<span class="at">title =</span> <span class="st">"Verificação de Outliers"</span>, <span class="at">x =</span> <span class="st">"Índice"</span>, <span class="at">y =</span> <span class="st">"Resíduos Padronizados"</span>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="sourceCode cell-code" id="cb22"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb22-1"><a href="#cb22-1" aria-hidden="true" tabindex="-1"></a><span class="co"># Salvando banco</span></span>
+<span id="cb22-2"><a href="#cb22-2" aria-hidden="true" tabindex="-1"></a><span class="fu">write.csv</span>(outliers, <span class="st">"outliers_binomial_model_17_22.csv"</span>, <span class="at">row.names =</span> <span class="cn">FALSE</span>)</span>
+<span id="cb22-3"><a href="#cb22-3" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb22-4"><a href="#cb22-4" aria-hidden="true" tabindex="-1"></a><span class="co"># Removendo as observações que eram outliers (≤ -3 ou ≥ 3).</span></span>
+<span id="cb22-5"><a href="#cb22-5" aria-hidden="true" tabindex="-1"></a>det_17_22<span class="ot">&lt;-</span> det_17_22 <span class="sc">%&gt;%</span> <span class="fu">filter</span>(residuos <span class="sc">&gt;</span> <span class="sc">-</span><span class="dv">3</span> <span class="sc">&amp;</span> residuos <span class="sc">&lt;</span> <span class="dv">3</span>)</span>
+<span id="cb22-6"><a href="#cb22-6" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb22-7"><a href="#cb22-7" aria-hidden="true" tabindex="-1"></a><span class="co">#Visualization</span></span>
+<span id="cb22-8"><a href="#cb22-8" aria-hidden="true" tabindex="-1"></a><span class="fu">ggplot</span>(det_17_22  , <span class="fu">aes</span>(<span class="at">x =</span> <span class="dv">1</span><span class="sc">:</span><span class="fu">nrow</span>(det_17_22), <span class="at">y =</span> residuos)) <span class="sc">+</span></span>
+<span id="cb22-9"><a href="#cb22-9" aria-hidden="true" tabindex="-1"></a>  <span class="fu">geom_point</span>() <span class="sc">+</span></span>
+<span id="cb22-10"><a href="#cb22-10" aria-hidden="true" tabindex="-1"></a>  <span class="fu">geom_hline</span>(<span class="at">yintercept =</span> <span class="fu">c</span>(<span class="sc">-</span><span class="dv">3</span>, <span class="dv">3</span>), <span class="at">linetype =</span> <span class="st">"dashed"</span>, <span class="at">color =</span> <span class="st">"red"</span>) <span class="sc">+</span></span>
+<span id="cb22-11"><a href="#cb22-11" aria-hidden="true" tabindex="-1"></a>  <span class="fu">labs</span>(<span class="at">title =</span> <span class="st">"Verificação de Outliers"</span>, <span class="at">x =</span> <span class="st">"Índice"</span>, <span class="at">y =</span> <span class="st">"Resíduos Padronizados"</span>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 <div class="cell-output-display">
 <div>
 <figure class="figure">
 <p><img src="model_binomial_17_22_files/figure-html/unnamed-chunk-3-1.png" class="img-fluid figure-img" width="672"></p>
 </figure>
 </div>
-</div>
-<div class="sourceCode cell-code" id="cb24"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb24-1"><a href="#cb24-1" aria-hidden="true" tabindex="-1"></a><span class="fu">colSums</span>(<span class="fu">is.na</span>(det_17_22))</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
-<div class="cell-output cell-output-stdout">
-<pre><code>           muni_code               region          tipo_regiao 
-                   0                    0                    0 
-              koppen                pop10         prop_residuo 
-                   0                    0                    0 
-          prop_esgot                bioma dengue_pattern_10_16 
-                   0                    0                    0 
-dengue_pattern_17_22    precip_tot_Autumn      thr_temp_Autumn 
-                   0                    0                    0 
-     thr_umid_Autumn      thr_prec_Autumn    precip_tot_Spring 
-                   0                    0                    0 
-     thr_temp_Spring      thr_prec_Spring thr_temp_umid_Spring 
-                   0                    0                    0 
-     temp_med_Summer      umid_med_Summer    precip_tot_Summer 
-                   0                    0                    0 
-     thr_prec_Summer    precip_tot_Winter      thr_prec_Winter 
-                   0                    0                    0 
-            residuos 
-                   0 </code></pre>
 </div>
 </div>
 </section>
@@ -525,31 +476,31 @@ dengue_pattern_17_22    precip_tot_Autumn      thr_temp_Autumn
 </ul>
 <p>Para cada categoria (em relação à referência “0”), o modelo estima coeficientes (Coefficients) para cada variável preditora. Esses coeficientes representam o efeito de cada variável sobre a probabilidade de estar nas categorias 1, em comparação com 0.</p>
 <div class="cell">
-<div class="sourceCode cell-code" id="cb26"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb26-1"><a href="#cb26-1" aria-hidden="true" tabindex="-1"></a><span class="co"># Remover colunas pelo nome</span></span>
-<span id="cb26-2"><a href="#cb26-2" aria-hidden="true" tabindex="-1"></a>det_17_22 <span class="ot">&lt;-</span> det_17_22[, <span class="sc">!</span><span class="fu">names</span>(det_17_22) <span class="sc">%in%</span> <span class="fu">c</span>(<span class="st">"muni_code"</span>)]</span>
-<span id="cb26-3"><a href="#cb26-3" aria-hidden="true" tabindex="-1"></a>det_17_22<span class="sc">$</span>region <span class="ot">&lt;-</span> <span class="fu">as.factor</span>(det_17_22<span class="sc">$</span>region)</span>
-<span id="cb26-4"><a href="#cb26-4" aria-hidden="true" tabindex="-1"></a><span class="co"># removendo as linhas com Na</span></span>
-<span id="cb26-5"><a href="#cb26-5" aria-hidden="true" tabindex="-1"></a>det_17_22 <span class="ot">&lt;-</span> det_17_22<span class="sc">%&gt;%</span> </span>
-<span id="cb26-6"><a href="#cb26-6" aria-hidden="true" tabindex="-1"></a>  <span class="fu">filter</span>(<span class="sc">!</span><span class="fu">if_any</span>(<span class="fu">where</span>(is.numeric), is.na))</span>
-<span id="cb26-7"><a href="#cb26-7" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb26-8"><a href="#cb26-8" aria-hidden="true" tabindex="-1"></a><span class="co"># Definir a categoria de referência para todas as variáveis categóricas</span></span>
-<span id="cb26-9"><a href="#cb26-9" aria-hidden="true" tabindex="-1"></a>det_17_22<span class="sc">$</span>dengue_pattern_17_22 <span class="ot">&lt;-</span> <span class="fu">relevel</span>(det_17_22<span class="sc">$</span>dengue_pattern_17_22, <span class="at">ref =</span> <span class="st">"0"</span>) <span class="co"># variável dependente</span></span>
-<span id="cb26-10"><a href="#cb26-10" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb26-11"><a href="#cb26-11" aria-hidden="true" tabindex="-1"></a><span class="co"># Variáveis independentes</span></span>
-<span id="cb26-12"><a href="#cb26-12" aria-hidden="true" tabindex="-1"></a>det_17_22<span class="sc">$</span>bioma <span class="ot">&lt;-</span> <span class="fu">relevel</span>(det_17_22<span class="sc">$</span>bioma, <span class="at">ref =</span> <span class="st">"Mata Atlantica"</span>)</span>
-<span id="cb26-13"><a href="#cb26-13" aria-hidden="true" tabindex="-1"></a>det_17_22<span class="sc">$</span>tipo_regiao <span class="ot">&lt;-</span> <span class="fu">relevel</span>(det_17_22<span class="sc">$</span>tipo_regiao , <span class="at">ref =</span> <span class="st">"nao metropolitana"</span>)</span>
-<span id="cb26-14"><a href="#cb26-14" aria-hidden="true" tabindex="-1"></a>det_17_22<span class="sc">$</span>dengue_pattern_10_16 <span class="ot">&lt;-</span> <span class="fu">relevel</span>(det_17_22<span class="sc">$</span>dengue_pattern_10_16, <span class="at">ref =</span> <span class="st">"0"</span>)</span>
-<span id="cb26-15"><a href="#cb26-15" aria-hidden="true" tabindex="-1"></a>det_17_22<span class="sc">$</span>koppen <span class="ot">&lt;-</span> <span class="fu">relevel</span>(det_17_22<span class="sc">$</span>koppen, <span class="at">ref =</span> <span class="st">"Aw"</span>)</span>
-<span id="cb26-16"><a href="#cb26-16" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb26-17"><a href="#cb26-17" aria-hidden="true" tabindex="-1"></a><span class="co"># Modelo com tudo</span></span>
-<span id="cb26-18"><a href="#cb26-18" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb26-19"><a href="#cb26-19" aria-hidden="true" tabindex="-1"></a><span class="co"># excluindo os resídos</span></span>
-<span id="cb26-20"><a href="#cb26-20" aria-hidden="true" tabindex="-1"></a>det_17_22<span class="sc">$</span>residuos<span class="ot">&lt;-</span> <span class="cn">NULL</span></span>
-<span id="cb26-21"><a href="#cb26-21" aria-hidden="true" tabindex="-1"></a>binomial_model <span class="ot">&lt;-</span> <span class="fu">glm</span>(dengue_pattern_17_22 <span class="sc">~</span> ., <span class="at">data =</span> det_17_22, <span class="at">family =</span> binomial)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="sourceCode cell-code" id="cb23"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb23-1"><a href="#cb23-1" aria-hidden="true" tabindex="-1"></a><span class="co"># Remover colunas pelo nome</span></span>
+<span id="cb23-2"><a href="#cb23-2" aria-hidden="true" tabindex="-1"></a>det_17_22 <span class="ot">&lt;-</span> det_17_22[, <span class="sc">!</span><span class="fu">names</span>(det_17_22) <span class="sc">%in%</span> <span class="fu">c</span>(<span class="st">"muni_code"</span>)]</span>
+<span id="cb23-3"><a href="#cb23-3" aria-hidden="true" tabindex="-1"></a>det_17_22<span class="sc">$</span>region <span class="ot">&lt;-</span> <span class="fu">as.factor</span>(det_17_22<span class="sc">$</span>region)</span>
+<span id="cb23-4"><a href="#cb23-4" aria-hidden="true" tabindex="-1"></a><span class="co"># removendo as linhas com Na</span></span>
+<span id="cb23-5"><a href="#cb23-5" aria-hidden="true" tabindex="-1"></a>det_17_22 <span class="ot">&lt;-</span> det_17_22<span class="sc">%&gt;%</span> </span>
+<span id="cb23-6"><a href="#cb23-6" aria-hidden="true" tabindex="-1"></a>  <span class="fu">filter</span>(<span class="sc">!</span><span class="fu">if_any</span>(<span class="fu">where</span>(is.numeric), is.na))</span>
+<span id="cb23-7"><a href="#cb23-7" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb23-8"><a href="#cb23-8" aria-hidden="true" tabindex="-1"></a><span class="co"># Definir a categoria de referência para todas as variáveis categóricas</span></span>
+<span id="cb23-9"><a href="#cb23-9" aria-hidden="true" tabindex="-1"></a>det_17_22<span class="sc">$</span>dengue_pattern_17_22 <span class="ot">&lt;-</span> <span class="fu">relevel</span>(det_17_22<span class="sc">$</span>dengue_pattern_17_22, <span class="at">ref =</span> <span class="st">"0"</span>) <span class="co"># variável dependente</span></span>
+<span id="cb23-10"><a href="#cb23-10" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb23-11"><a href="#cb23-11" aria-hidden="true" tabindex="-1"></a><span class="co"># Variáveis independentes</span></span>
+<span id="cb23-12"><a href="#cb23-12" aria-hidden="true" tabindex="-1"></a>det_17_22<span class="sc">$</span>bioma <span class="ot">&lt;-</span> <span class="fu">relevel</span>(det_17_22<span class="sc">$</span>bioma, <span class="at">ref =</span> <span class="st">"Mata Atlantica"</span>)</span>
+<span id="cb23-13"><a href="#cb23-13" aria-hidden="true" tabindex="-1"></a>det_17_22<span class="sc">$</span>tipo_regiao <span class="ot">&lt;-</span> <span class="fu">relevel</span>(det_17_22<span class="sc">$</span>tipo_regiao , <span class="at">ref =</span> <span class="st">"nao metropolitana"</span>)</span>
+<span id="cb23-14"><a href="#cb23-14" aria-hidden="true" tabindex="-1"></a>det_17_22<span class="sc">$</span>dengue_pattern_10_16 <span class="ot">&lt;-</span> <span class="fu">relevel</span>(det_17_22<span class="sc">$</span>dengue_pattern_10_16, <span class="at">ref =</span> <span class="st">"0"</span>)</span>
+<span id="cb23-15"><a href="#cb23-15" aria-hidden="true" tabindex="-1"></a>det_17_22<span class="sc">$</span>koppen <span class="ot">&lt;-</span> <span class="fu">relevel</span>(det_17_22<span class="sc">$</span>koppen, <span class="at">ref =</span> <span class="st">"Aw"</span>)</span>
+<span id="cb23-16"><a href="#cb23-16" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb23-17"><a href="#cb23-17" aria-hidden="true" tabindex="-1"></a><span class="co"># Modelo com tudo</span></span>
+<span id="cb23-18"><a href="#cb23-18" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb23-19"><a href="#cb23-19" aria-hidden="true" tabindex="-1"></a><span class="co"># excluindo os resídos</span></span>
+<span id="cb23-20"><a href="#cb23-20" aria-hidden="true" tabindex="-1"></a>det_17_22<span class="sc">$</span>residuos<span class="ot">&lt;-</span> <span class="cn">NULL</span></span>
+<span id="cb23-21"><a href="#cb23-21" aria-hidden="true" tabindex="-1"></a>binomial_model <span class="ot">&lt;-</span> <span class="fu">glm</span>(dengue_pattern_17_22 <span class="sc">~</span> ., <span class="at">data =</span> det_17_22, <span class="at">family =</span> binomial)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 <div class="cell-output cell-output-stderr">
 <pre><code>Warning: glm.fit: probabilidades ajustadas numericamente 0 ou 1 ocorreu</code></pre>
 </div>
-<div class="sourceCode cell-code" id="cb28"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb28-1"><a href="#cb28-1" aria-hidden="true" tabindex="-1"></a><span class="fu">summary</span>(binomial_model)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="sourceCode cell-code" id="cb25"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb25-1"><a href="#cb25-1" aria-hidden="true" tabindex="-1"></a><span class="fu">summary</span>(binomial_model)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 <div class="cell-output cell-output-stdout">
 <pre><code>
 Call:
@@ -557,51 +508,51 @@ glm(formula = dengue_pattern_17_22 ~ ., family = binomial, data = det_17_22)
 
 Coefficients:
                            Estimate Std. Error z value Pr(&gt;|z|)    
-(Intercept)              -2.903e+01  4.636e+00  -6.262 3.81e-10 ***
-region2                  -7.454e-01  5.555e-01  -1.342  0.17962    
-region3                   7.458e-01  4.640e-01   1.607  0.10800    
-region4                   9.134e-01  5.412e-01   1.688  0.09149 .  
-region5                   5.909e-01  3.728e-01   1.585  0.11297    
-tipo_regiaometropolitana -2.631e-01  2.705e-01  -0.973  0.33077    
-koppenAf                  6.768e-01  4.214e-01   1.606  0.10824    
-koppenAm                  8.514e-02  3.169e-01   0.269  0.78816    
-koppenAs                  3.920e-01  4.301e-01   0.911  0.36208    
-koppenBSh                 1.071e+00  5.530e-01   1.936  0.05284 .  
-koppenCfa                 2.500e-01  3.147e-01   0.795  0.42685    
-koppenCfb                -2.598e-01  6.362e-01  -0.408  0.68294    
-koppenCwa                 7.388e-02  3.150e-01   0.234  0.81460    
-koppenCwb                -4.202e-01  5.191e-01  -0.809  0.41824    
-pop10                     3.715e-05  2.672e-06  13.904  &lt; 2e-16 ***
-prop_residuo              2.121e-03  4.316e-03   0.491  0.62315    
-prop_esgot               -2.363e-03  3.080e-03  -0.767  0.44293    
-biomaAmazonia             8.528e-02  4.816e-01   0.177  0.85946    
-biomaCaatinga             4.861e-01  4.649e-01   1.046  0.29577    
-biomaCerrado              3.545e-02  2.241e-01   0.158  0.87431    
-biomaPampa               -2.005e+01  3.083e+02  -0.065  0.94814    
-biomaPantanal             1.362e+00  8.626e-01   1.578  0.11445    
-dengue_pattern_10_161     2.727e+00  1.639e-01  16.641  &lt; 2e-16 ***
-precip_tot_Autumn        -1.328e-03  5.186e-04  -2.561  0.01045 *  
-thr_temp_Autumn          -6.584e-02  1.565e-02  -4.206 2.60e-05 ***
-thr_umid_Autumn          -4.868e-02  9.187e-03  -5.299 1.17e-07 ***
-thr_prec_Autumn           1.851e-02  2.963e-02   0.625  0.53211    
-precip_tot_Spring        -7.694e-04  5.043e-04  -1.526  0.12710    
-thr_temp_Spring           1.642e-01  2.024e-02   8.114 4.88e-16 ***
-thr_prec_Spring           5.184e-02  2.783e-02   1.863  0.06248 .  
-thr_temp_umid_Spring     -3.850e-03  7.618e-03  -0.505  0.61322    
-temp_med_Summer           2.863e-01  1.066e-01   2.686  0.00723 ** 
-umid_med_Summer           1.855e-01  4.701e-02   3.947 7.91e-05 ***
-precip_tot_Summer        -5.349e-04  3.376e-04  -1.585  0.11306    
-thr_prec_Summer          -1.640e-02  2.330e-02  -0.704  0.48160    
-precip_tot_Winter         2.586e-03  9.191e-04   2.814  0.00490 ** 
-thr_prec_Winter          -6.786e-02  3.166e-02  -2.143  0.03210 *  
+(Intercept)              -2.917e+01  4.675e+00  -6.240 4.36e-10 ***
+region2                  -8.416e-01  5.554e-01  -1.515 0.129702    
+region3                   6.660e-01  4.647e-01   1.433 0.151786    
+region4                   8.129e-01  5.422e-01   1.499 0.133806    
+region5                   5.026e-01  3.749e-01   1.341 0.180072    
+tipo_regiaometropolitana -4.720e-01  2.808e-01  -1.681 0.092820 .  
+koppenAf                  6.568e-01  4.228e-01   1.554 0.120250    
+koppenAm                  6.994e-02  3.192e-01   0.219 0.826596    
+koppenAs                  3.978e-01  4.301e-01   0.925 0.355083    
+koppenBSh                 1.054e+00  5.541e-01   1.901 0.057254 .  
+koppenCfa                 1.734e-01  3.156e-01   0.549 0.582797    
+koppenCfb                -4.664e-01  6.723e-01  -0.694 0.487870    
+koppenCwa                 6.484e-02  3.153e-01   0.206 0.837071    
+koppenCwb                -4.606e-01  5.200e-01  -0.886 0.375746    
+pop22                     3.446e-05  2.420e-06  14.236  &lt; 2e-16 ***
+prop_residuo              2.258e-03  4.357e-03   0.518 0.604318    
+prop_esgot               -2.605e-03  3.096e-03  -0.841 0.400192    
+biomaAmazonia             6.214e-02  4.877e-01   0.127 0.898606    
+biomaCaatinga             4.405e-01  4.627e-01   0.952 0.341101    
+biomaCerrado              1.325e-02  2.245e-01   0.059 0.952931    
+biomaPampa               -1.928e+01  3.162e+02  -0.061 0.951367    
+biomaPantanal             1.499e+00  8.688e-01   1.725 0.084504 .  
+dengue_pattern_10_161     2.707e+00  1.641e-01  16.499  &lt; 2e-16 ***
+precip_tot_Autumn        -1.505e-03  5.099e-04  -2.951 0.003168 ** 
+thr_temp_Autumn          -6.959e-02  1.569e-02  -4.434 9.25e-06 ***
+thr_umid_Autumn          -4.726e-02  9.176e-03  -5.150 2.61e-07 ***
+thr_prec_Autumn           2.628e-02  2.942e-02   0.893 0.371677    
+precip_tot_Spring        -6.873e-04  5.078e-04  -1.354 0.175861    
+thr_temp_Spring           1.744e-01  2.054e-02   8.491  &lt; 2e-16 ***
+thr_prec_Spring           4.766e-02  2.795e-02   1.705 0.088118 .  
+thr_temp_umid_Spring     -3.961e-03  7.619e-03  -0.520 0.603185    
+temp_med_Summer           2.912e-01  1.074e-01   2.712 0.006685 ** 
+umid_med_Summer           1.785e-01  4.729e-02   3.774 0.000161 ***
+precip_tot_Summer        -5.378e-04  3.420e-04  -1.572 0.115861    
+thr_prec_Summer          -1.636e-02  2.348e-02  -0.697 0.486019    
+precip_tot_Winter         2.635e-03  9.297e-04   2.834 0.004596 ** 
+thr_prec_Winter          -7.004e-02  3.194e-02  -2.193 0.028315 *  
 ---
 Signif. codes:  0 '***' 0.001 '**' 0.01 '*' 0.05 '.' 0.1 ' ' 1
 
 (Dispersion parameter for binomial family taken to be 1)
 
-    Null deviance: 4404.3  on 5552  degrees of freedom
-Residual deviance: 2007.4  on 5516  degrees of freedom
-AIC: 2081.4
+    Null deviance: 4405.7  on 5557  degrees of freedom
+Residual deviance: 1980.0  on 5521  degrees of freedom
+AIC: 2054
 
 Number of Fisher Scoring iterations: 17</code></pre>
 </div>
@@ -611,65 +562,67 @@ Number of Fisher Scoring iterations: 17</code></pre>
 <h2 class="anchored" data-anchor-id="seleção-de-variáveis">4. Seleção de variáveis</h2>
 <p>O stepwise é um método automatizado de seleção de variáveis em modelos estatísticos, que adiciona ou remove preditores com base em critérios como o AIC (Akaike Information Criterion). Ele busca um equilíbrio entre ajuste e simplicidade do modelo, evitando a inclusão de variáveis irrelevantes. Na regressão binomial, interpreta-se o modelo final pelos coeficientes das variáveis selecionadas, que indicam a influência de cada preditor na probabilidade do evento analisado, além do AIC, que avalia a qualidade do ajuste.</p>
 <div class="cell">
-<div class="sourceCode cell-code" id="cb30"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb30-1"><a href="#cb30-1" aria-hidden="true" tabindex="-1"></a><span class="co"># Criar o modelo inicial (nulo com region e pop10)</span></span>
-<span id="cb30-2"><a href="#cb30-2" aria-hidden="true" tabindex="-1"></a>null_model <span class="ot">&lt;-</span> <span class="fu">glm</span>(dengue_pattern_17_22 <span class="sc">~</span> region <span class="sc">+</span> pop10, </span>
-<span id="cb30-3"><a href="#cb30-3" aria-hidden="true" tabindex="-1"></a>                  <span class="at">data =</span> det_17_22, </span>
-<span id="cb30-4"><a href="#cb30-4" aria-hidden="true" tabindex="-1"></a>                  <span class="at">family =</span> binomial)</span>
-<span id="cb30-5"><a href="#cb30-5" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb30-6"><a href="#cb30-6" aria-hidden="true" tabindex="-1"></a><span class="co"># Criar o modelo completo (com todas as variáveis preditoras adicionais)</span></span>
-<span id="cb30-7"><a href="#cb30-7" aria-hidden="true" tabindex="-1"></a>full_formula <span class="ot">&lt;-</span> <span class="fu">as.formula</span>(<span class="fu">paste</span>(<span class="st">"dengue_pattern_17_22 ~ region + pop10 +"</span>, </span>
-<span id="cb30-8"><a href="#cb30-8" aria-hidden="true" tabindex="-1"></a>                                 <span class="fu">paste</span>(<span class="fu">setdiff</span>(<span class="fu">names</span>(det_17_22), <span class="fu">c</span>(<span class="st">"dengue_pattern_17_22_17_22"</span>, <span class="st">"region"</span>, <span class="st">"pop10"</span>)), </span>
-<span id="cb30-9"><a href="#cb30-9" aria-hidden="true" tabindex="-1"></a>                                       <span class="at">collapse =</span> <span class="st">" + "</span>)))</span>
-<span id="cb30-10"><a href="#cb30-10" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb30-11"><a href="#cb30-11" aria-hidden="true" tabindex="-1"></a>full_model <span class="ot">&lt;-</span> <span class="fu">glm</span>(full_formula, <span class="at">data =</span> det_17_22, <span class="at">family =</span> binomial)</span>
-<span id="cb30-12"><a href="#cb30-12" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb30-13"><a href="#cb30-13" aria-hidden="true" tabindex="-1"></a><span class="co"># Aplicar a seleção stepwise sem mostrar o processo intermediário</span></span>
-<span id="cb30-14"><a href="#cb30-14" aria-hidden="true" tabindex="-1"></a>step_model <span class="ot">&lt;-</span> <span class="fu">stepAIC</span>(null_model, </span>
-<span id="cb30-15"><a href="#cb30-15" aria-hidden="true" tabindex="-1"></a>                      <span class="at">scope =</span> <span class="fu">list</span>(<span class="at">lower =</span> null_model, <span class="at">upper =</span> full_model), </span>
-<span id="cb30-16"><a href="#cb30-16" aria-hidden="true" tabindex="-1"></a>                      <span class="at">direction =</span> <span class="st">"both"</span>, </span>
-<span id="cb30-17"><a href="#cb30-17" aria-hidden="true" tabindex="-1"></a>                      <span class="at">trace =</span> <span class="cn">FALSE</span>)  <span class="co"># &lt;- Isso esconde as iterações</span></span>
-<span id="cb30-18"><a href="#cb30-18" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb30-19"><a href="#cb30-19" aria-hidden="true" tabindex="-1"></a><span class="co"># Exibir apenas o resumo final do modelo</span></span>
-<span id="cb30-20"><a href="#cb30-20" aria-hidden="true" tabindex="-1"></a><span class="fu">print</span>(<span class="fu">summary</span>(step_model))</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="sourceCode cell-code" id="cb27"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb27-1"><a href="#cb27-1" aria-hidden="true" tabindex="-1"></a><span class="co"># Criar o modelo inicial (nulo com region e pop22)</span></span>
+<span id="cb27-2"><a href="#cb27-2" aria-hidden="true" tabindex="-1"></a>null_model <span class="ot">&lt;-</span> <span class="fu">glm</span>(dengue_pattern_17_22 <span class="sc">~</span> region <span class="sc">+</span> pop22, </span>
+<span id="cb27-3"><a href="#cb27-3" aria-hidden="true" tabindex="-1"></a>                  <span class="at">data =</span> det_17_22, </span>
+<span id="cb27-4"><a href="#cb27-4" aria-hidden="true" tabindex="-1"></a>                  <span class="at">family =</span> binomial)</span>
+<span id="cb27-5"><a href="#cb27-5" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb27-6"><a href="#cb27-6" aria-hidden="true" tabindex="-1"></a><span class="co"># Criar o modelo completo (com todas as variáveis preditoras adicionais)</span></span>
+<span id="cb27-7"><a href="#cb27-7" aria-hidden="true" tabindex="-1"></a>full_formula <span class="ot">&lt;-</span> <span class="fu">as.formula</span>(<span class="fu">paste</span>(<span class="st">"dengue_pattern_17_22 ~ region + pop22 +"</span>, </span>
+<span id="cb27-8"><a href="#cb27-8" aria-hidden="true" tabindex="-1"></a>                                 <span class="fu">paste</span>(<span class="fu">setdiff</span>(<span class="fu">names</span>(det_17_22), <span class="fu">c</span>(<span class="st">"dengue_pattern_17_22_17_22"</span>, <span class="st">"region"</span>, <span class="st">"pop22"</span>)), </span>
+<span id="cb27-9"><a href="#cb27-9" aria-hidden="true" tabindex="-1"></a>                                       <span class="at">collapse =</span> <span class="st">" + "</span>)))</span>
+<span id="cb27-10"><a href="#cb27-10" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb27-11"><a href="#cb27-11" aria-hidden="true" tabindex="-1"></a>full_model <span class="ot">&lt;-</span> <span class="fu">glm</span>(full_formula, <span class="at">data =</span> det_17_22, <span class="at">family =</span> binomial)</span>
+<span id="cb27-12"><a href="#cb27-12" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb27-13"><a href="#cb27-13" aria-hidden="true" tabindex="-1"></a><span class="co"># Aplicar a seleção stepwise sem mostrar o processo intermediário</span></span>
+<span id="cb27-14"><a href="#cb27-14" aria-hidden="true" tabindex="-1"></a>step_model <span class="ot">&lt;-</span> <span class="fu">stepAIC</span>(null_model, </span>
+<span id="cb27-15"><a href="#cb27-15" aria-hidden="true" tabindex="-1"></a>                      <span class="at">scope =</span> <span class="fu">list</span>(<span class="at">lower =</span> null_model, <span class="at">upper =</span> full_model), </span>
+<span id="cb27-16"><a href="#cb27-16" aria-hidden="true" tabindex="-1"></a>                      <span class="at">direction =</span> <span class="st">"both"</span>, </span>
+<span id="cb27-17"><a href="#cb27-17" aria-hidden="true" tabindex="-1"></a>                      <span class="at">trace =</span> <span class="cn">FALSE</span>)  <span class="co"># &lt;- Isso esconde as iterações</span></span>
+<span id="cb27-18"><a href="#cb27-18" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb27-19"><a href="#cb27-19" aria-hidden="true" tabindex="-1"></a><span class="co"># Exibir apenas o resumo final do modelo</span></span>
+<span id="cb27-20"><a href="#cb27-20" aria-hidden="true" tabindex="-1"></a><span class="fu">print</span>(<span class="fu">summary</span>(step_model))</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 <div class="cell-output cell-output-stdout">
 <pre><code>
 Call:
-glm(formula = dengue_pattern_17_22 ~ region + pop10 + dengue_pattern_10_16 + 
+glm(formula = dengue_pattern_17_22 ~ region + pop22 + dengue_pattern_10_16 + 
     thr_temp_Spring + bioma + precip_tot_Autumn + precip_tot_Winter + 
-    precip_tot_Summer + thr_umid_Autumn + thr_temp_Autumn + umid_med_Summer + 
-    temp_med_Summer + thr_prec_Winter, family = binomial, data = det_17_22)
+    precip_tot_Summer + tipo_regiao + thr_umid_Autumn + thr_temp_Autumn + 
+    umid_med_Summer + temp_med_Summer + thr_prec_Winter, family = binomial, 
+    data = det_17_22)
 
 Coefficients:
-                        Estimate Std. Error z value Pr(&gt;|z|)    
-(Intercept)           -2.660e+01  3.178e+00  -8.368  &lt; 2e-16 ***
-region2               -9.109e-01  4.788e-01  -1.903  0.05710 .  
-region3                3.897e-01  4.067e-01   0.958  0.33803    
-region4                7.080e-01  4.915e-01   1.440  0.14977    
-region5                4.461e-01  3.526e-01   1.265  0.20583    
-pop10                  3.623e-05  2.522e-06  14.364  &lt; 2e-16 ***
-dengue_pattern_10_161  2.758e+00  1.630e-01  16.920  &lt; 2e-16 ***
-thr_temp_Spring        1.569e-01  1.520e-02  10.325  &lt; 2e-16 ***
-biomaAmazonia          5.358e-01  3.999e-01   1.340  0.18032    
-biomaCaatinga          7.654e-01  3.699e-01   2.069  0.03853 *  
-biomaCerrado           3.940e-02  2.187e-01   0.180  0.85701    
-biomaPampa            -2.013e+01  3.071e+02  -0.066  0.94774    
-biomaPantanal          1.368e+00  8.429e-01   1.623  0.10453    
-precip_tot_Autumn     -1.310e-03  2.523e-04  -5.191 2.09e-07 ***
-precip_tot_Winter      2.561e-03  7.790e-04   3.288  0.00101 ** 
-precip_tot_Summer     -5.348e-04  2.212e-04  -2.417  0.01564 *  
-thr_umid_Autumn       -4.476e-02  6.868e-03  -6.517 7.17e-11 ***
-thr_temp_Autumn       -5.836e-02  1.021e-02  -5.716 1.09e-08 ***
-umid_med_Summer        1.610e-01  2.650e-02   6.076 1.23e-09 ***
-temp_med_Summer        2.588e-01  9.106e-02   2.842  0.00448 ** 
-thr_prec_Winter       -4.358e-02  2.407e-02  -1.810  0.07024 .  
+                           Estimate Std. Error z value Pr(&gt;|z|)    
+(Intercept)              -2.690e+01  3.215e+00  -8.367  &lt; 2e-16 ***
+region2                  -9.917e-01  4.825e-01  -2.055  0.03985 *  
+region3                   3.146e-01  4.069e-01   0.773  0.43950    
+region4                   6.174e-01  4.927e-01   1.253  0.21023    
+region5                   3.779e-01  3.544e-01   1.066  0.28620    
+pop22                     3.433e-05  2.360e-06  14.544  &lt; 2e-16 ***
+dengue_pattern_10_161     2.738e+00  1.634e-01  16.762  &lt; 2e-16 ***
+thr_temp_Spring           1.653e-01  1.564e-02  10.574  &lt; 2e-16 ***
+biomaAmazonia             4.421e-01  4.090e-01   1.081  0.27968    
+biomaCaatinga             7.197e-01  3.713e-01   1.938  0.05262 .  
+biomaCerrado              2.747e-02  2.193e-01   0.125  0.90030    
+biomaPampa               -1.935e+01  3.172e+02  -0.061  0.95136    
+biomaPantanal             1.629e+00  8.631e-01   1.887  0.05916 .  
+precip_tot_Autumn        -1.314e-03  2.525e-04  -5.204 1.95e-07 ***
+precip_tot_Winter         2.471e-03  7.950e-04   3.108  0.00189 ** 
+precip_tot_Summer        -5.443e-04  2.238e-04  -2.432  0.01501 *  
+tipo_regiaometropolitana -5.419e-01  2.727e-01  -1.987  0.04689 *  
+thr_umid_Autumn          -4.288e-02  6.881e-03  -6.232 4.60e-10 ***
+thr_temp_Autumn          -5.941e-02  1.027e-02  -5.784 7.28e-09 ***
+umid_med_Summer           1.562e-01  2.664e-02   5.862 4.56e-09 ***
+temp_med_Summer           2.591e-01  9.199e-02   2.817  0.00485 ** 
+thr_prec_Winter          -4.048e-02  2.435e-02  -1.663  0.09634 .  
 ---
 Signif. codes:  0 '***' 0.001 '**' 0.01 '*' 0.05 '.' 0.1 ' ' 1
 
 (Dispersion parameter for binomial family taken to be 1)
 
-    Null deviance: 4404.3  on 5552  degrees of freedom
-Residual deviance: 2026.8  on 5532  degrees of freedom
-AIC: 2068.8
+    Null deviance: 4405.7  on 5557  degrees of freedom
+Residual deviance: 1996.7  on 5536  degrees of freedom
+AIC: 2040.7
 
 Number of Fisher Scoring iterations: 17</code></pre>
 </div>
@@ -684,7 +637,6 @@ Number of Fisher Scoring iterations: 17</code></pre>
 <li><p>Nagelkerke R² &gt; 0.4 → Muito bom ajuste</p></li>
 </ul></li>
 <li><p>Teste de Verossimilhança (Likelihood Ratio Test - LRT): Compara um modelo com e sem variáveis explicativas para ver se o modelo ajustado é significativamente melhor do que um modelo nulo. Se o p-valor for baixo (&lt; 0.05), rejeitamos o modelo nulo, indicando que as variáveis explicativas contribuem para a predição.</p></li>
-<li><p>Teste de Hosmer-Lemeshow : Avalia se as probabilidades previstas pelo modelo são bem ajustadas aos dados observados. Interpretação: p-valor &gt; 0.05 → Indica bom ajuste p-valor &lt; 0.05 → Indica que o modelo pode não estar ajustando bem.</p></li>
 <li><p>Curva ROC e AUC (Área Sob a Curva) : Mede a capacidade do modelo de discriminar entre as classes (0 e 1).</p>
 <ul>
 <li><p>AUC = 0.5 → Modelo sem discriminação</p></li>
@@ -718,56 +670,52 @@ Number of Fisher Scoring iterations: 17</code></pre>
 <td>Verifica se o modelo ajustado é significativamente melhor que um modelo nulo.</td>
 </tr>
 <tr class="odd">
-<td>Hosmer-Lemeshow</td>
-<td>Testa se as previsões do modelo correspondem às observações reais.</td>
-</tr>
-<tr class="even">
 <td>Curva ROC e AUC</td>
 <td>Mede a capacidade preditiva do modelo (valores &gt; 0.8 indicam ótimo desempenho).</td>
 </tr>
-<tr class="odd">
+<tr class="even">
 <td>Matriz de Confusão</td>
 <td>Avalia a acurácia da classificação do modelo.</td>
 </tr>
 </tbody>
 </table>
 <div class="cell">
-<div class="sourceCode cell-code" id="cb32"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb32-1"><a href="#cb32-1" aria-hidden="true" tabindex="-1"></a><span class="co"># Pseudo R²</span></span>
-<span id="cb32-2"><a href="#cb32-2" aria-hidden="true" tabindex="-1"></a><span class="fu">pR2</span>(step_model)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="sourceCode cell-code" id="cb29"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb29-1"><a href="#cb29-1" aria-hidden="true" tabindex="-1"></a><span class="co"># Pseudo R²</span></span>
+<span id="cb29-2"><a href="#cb29-2" aria-hidden="true" tabindex="-1"></a><span class="fu">pR2</span>(step_model)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 <div class="cell-output cell-output-stdout">
 <pre><code>fitting null model for pseudo-r2</code></pre>
 </div>
 <div class="cell-output cell-output-stdout">
 <pre><code>          llh       llhNull            G2      McFadden          r2ML 
--1013.4154505 -2202.1298316  2377.4287622     0.5398021     0.3482760 
+ -998.3619929 -2202.8570497  2408.9901136     0.5467877     0.3517167 
          r2CU 
-    0.6360343 </code></pre>
+    0.6425578 </code></pre>
 </div>
-<div class="sourceCode cell-code" id="cb35"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb35-1"><a href="#cb35-1" aria-hidden="true" tabindex="-1"></a><span class="co"># Teste de verossimilhança (Comparação com modelo nulo)</span></span>
-<span id="cb35-2"><a href="#cb35-2" aria-hidden="true" tabindex="-1"></a><span class="fu">anova</span>(null_model, step_model, <span class="at">test =</span> <span class="st">"Chisq"</span>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="sourceCode cell-code" id="cb32"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb32-1"><a href="#cb32-1" aria-hidden="true" tabindex="-1"></a><span class="co"># Teste de verossimilhança (Comparação com modelo nulo)</span></span>
+<span id="cb32-2"><a href="#cb32-2" aria-hidden="true" tabindex="-1"></a><span class="fu">anova</span>(null_model, step_model, <span class="at">test =</span> <span class="st">"Chisq"</span>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 <div class="cell-output cell-output-stdout">
 <pre><code>Analysis of Deviance Table
 
-Model 1: dengue_pattern_17_22 ~ region + pop10
-Model 2: dengue_pattern_17_22 ~ region + pop10 + dengue_pattern_10_16 + 
+Model 1: dengue_pattern_17_22 ~ region + pop22
+Model 2: dengue_pattern_17_22 ~ region + pop22 + dengue_pattern_10_16 + 
     thr_temp_Spring + bioma + precip_tot_Autumn + precip_tot_Winter + 
-    precip_tot_Summer + thr_umid_Autumn + thr_temp_Autumn + umid_med_Summer + 
-    temp_med_Summer + thr_prec_Winter
+    precip_tot_Summer + tipo_regiao + thr_umid_Autumn + thr_temp_Autumn + 
+    umid_med_Summer + temp_med_Summer + thr_prec_Winter
   Resid. Df Resid. Dev Df Deviance  Pr(&gt;Chi)    
-1      5547     3094.5                          
-2      5532     2026.8 15   1067.6 &lt; 2.2e-16 ***
+1      5552     3071.8                          
+2      5536     1996.7 16   1075.1 &lt; 2.2e-16 ***
 ---
 Signif. codes:  0 '***' 0.001 '**' 0.01 '*' 0.05 '.' 0.1 ' ' 1</code></pre>
 </div>
-<div class="sourceCode cell-code" id="cb37"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb37-1"><a href="#cb37-1" aria-hidden="true" tabindex="-1"></a><span class="co">#Curva ROC e AUC (Área Sob a Curva)</span></span>
-<span id="cb37-2"><a href="#cb37-2" aria-hidden="true" tabindex="-1"></a>roc_curve <span class="ot">&lt;-</span> <span class="fu">roc</span>(det_17_22<span class="sc">$</span>dengue_pattern_17_22, <span class="fu">fitted</span>(step_model))</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="sourceCode cell-code" id="cb34"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb34-1"><a href="#cb34-1" aria-hidden="true" tabindex="-1"></a><span class="co">#Curva ROC e AUC (Área Sob a Curva)</span></span>
+<span id="cb34-2"><a href="#cb34-2" aria-hidden="true" tabindex="-1"></a>roc_curve <span class="ot">&lt;-</span> <span class="fu">roc</span>(det_17_22<span class="sc">$</span>dengue_pattern_17_22, <span class="fu">fitted</span>(step_model))</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 <div class="cell-output cell-output-stderr">
 <pre><code>Setting levels: control = 0, case = 1</code></pre>
 </div>
 <div class="cell-output cell-output-stderr">
 <pre><code>Setting direction: controls &lt; cases</code></pre>
 </div>
-<div class="sourceCode cell-code" id="cb40"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb40-1"><a href="#cb40-1" aria-hidden="true" tabindex="-1"></a><span class="fu">plot</span>(roc_curve, <span class="at">col =</span> <span class="st">"blue"</span>, <span class="at">main =</span> <span class="st">"Curva ROC"</span>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="sourceCode cell-code" id="cb37"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb37-1"><a href="#cb37-1" aria-hidden="true" tabindex="-1"></a><span class="fu">plot</span>(roc_curve, <span class="at">col =</span> <span class="st">"blue"</span>, <span class="at">main =</span> <span class="st">"Curva ROC"</span>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 <div class="cell-output-display">
 <div>
 <figure class="figure">
@@ -775,39 +723,39 @@ Signif. codes:  0 '***' 0.001 '**' 0.01 '*' 0.05 '.' 0.1 ' ' 1</code></pre>
 </figure>
 </div>
 </div>
-<div class="sourceCode cell-code" id="cb41"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb41-1"><a href="#cb41-1" aria-hidden="true" tabindex="-1"></a><span class="fu">auc</span>(roc_curve) <span class="co"># Calcula a AUC</span></span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="sourceCode cell-code" id="cb38"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb38-1"><a href="#cb38-1" aria-hidden="true" tabindex="-1"></a><span class="fu">auc</span>(roc_curve) <span class="co"># Calcula a AUC</span></span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 <div class="cell-output cell-output-stdout">
-<pre><code>Area under the curve: 0.9476</code></pre>
+<pre><code>Area under the curve: 0.9488</code></pre>
 </div>
-<div class="sourceCode cell-code" id="cb43"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb43-1"><a href="#cb43-1" aria-hidden="true" tabindex="-1"></a><span class="co"># Matriz de Confusão e Acurácia</span></span>
-<span id="cb43-2"><a href="#cb43-2" aria-hidden="true" tabindex="-1"></a>predicoes <span class="ot">&lt;-</span> <span class="fu">ifelse</span>(<span class="fu">fitted</span>(step_model) <span class="sc">&gt;</span> <span class="fl">0.5</span>, <span class="dv">1</span>, <span class="dv">0</span>)</span>
-<span id="cb43-3"><a href="#cb43-3" aria-hidden="true" tabindex="-1"></a>conf_matrix <span class="ot">&lt;-</span> <span class="fu">confusionMatrix</span>(<span class="fu">as.factor</span>(predicoes), <span class="fu">as.factor</span>(det_17_22<span class="sc">$</span>dengue_pattern_17_22))</span>
-<span id="cb43-4"><a href="#cb43-4" aria-hidden="true" tabindex="-1"></a><span class="fu">print</span>(conf_matrix)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="sourceCode cell-code" id="cb40"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb40-1"><a href="#cb40-1" aria-hidden="true" tabindex="-1"></a><span class="co"># Matriz de Confusão e Acurácia</span></span>
+<span id="cb40-2"><a href="#cb40-2" aria-hidden="true" tabindex="-1"></a>predicoes <span class="ot">&lt;-</span> <span class="fu">ifelse</span>(<span class="fu">fitted</span>(step_model) <span class="sc">&gt;</span> <span class="fl">0.5</span>, <span class="dv">1</span>, <span class="dv">0</span>)</span>
+<span id="cb40-3"><a href="#cb40-3" aria-hidden="true" tabindex="-1"></a>conf_matrix <span class="ot">&lt;-</span> <span class="fu">confusionMatrix</span>(<span class="fu">as.factor</span>(predicoes), <span class="fu">as.factor</span>(det_17_22<span class="sc">$</span>dengue_pattern_17_22))</span>
+<span id="cb40-4"><a href="#cb40-4" aria-hidden="true" tabindex="-1"></a><span class="fu">print</span>(conf_matrix)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 <div class="cell-output cell-output-stdout">
 <pre><code>Confusion Matrix and Statistics
 
           Reference
 Prediction    0    1
-         0 4715  309
-         1   86  443
+         0 4721  311
+         1   85  441
                                           
-               Accuracy : 0.9289          
-                 95% CI : (0.9218, 0.9355)
-    No Information Rate : 0.8646          
+               Accuracy : 0.9288          
+                 95% CI : (0.9217, 0.9354)
+    No Information Rate : 0.8647          
     P-Value [Acc &gt; NIR] : &lt; 2.2e-16       
                                           
-                  Kappa : 0.6528          
+                  Kappa : 0.6513          
                                           
  Mcnemar's Test P-Value : &lt; 2.2e-16       
                                           
-            Sensitivity : 0.9821          
-            Specificity : 0.5891          
-         Pos Pred Value : 0.9385          
-         Neg Pred Value : 0.8374          
-             Prevalence : 0.8646          
-         Detection Rate : 0.8491          
-   Detection Prevalence : 0.9047          
-      Balanced Accuracy : 0.7856          
+            Sensitivity : 0.9823          
+            Specificity : 0.5864          
+         Pos Pred Value : 0.9382          
+         Neg Pred Value : 0.8384          
+             Prevalence : 0.8647          
+         Detection Rate : 0.8494          
+   Detection Prevalence : 0.9054          
+      Balanced Accuracy : 0.7844          
                                           
        'Positive' Class : 0               
                                           </code></pre>
@@ -820,23 +768,23 @@ Prediction    0    1
 <section id="or-ic95-p-valor" class="level2">
 <h2 class="anchored" data-anchor-id="or-ic95-p-valor">Or, IC95%, p-valor</h2>
 <div class="cell">
-<div class="sourceCode cell-code" id="cb45"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb45-1"><a href="#cb45-1" aria-hidden="true" tabindex="-1"></a><span class="co"># Salvar o modelo final</span></span>
-<span id="cb45-2"><a href="#cb45-2" aria-hidden="true" tabindex="-1"></a>modelo_final <span class="ot">&lt;-</span> step_model</span>
-<span id="cb45-3"><a href="#cb45-3" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb45-4"><a href="#cb45-4" aria-hidden="true" tabindex="-1"></a><span class="co"># Calcular Odds Ratio, Intervalo de Confiança e p-valor</span></span>
-<span id="cb45-5"><a href="#cb45-5" aria-hidden="true" tabindex="-1"></a>odds_ratio_table <span class="ot">&lt;-</span> <span class="fu">exp</span>(<span class="fu">cbind</span>(<span class="at">OR =</span> <span class="fu">coef</span>(modelo_final), <span class="fu">confint</span>(modelo_final)))</span>
-<span id="cb45-6"><a href="#cb45-6" aria-hidden="true" tabindex="-1"></a>p_values <span class="ot">&lt;-</span> <span class="fu">summary</span>(modelo_final)<span class="sc">$</span>coefficients[, <span class="dv">4</span>]  <span class="co"># Extrair p-valores</span></span>
-<span id="cb45-7"><a href="#cb45-7" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb45-8"><a href="#cb45-8" aria-hidden="true" tabindex="-1"></a><span class="co"># Transformar em data frame para melhor visualização</span></span>
-<span id="cb45-9"><a href="#cb45-9" aria-hidden="true" tabindex="-1"></a>odds_ratio_df <span class="ot">&lt;-</span> <span class="fu">as.data.frame</span>(odds_ratio_table)</span>
-<span id="cb45-10"><a href="#cb45-10" aria-hidden="true" tabindex="-1"></a>odds_ratio_df<span class="sc">$</span><span class="st">`</span><span class="at">p-valor</span><span class="st">`</span> <span class="ot">&lt;-</span> p_values  <span class="co"># Adicionar p-valor à tabela</span></span>
-<span id="cb45-11"><a href="#cb45-11" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb45-12"><a href="#cb45-12" aria-hidden="true" tabindex="-1"></a><span class="co"># Nomear colunas</span></span>
-<span id="cb45-13"><a href="#cb45-13" aria-hidden="true" tabindex="-1"></a><span class="fu">colnames</span>(odds_ratio_df) <span class="ot">&lt;-</span> <span class="fu">c</span>(<span class="st">"Odds Ratio"</span>, <span class="st">"IC 95% Lower"</span>, <span class="st">"IC 95% Upper"</span>, <span class="st">"p-valor"</span>)</span>
-<span id="cb45-14"><a href="#cb45-14" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb45-15"><a href="#cb45-15" aria-hidden="true" tabindex="-1"></a><span class="co"># Criar uma tabela formatada</span></span>
-<span id="cb45-16"><a href="#cb45-16" aria-hidden="true" tabindex="-1"></a><span class="fu">kable</span>(odds_ratio_df, <span class="at">digits =</span> <span class="dv">3</span>, <span class="at">caption =</span> <span class="st">"Odds Ratio, Intervalo de Confiança (95%) e p-valor"</span>) <span class="sc">%&gt;%</span></span>
-<span id="cb45-17"><a href="#cb45-17" aria-hidden="true" tabindex="-1"></a>  <span class="fu">kable_styling</span>(<span class="at">full_width =</span> <span class="cn">FALSE</span>, <span class="at">bootstrap_options =</span> <span class="fu">c</span>(<span class="st">"striped"</span>, <span class="st">"hover"</span>))</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="sourceCode cell-code" id="cb42"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb42-1"><a href="#cb42-1" aria-hidden="true" tabindex="-1"></a><span class="co"># Salvar o modelo final</span></span>
+<span id="cb42-2"><a href="#cb42-2" aria-hidden="true" tabindex="-1"></a>modelo_final <span class="ot">&lt;-</span> step_model</span>
+<span id="cb42-3"><a href="#cb42-3" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb42-4"><a href="#cb42-4" aria-hidden="true" tabindex="-1"></a><span class="co"># Calcular Odds Ratio, Intervalo de Confiança e p-valor</span></span>
+<span id="cb42-5"><a href="#cb42-5" aria-hidden="true" tabindex="-1"></a>odds_ratio_table <span class="ot">&lt;-</span> <span class="fu">exp</span>(<span class="fu">cbind</span>(<span class="at">OR =</span> <span class="fu">coef</span>(modelo_final), <span class="fu">confint</span>(modelo_final)))</span>
+<span id="cb42-6"><a href="#cb42-6" aria-hidden="true" tabindex="-1"></a>p_values <span class="ot">&lt;-</span> <span class="fu">summary</span>(modelo_final)<span class="sc">$</span>coefficients[, <span class="dv">4</span>]  <span class="co"># Extrair p-valores</span></span>
+<span id="cb42-7"><a href="#cb42-7" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb42-8"><a href="#cb42-8" aria-hidden="true" tabindex="-1"></a><span class="co"># Transformar em data frame para melhor visualização</span></span>
+<span id="cb42-9"><a href="#cb42-9" aria-hidden="true" tabindex="-1"></a>odds_ratio_df <span class="ot">&lt;-</span> <span class="fu">as.data.frame</span>(odds_ratio_table)</span>
+<span id="cb42-10"><a href="#cb42-10" aria-hidden="true" tabindex="-1"></a>odds_ratio_df<span class="sc">$</span><span class="st">`</span><span class="at">p-valor</span><span class="st">`</span> <span class="ot">&lt;-</span> p_values  <span class="co"># Adicionar p-valor à tabela</span></span>
+<span id="cb42-11"><a href="#cb42-11" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb42-12"><a href="#cb42-12" aria-hidden="true" tabindex="-1"></a><span class="co"># Nomear colunas</span></span>
+<span id="cb42-13"><a href="#cb42-13" aria-hidden="true" tabindex="-1"></a><span class="fu">colnames</span>(odds_ratio_df) <span class="ot">&lt;-</span> <span class="fu">c</span>(<span class="st">"Odds Ratio"</span>, <span class="st">"IC 95% Lower"</span>, <span class="st">"IC 95% Upper"</span>, <span class="st">"p-valor"</span>)</span>
+<span id="cb42-14"><a href="#cb42-14" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb42-15"><a href="#cb42-15" aria-hidden="true" tabindex="-1"></a><span class="co"># Criar uma tabela formatada</span></span>
+<span id="cb42-16"><a href="#cb42-16" aria-hidden="true" tabindex="-1"></a><span class="fu">kable</span>(odds_ratio_df, <span class="at">digits =</span> <span class="dv">3</span>, <span class="at">caption =</span> <span class="st">"Odds Ratio, Intervalo de Confiança (95%) e p-valor"</span>) <span class="sc">%&gt;%</span></span>
+<span id="cb42-17"><a href="#cb42-17" aria-hidden="true" tabindex="-1"></a>  <span class="fu">kable_styling</span>(<span class="at">full_width =</span> <span class="cn">FALSE</span>, <span class="at">bootstrap_options =</span> <span class="fu">c</span>(<span class="st">"striped"</span>, <span class="st">"hover"</span>))</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 <div class="cell-output-display">
 <table class="table table-striped table-hover caption-top table-sm small" data-quarto-postprocess="true">
 <caption>Odds Ratio, Intervalo de Confiança (95%) e p-valor</caption>
@@ -859,34 +807,34 @@ Prediction    0    1
 </tr>
 <tr class="even">
 <td style="text-align: left;">region2</td>
-<td style="text-align: right;">0.402</td>
-<td style="text-align: right;">0.156</td>
-<td style="text-align: right;">1.018</td>
-<td style="text-align: right;">0.057</td>
+<td style="text-align: right;">0.371</td>
+<td style="text-align: right;">0.143</td>
+<td style="text-align: right;">0.946</td>
+<td style="text-align: right;">0.040</td>
 </tr>
 <tr class="odd">
 <td style="text-align: left;">region3</td>
-<td style="text-align: right;">1.476</td>
-<td style="text-align: right;">0.670</td>
-<td style="text-align: right;">3.306</td>
-<td style="text-align: right;">0.338</td>
+<td style="text-align: right;">1.370</td>
+<td style="text-align: right;">0.622</td>
+<td style="text-align: right;">3.069</td>
+<td style="text-align: right;">0.440</td>
 </tr>
 <tr class="even">
 <td style="text-align: left;">region4</td>
-<td style="text-align: right;">2.030</td>
-<td style="text-align: right;">0.781</td>
-<td style="text-align: right;">5.365</td>
-<td style="text-align: right;">0.150</td>
+<td style="text-align: right;">1.854</td>
+<td style="text-align: right;">0.711</td>
+<td style="text-align: right;">4.913</td>
+<td style="text-align: right;">0.210</td>
 </tr>
 <tr class="odd">
 <td style="text-align: left;">region5</td>
-<td style="text-align: right;">1.562</td>
-<td style="text-align: right;">0.790</td>
-<td style="text-align: right;">3.150</td>
-<td style="text-align: right;">0.206</td>
+<td style="text-align: right;">1.459</td>
+<td style="text-align: right;">0.735</td>
+<td style="text-align: right;">2.953</td>
+<td style="text-align: right;">0.286</td>
 </tr>
 <tr class="even">
-<td style="text-align: left;">pop10</td>
+<td style="text-align: left;">pop22</td>
 <td style="text-align: right;">1.000</td>
 <td style="text-align: right;">1.000</td>
 <td style="text-align: right;">1.000</td>
@@ -894,52 +842,52 @@ Prediction    0    1
 </tr>
 <tr class="odd">
 <td style="text-align: left;">dengue_pattern_10_161</td>
-<td style="text-align: right;">15.763</td>
-<td style="text-align: right;">11.495</td>
-<td style="text-align: right;">21.787</td>
+<td style="text-align: right;">15.459</td>
+<td style="text-align: right;">11.266</td>
+<td style="text-align: right;">21.384</td>
 <td style="text-align: right;">0.000</td>
 </tr>
 <tr class="even">
 <td style="text-align: left;">thr_temp_Spring</td>
-<td style="text-align: right;">1.170</td>
-<td style="text-align: right;">1.136</td>
-<td style="text-align: right;">1.206</td>
+<td style="text-align: right;">1.180</td>
+<td style="text-align: right;">1.145</td>
+<td style="text-align: right;">1.217</td>
 <td style="text-align: right;">0.000</td>
 </tr>
 <tr class="odd">
 <td style="text-align: left;">biomaAmazonia</td>
-<td style="text-align: right;">1.709</td>
-<td style="text-align: right;">0.775</td>
-<td style="text-align: right;">3.719</td>
-<td style="text-align: right;">0.180</td>
+<td style="text-align: right;">1.556</td>
+<td style="text-align: right;">0.693</td>
+<td style="text-align: right;">3.444</td>
+<td style="text-align: right;">0.280</td>
 </tr>
 <tr class="even">
 <td style="text-align: left;">biomaCaatinga</td>
-<td style="text-align: right;">2.150</td>
-<td style="text-align: right;">1.043</td>
-<td style="text-align: right;">4.449</td>
-<td style="text-align: right;">0.039</td>
+<td style="text-align: right;">2.054</td>
+<td style="text-align: right;">0.994</td>
+<td style="text-align: right;">4.263</td>
+<td style="text-align: right;">0.053</td>
 </tr>
 <tr class="odd">
 <td style="text-align: left;">biomaCerrado</td>
-<td style="text-align: right;">1.040</td>
-<td style="text-align: right;">0.674</td>
-<td style="text-align: right;">1.590</td>
-<td style="text-align: right;">0.857</td>
+<td style="text-align: right;">1.028</td>
+<td style="text-align: right;">0.666</td>
+<td style="text-align: right;">1.573</td>
+<td style="text-align: right;">0.900</td>
 </tr>
 <tr class="even">
 <td style="text-align: left;">biomaPampa</td>
 <td style="text-align: right;">0.000</td>
 <td style="text-align: right;">0.000</td>
 <td style="text-align: right;">0.000</td>
-<td style="text-align: right;">0.948</td>
+<td style="text-align: right;">0.951</td>
 </tr>
 <tr class="odd">
 <td style="text-align: left;">biomaPantanal</td>
-<td style="text-align: right;">3.929</td>
-<td style="text-align: right;">0.684</td>
-<td style="text-align: right;">20.618</td>
-<td style="text-align: right;">0.105</td>
+<td style="text-align: right;">5.097</td>
+<td style="text-align: right;">0.858</td>
+<td style="text-align: right;">27.809</td>
+<td style="text-align: right;">0.059</td>
 </tr>
 <tr class="even">
 <td style="text-align: left;">precip_tot_Autumn</td>
@@ -950,96 +898,103 @@ Prediction    0    1
 </tr>
 <tr class="odd">
 <td style="text-align: left;">precip_tot_Winter</td>
-<td style="text-align: right;">1.003</td>
+<td style="text-align: right;">1.002</td>
 <td style="text-align: right;">1.001</td>
 <td style="text-align: right;">1.004</td>
-<td style="text-align: right;">0.001</td>
+<td style="text-align: right;">0.002</td>
 </tr>
 <tr class="even">
 <td style="text-align: left;">precip_tot_Summer</td>
 <td style="text-align: right;">0.999</td>
 <td style="text-align: right;">0.999</td>
 <td style="text-align: right;">1.000</td>
-<td style="text-align: right;">0.016</td>
+<td style="text-align: right;">0.015</td>
 </tr>
 <tr class="odd">
+<td style="text-align: left;">tipo_regiaometropolitana</td>
+<td style="text-align: right;">0.582</td>
+<td style="text-align: right;">0.338</td>
+<td style="text-align: right;">0.984</td>
+<td style="text-align: right;">0.047</td>
+</tr>
+<tr class="even">
 <td style="text-align: left;">thr_umid_Autumn</td>
-<td style="text-align: right;">0.956</td>
-<td style="text-align: right;">0.943</td>
-<td style="text-align: right;">0.969</td>
+<td style="text-align: right;">0.958</td>
+<td style="text-align: right;">0.945</td>
+<td style="text-align: right;">0.971</td>
 <td style="text-align: right;">0.000</td>
 </tr>
-<tr class="even">
+<tr class="odd">
 <td style="text-align: left;">thr_temp_Autumn</td>
-<td style="text-align: right;">0.943</td>
-<td style="text-align: right;">0.924</td>
-<td style="text-align: right;">0.962</td>
-<td style="text-align: right;">0.000</td>
-</tr>
-<tr class="odd">
-<td style="text-align: left;">umid_med_Summer</td>
-<td style="text-align: right;">1.175</td>
-<td style="text-align: right;">1.116</td>
-<td style="text-align: right;">1.238</td>
+<td style="text-align: right;">0.942</td>
+<td style="text-align: right;">0.923</td>
+<td style="text-align: right;">0.961</td>
 <td style="text-align: right;">0.000</td>
 </tr>
 <tr class="even">
-<td style="text-align: left;">temp_med_Summer</td>
-<td style="text-align: right;">1.295</td>
-<td style="text-align: right;">1.085</td>
-<td style="text-align: right;">1.550</td>
-<td style="text-align: right;">0.004</td>
+<td style="text-align: left;">umid_med_Summer</td>
+<td style="text-align: right;">1.169</td>
+<td style="text-align: right;">1.110</td>
+<td style="text-align: right;">1.232</td>
+<td style="text-align: right;">0.000</td>
 </tr>
 <tr class="odd">
+<td style="text-align: left;">temp_med_Summer</td>
+<td style="text-align: right;">1.296</td>
+<td style="text-align: right;">1.083</td>
+<td style="text-align: right;">1.554</td>
+<td style="text-align: right;">0.005</td>
+</tr>
+<tr class="even">
 <td style="text-align: left;">thr_prec_Winter</td>
-<td style="text-align: right;">0.957</td>
-<td style="text-align: right;">0.913</td>
-<td style="text-align: right;">1.003</td>
-<td style="text-align: right;">0.070</td>
+<td style="text-align: right;">0.960</td>
+<td style="text-align: right;">0.915</td>
+<td style="text-align: right;">1.007</td>
+<td style="text-align: right;">0.096</td>
 </tr>
 </tbody>
 </table>
 
 
 </div>
-<div class="sourceCode cell-code" id="cb46"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb46-1"><a href="#cb46-1" aria-hidden="true" tabindex="-1"></a><span class="co">#write.csv(odds_ratio_df, "odds_ratio_tabela_17_22.csv", row.names = FALSE)</span></span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="sourceCode cell-code" id="cb43"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb43-1"><a href="#cb43-1" aria-hidden="true" tabindex="-1"></a><span class="co">#write.csv(odds_ratio_df, "odds_ratio_tabela_17_22.csv", row.names = FALSE)</span></span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 </div>
 </section>
 <section id="figura" class="level2">
 <h2 class="anchored" data-anchor-id="figura">Figura</h2>
 <div class="cell">
-<div class="sourceCode cell-code" id="cb47"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb47-1"><a href="#cb47-1" aria-hidden="true" tabindex="-1"></a><span class="co"># geral</span></span>
-<span id="cb47-2"><a href="#cb47-2" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb47-3"><a href="#cb47-3" aria-hidden="true" tabindex="-1"></a><span class="co"># Extraindo os coeficientes do modelo multinomial com intervalo de confiança</span></span>
-<span id="cb47-4"><a href="#cb47-4" aria-hidden="true" tabindex="-1"></a>tidy_model <span class="ot">&lt;-</span> broom<span class="sc">::</span><span class="fu">tidy</span>(modelo_final, <span class="at">conf.int =</span> <span class="cn">TRUE</span>)</span>
-<span id="cb47-5"><a href="#cb47-5" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb47-6"><a href="#cb47-6" aria-hidden="true" tabindex="-1"></a><span class="co"># Filtrando apenas os coeficientes das variáveis preditoras (removendo a categoria base)</span></span>
-<span id="cb47-7"><a href="#cb47-7" aria-hidden="true" tabindex="-1"></a>tidy_model <span class="ot">&lt;-</span> tidy_model <span class="sc">%&gt;%</span></span>
-<span id="cb47-8"><a href="#cb47-8" aria-hidden="true" tabindex="-1"></a>  <span class="fu">filter</span>(term <span class="sc">!=</span> <span class="st">"(Intercept)"</span>)</span>
-<span id="cb47-9"><a href="#cb47-9" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb47-10"><a href="#cb47-10" aria-hidden="true" tabindex="-1"></a><span class="co"># Convertendo os coeficientes log-OR para OR e arredondando para 3 casas decimais, sem limites</span></span>
-<span id="cb47-11"><a href="#cb47-11" aria-hidden="true" tabindex="-1"></a>tidy_model <span class="ot">&lt;-</span> tidy_model <span class="sc">%&gt;%</span></span>
-<span id="cb47-12"><a href="#cb47-12" aria-hidden="true" tabindex="-1"></a>  <span class="fu">mutate</span>(</span>
-<span id="cb47-13"><a href="#cb47-13" aria-hidden="true" tabindex="-1"></a>    <span class="at">estimate =</span> <span class="fu">round</span>(<span class="fu">exp</span>(estimate), <span class="dv">3</span>),   <span class="co"># Convertendo log-OR para OR</span></span>
-<span id="cb47-14"><a href="#cb47-14" aria-hidden="true" tabindex="-1"></a>    <span class="at">conf.low =</span> <span class="fu">round</span>(<span class="fu">exp</span>(conf.low), <span class="dv">3</span>),   <span class="co"># Convertendo intervalo inferior</span></span>
-<span id="cb47-15"><a href="#cb47-15" aria-hidden="true" tabindex="-1"></a>    <span class="at">conf.high =</span> <span class="fu">round</span>(<span class="fu">exp</span>(conf.high), <span class="dv">3</span>)  <span class="co"># Convertendo intervalo superior</span></span>
-<span id="cb47-16"><a href="#cb47-16" aria-hidden="true" tabindex="-1"></a>  )</span>
-<span id="cb47-17"><a href="#cb47-17" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb47-18"><a href="#cb47-18" aria-hidden="true" tabindex="-1"></a><span class="co"># Definindo os valores do eixo X dinamicamente, sem limite fixo</span></span>
-<span id="cb47-19"><a href="#cb47-19" aria-hidden="true" tabindex="-1"></a>x_breaks <span class="ot">&lt;-</span> <span class="fu">seq</span>(<span class="dv">0</span>, <span class="fu">max</span>(tidy_model<span class="sc">$</span>conf.high, <span class="at">na.rm =</span> <span class="cn">TRUE</span>) <span class="sc">+</span> <span class="dv">1</span>, <span class="at">by =</span> <span class="dv">1</span>)</span>
-<span id="cb47-20"><a href="#cb47-20" aria-hidden="true" tabindex="-1"></a>x_labels <span class="ot">&lt;-</span> <span class="fu">format</span>(<span class="fu">round</span>(x_breaks, <span class="dv">1</span>), <span class="at">nsmall =</span> <span class="dv">1</span>)  <span class="co"># Formata com 1 casa decimal</span></span>
-<span id="cb47-21"><a href="#cb47-21" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb47-22"><a href="#cb47-22" aria-hidden="true" tabindex="-1"></a><span class="co"># Criando o gráfico de forest plot sem limite artificial no eixo X</span></span>
-<span id="cb47-23"><a href="#cb47-23" aria-hidden="true" tabindex="-1"></a><span class="fu">ggplot</span>(tidy_model, <span class="fu">aes</span>(<span class="at">x =</span> estimate, <span class="at">y =</span> term)) <span class="sc">+</span></span>
-<span id="cb47-24"><a href="#cb47-24" aria-hidden="true" tabindex="-1"></a>  <span class="fu">geom_point</span>(<span class="at">color =</span> <span class="st">"darkgreen"</span>, <span class="at">size =</span> <span class="dv">3</span>) <span class="sc">+</span>  <span class="co"># Pontos dos ORs</span></span>
-<span id="cb47-25"><a href="#cb47-25" aria-hidden="true" tabindex="-1"></a>  <span class="fu">geom_errorbarh</span>(<span class="fu">aes</span>(<span class="at">xmin =</span> conf.low, <span class="at">xmax =</span> conf.high), <span class="at">height =</span> <span class="fl">0.2</span>, <span class="at">color =</span> <span class="st">"darkgreen"</span>) <span class="sc">+</span>  <span class="co"># Barras de erro</span></span>
-<span id="cb47-26"><a href="#cb47-26" aria-hidden="true" tabindex="-1"></a>  <span class="fu">geom_vline</span>(<span class="at">xintercept =</span> <span class="dv">1</span>, <span class="at">linetype =</span> <span class="st">"dashed"</span>, <span class="at">color =</span> <span class="st">"gray"</span>) <span class="sc">+</span>  <span class="co"># Linha vertical em OR = 1</span></span>
-<span id="cb47-27"><a href="#cb47-27" aria-hidden="true" tabindex="-1"></a>  <span class="fu">scale_x_continuous</span>(</span>
-<span id="cb47-28"><a href="#cb47-28" aria-hidden="true" tabindex="-1"></a>    <span class="at">breaks =</span> x_breaks,</span>
-<span id="cb47-29"><a href="#cb47-29" aria-hidden="true" tabindex="-1"></a>    <span class="at">labels =</span> x_labels</span>
-<span id="cb47-30"><a href="#cb47-30" aria-hidden="true" tabindex="-1"></a>  ) <span class="sc">+</span></span>
-<span id="cb47-31"><a href="#cb47-31" aria-hidden="true" tabindex="-1"></a>  <span class="fu">labs</span>(<span class="at">x =</span> <span class="st">"Odds Ratio (OR)"</span>, <span class="at">y =</span> <span class="st">""</span>, <span class="at">title =</span> <span class="st">"Forest Plot - Modelo Binomial"</span>) <span class="sc">+</span></span>
-<span id="cb47-32"><a href="#cb47-32" aria-hidden="true" tabindex="-1"></a>  <span class="fu">theme_minimal</span>()</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="sourceCode cell-code" id="cb44"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb44-1"><a href="#cb44-1" aria-hidden="true" tabindex="-1"></a><span class="co"># geral</span></span>
+<span id="cb44-2"><a href="#cb44-2" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb44-3"><a href="#cb44-3" aria-hidden="true" tabindex="-1"></a><span class="co"># Extraindo os coeficientes do modelo multinomial com intervalo de confiança</span></span>
+<span id="cb44-4"><a href="#cb44-4" aria-hidden="true" tabindex="-1"></a>tidy_model <span class="ot">&lt;-</span> broom<span class="sc">::</span><span class="fu">tidy</span>(modelo_final, <span class="at">conf.int =</span> <span class="cn">TRUE</span>)</span>
+<span id="cb44-5"><a href="#cb44-5" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb44-6"><a href="#cb44-6" aria-hidden="true" tabindex="-1"></a><span class="co"># Filtrando apenas os coeficientes das variáveis preditoras (removendo a categoria base)</span></span>
+<span id="cb44-7"><a href="#cb44-7" aria-hidden="true" tabindex="-1"></a>tidy_model <span class="ot">&lt;-</span> tidy_model <span class="sc">%&gt;%</span></span>
+<span id="cb44-8"><a href="#cb44-8" aria-hidden="true" tabindex="-1"></a>  <span class="fu">filter</span>(term <span class="sc">!=</span> <span class="st">"(Intercept)"</span>)</span>
+<span id="cb44-9"><a href="#cb44-9" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb44-10"><a href="#cb44-10" aria-hidden="true" tabindex="-1"></a><span class="co"># Convertendo os coeficientes log-OR para OR e arredondando para 3 casas decimais, sem limites</span></span>
+<span id="cb44-11"><a href="#cb44-11" aria-hidden="true" tabindex="-1"></a>tidy_model <span class="ot">&lt;-</span> tidy_model <span class="sc">%&gt;%</span></span>
+<span id="cb44-12"><a href="#cb44-12" aria-hidden="true" tabindex="-1"></a>  <span class="fu">mutate</span>(</span>
+<span id="cb44-13"><a href="#cb44-13" aria-hidden="true" tabindex="-1"></a>    <span class="at">estimate =</span> <span class="fu">round</span>(<span class="fu">exp</span>(estimate), <span class="dv">3</span>),   <span class="co"># Convertendo log-OR para OR</span></span>
+<span id="cb44-14"><a href="#cb44-14" aria-hidden="true" tabindex="-1"></a>    <span class="at">conf.low =</span> <span class="fu">round</span>(<span class="fu">exp</span>(conf.low), <span class="dv">3</span>),   <span class="co"># Convertendo intervalo inferior</span></span>
+<span id="cb44-15"><a href="#cb44-15" aria-hidden="true" tabindex="-1"></a>    <span class="at">conf.high =</span> <span class="fu">round</span>(<span class="fu">exp</span>(conf.high), <span class="dv">3</span>)  <span class="co"># Convertendo intervalo superior</span></span>
+<span id="cb44-16"><a href="#cb44-16" aria-hidden="true" tabindex="-1"></a>  )</span>
+<span id="cb44-17"><a href="#cb44-17" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb44-18"><a href="#cb44-18" aria-hidden="true" tabindex="-1"></a><span class="co"># Definindo os valores do eixo X dinamicamente, sem limite fixo</span></span>
+<span id="cb44-19"><a href="#cb44-19" aria-hidden="true" tabindex="-1"></a>x_breaks <span class="ot">&lt;-</span> <span class="fu">seq</span>(<span class="dv">0</span>, <span class="fu">max</span>(tidy_model<span class="sc">$</span>conf.high, <span class="at">na.rm =</span> <span class="cn">TRUE</span>) <span class="sc">+</span> <span class="dv">1</span>, <span class="at">by =</span> <span class="dv">1</span>)</span>
+<span id="cb44-20"><a href="#cb44-20" aria-hidden="true" tabindex="-1"></a>x_labels <span class="ot">&lt;-</span> <span class="fu">format</span>(<span class="fu">round</span>(x_breaks, <span class="dv">1</span>), <span class="at">nsmall =</span> <span class="dv">1</span>)  <span class="co"># Formata com 1 casa decimal</span></span>
+<span id="cb44-21"><a href="#cb44-21" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb44-22"><a href="#cb44-22" aria-hidden="true" tabindex="-1"></a><span class="co"># Criando o gráfico de forest plot sem limite artificial no eixo X</span></span>
+<span id="cb44-23"><a href="#cb44-23" aria-hidden="true" tabindex="-1"></a><span class="fu">ggplot</span>(tidy_model, <span class="fu">aes</span>(<span class="at">x =</span> estimate, <span class="at">y =</span> term)) <span class="sc">+</span></span>
+<span id="cb44-24"><a href="#cb44-24" aria-hidden="true" tabindex="-1"></a>  <span class="fu">geom_point</span>(<span class="at">color =</span> <span class="st">"darkgreen"</span>, <span class="at">size =</span> <span class="dv">3</span>) <span class="sc">+</span>  <span class="co"># Pontos dos ORs</span></span>
+<span id="cb44-25"><a href="#cb44-25" aria-hidden="true" tabindex="-1"></a>  <span class="fu">geom_errorbarh</span>(<span class="fu">aes</span>(<span class="at">xmin =</span> conf.low, <span class="at">xmax =</span> conf.high), <span class="at">height =</span> <span class="fl">0.2</span>, <span class="at">color =</span> <span class="st">"darkgreen"</span>) <span class="sc">+</span>  <span class="co"># Barras de erro</span></span>
+<span id="cb44-26"><a href="#cb44-26" aria-hidden="true" tabindex="-1"></a>  <span class="fu">geom_vline</span>(<span class="at">xintercept =</span> <span class="dv">1</span>, <span class="at">linetype =</span> <span class="st">"dashed"</span>, <span class="at">color =</span> <span class="st">"gray"</span>) <span class="sc">+</span>  <span class="co"># Linha vertical em OR = 1</span></span>
+<span id="cb44-27"><a href="#cb44-27" aria-hidden="true" tabindex="-1"></a>  <span class="fu">scale_x_continuous</span>(</span>
+<span id="cb44-28"><a href="#cb44-28" aria-hidden="true" tabindex="-1"></a>    <span class="at">breaks =</span> x_breaks,</span>
+<span id="cb44-29"><a href="#cb44-29" aria-hidden="true" tabindex="-1"></a>    <span class="at">labels =</span> x_labels</span>
+<span id="cb44-30"><a href="#cb44-30" aria-hidden="true" tabindex="-1"></a>  ) <span class="sc">+</span></span>
+<span id="cb44-31"><a href="#cb44-31" aria-hidden="true" tabindex="-1"></a>  <span class="fu">labs</span>(<span class="at">x =</span> <span class="st">"Odds Ratio (OR)"</span>, <span class="at">y =</span> <span class="st">""</span>, <span class="at">title =</span> <span class="st">"Forest Plot - Modelo Binomial"</span>) <span class="sc">+</span></span>
+<span id="cb44-32"><a href="#cb44-32" aria-hidden="true" tabindex="-1"></a>  <span class="fu">theme_minimal</span>()</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 <div class="cell-output-display">
 <div>
 <figure class="figure">
@@ -1047,38 +1002,38 @@ Prediction    0    1
 </figure>
 </div>
 </div>
-<div class="sourceCode cell-code" id="cb48"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb48-1"><a href="#cb48-1" aria-hidden="true" tabindex="-1"></a><span class="do">## Com limites de -3 e 3</span></span>
-<span id="cb48-2"><a href="#cb48-2" aria-hidden="true" tabindex="-1"></a><span class="co"># Extraindo os coeficientes do modelo multinomial com intervalo de confiança</span></span>
-<span id="cb48-3"><a href="#cb48-3" aria-hidden="true" tabindex="-1"></a>tidy_model <span class="ot">&lt;-</span> broom<span class="sc">::</span><span class="fu">tidy</span>(modelo_final, <span class="at">conf.int =</span> <span class="cn">TRUE</span>)</span>
-<span id="cb48-4"><a href="#cb48-4" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb48-5"><a href="#cb48-5" aria-hidden="true" tabindex="-1"></a><span class="co"># Filtrando apenas os coeficientes das variáveis preditoras (removendo a categoria base)</span></span>
-<span id="cb48-6"><a href="#cb48-6" aria-hidden="true" tabindex="-1"></a>tidy_model <span class="ot">&lt;-</span> tidy_model <span class="sc">%&gt;%</span></span>
-<span id="cb48-7"><a href="#cb48-7" aria-hidden="true" tabindex="-1"></a>  <span class="fu">filter</span>(term <span class="sc">!=</span> <span class="st">"(Intercept)"</span>)</span>
-<span id="cb48-8"><a href="#cb48-8" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb48-9"><a href="#cb48-9" aria-hidden="true" tabindex="-1"></a><span class="co"># Convertendo os coeficientes log-OR para OR e arredondando para 3 casas decimais</span></span>
-<span id="cb48-10"><a href="#cb48-10" aria-hidden="true" tabindex="-1"></a>tidy_model <span class="ot">&lt;-</span> tidy_model <span class="sc">%&gt;%</span></span>
-<span id="cb48-11"><a href="#cb48-11" aria-hidden="true" tabindex="-1"></a>  <span class="fu">mutate</span>(</span>
-<span id="cb48-12"><a href="#cb48-12" aria-hidden="true" tabindex="-1"></a>    <span class="at">estimate =</span> <span class="fu">round</span>(<span class="fu">pmin</span>(<span class="fu">exp</span>(estimate), <span class="dv">3</span>), <span class="dv">3</span>),   <span class="co"># Limita os valores acima de 3 para 3</span></span>
-<span id="cb48-13"><a href="#cb48-13" aria-hidden="true" tabindex="-1"></a>    <span class="at">conf.low =</span> <span class="fu">round</span>(<span class="fu">pmax</span>(<span class="fu">exp</span>(conf.low), <span class="dv">0</span>), <span class="dv">3</span>),   <span class="co"># Garante que conf.low nunca seja menor que 0</span></span>
-<span id="cb48-14"><a href="#cb48-14" aria-hidden="true" tabindex="-1"></a>    <span class="at">conf.high =</span> <span class="fu">round</span>(<span class="fu">pmin</span>(<span class="fu">exp</span>(conf.high), <span class="dv">3</span>), <span class="dv">3</span>)  <span class="co"># Limita os valores acima de 3 para 3</span></span>
-<span id="cb48-15"><a href="#cb48-15" aria-hidden="true" tabindex="-1"></a>  )</span>
-<span id="cb48-16"><a href="#cb48-16" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb48-17"><a href="#cb48-17" aria-hidden="true" tabindex="-1"></a><span class="co"># Definindo os valores fixos do eixo X</span></span>
-<span id="cb48-18"><a href="#cb48-18" aria-hidden="true" tabindex="-1"></a>x_breaks <span class="ot">&lt;-</span> <span class="fu">c</span>(<span class="dv">0</span>, <span class="fl">0.1</span>, <span class="dv">1</span>, <span class="dv">2</span>, <span class="dv">3</span>)  <span class="co"># Apenas 1 casa decimal</span></span>
-<span id="cb48-19"><a href="#cb48-19" aria-hidden="true" tabindex="-1"></a>x_labels <span class="ot">&lt;-</span> <span class="fu">format</span>(<span class="fu">round</span>(x_breaks, <span class="dv">1</span>), <span class="at">nsmall =</span> <span class="dv">1</span>)  <span class="co"># Formata com 1 casa decimal</span></span>
-<span id="cb48-20"><a href="#cb48-20" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb48-21"><a href="#cb48-21" aria-hidden="true" tabindex="-1"></a><span class="co"># Criando o gráfico de forest plot</span></span>
-<span id="cb48-22"><a href="#cb48-22" aria-hidden="true" tabindex="-1"></a><span class="fu">ggplot</span>(tidy_model, <span class="fu">aes</span>(<span class="at">x =</span> estimate, <span class="at">y =</span> term)) <span class="sc">+</span></span>
-<span id="cb48-23"><a href="#cb48-23" aria-hidden="true" tabindex="-1"></a>  <span class="fu">geom_point</span>(<span class="at">color =</span> <span class="st">"darkgreen"</span>, <span class="at">size =</span> <span class="dv">3</span>) <span class="sc">+</span>  <span class="co"># Pontos dos ORs</span></span>
-<span id="cb48-24"><a href="#cb48-24" aria-hidden="true" tabindex="-1"></a>  <span class="fu">geom_errorbarh</span>(<span class="fu">aes</span>(<span class="at">xmin =</span> conf.low, <span class="at">xmax =</span> conf.high), <span class="at">height =</span> <span class="fl">0.2</span>, <span class="at">color =</span> <span class="st">"darkgreen"</span>) <span class="sc">+</span>  <span class="co"># Barras de erro</span></span>
-<span id="cb48-25"><a href="#cb48-25" aria-hidden="true" tabindex="-1"></a>  <span class="fu">geom_vline</span>(<span class="at">xintercept =</span> <span class="dv">1</span>, <span class="at">linetype =</span> <span class="st">"dashed"</span>, <span class="at">color =</span> <span class="st">"gray"</span>) <span class="sc">+</span>  <span class="co"># Linha vertical em OR = 1</span></span>
-<span id="cb48-26"><a href="#cb48-26" aria-hidden="true" tabindex="-1"></a>  <span class="fu">scale_x_continuous</span>(</span>
-<span id="cb48-27"><a href="#cb48-27" aria-hidden="true" tabindex="-1"></a>    <span class="at">breaks =</span> x_breaks,</span>
-<span id="cb48-28"><a href="#cb48-28" aria-hidden="true" tabindex="-1"></a>    <span class="at">labels =</span> x_labels,</span>
-<span id="cb48-29"><a href="#cb48-29" aria-hidden="true" tabindex="-1"></a>    <span class="at">limits =</span> <span class="fu">c</span>(<span class="dv">0</span>, <span class="dv">3</span>)  <span class="co"># Limita a escala até 3</span></span>
-<span id="cb48-30"><a href="#cb48-30" aria-hidden="true" tabindex="-1"></a>  ) <span class="sc">+</span></span>
-<span id="cb48-31"><a href="#cb48-31" aria-hidden="true" tabindex="-1"></a>  <span class="fu">labs</span>(<span class="at">x =</span> <span class="st">"Odds Ratio (OR)"</span>, <span class="at">y =</span> <span class="st">""</span>, <span class="at">title =</span> <span class="st">"Forest Plot - Modelo Binomial"</span>) <span class="sc">+</span></span>
-<span id="cb48-32"><a href="#cb48-32" aria-hidden="true" tabindex="-1"></a>  <span class="fu">theme_minimal</span>()</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="sourceCode cell-code" id="cb45"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb45-1"><a href="#cb45-1" aria-hidden="true" tabindex="-1"></a><span class="do">## Com limites de -3 e 3</span></span>
+<span id="cb45-2"><a href="#cb45-2" aria-hidden="true" tabindex="-1"></a><span class="co"># Extraindo os coeficientes do modelo multinomial com intervalo de confiança</span></span>
+<span id="cb45-3"><a href="#cb45-3" aria-hidden="true" tabindex="-1"></a>tidy_model <span class="ot">&lt;-</span> broom<span class="sc">::</span><span class="fu">tidy</span>(modelo_final, <span class="at">conf.int =</span> <span class="cn">TRUE</span>)</span>
+<span id="cb45-4"><a href="#cb45-4" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb45-5"><a href="#cb45-5" aria-hidden="true" tabindex="-1"></a><span class="co"># Filtrando apenas os coeficientes das variáveis preditoras (removendo a categoria base)</span></span>
+<span id="cb45-6"><a href="#cb45-6" aria-hidden="true" tabindex="-1"></a>tidy_model <span class="ot">&lt;-</span> tidy_model <span class="sc">%&gt;%</span></span>
+<span id="cb45-7"><a href="#cb45-7" aria-hidden="true" tabindex="-1"></a>  <span class="fu">filter</span>(term <span class="sc">!=</span> <span class="st">"(Intercept)"</span>)</span>
+<span id="cb45-8"><a href="#cb45-8" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb45-9"><a href="#cb45-9" aria-hidden="true" tabindex="-1"></a><span class="co"># Convertendo os coeficientes log-OR para OR e arredondando para 3 casas decimais</span></span>
+<span id="cb45-10"><a href="#cb45-10" aria-hidden="true" tabindex="-1"></a>tidy_model <span class="ot">&lt;-</span> tidy_model <span class="sc">%&gt;%</span></span>
+<span id="cb45-11"><a href="#cb45-11" aria-hidden="true" tabindex="-1"></a>  <span class="fu">mutate</span>(</span>
+<span id="cb45-12"><a href="#cb45-12" aria-hidden="true" tabindex="-1"></a>    <span class="at">estimate =</span> <span class="fu">round</span>(<span class="fu">pmin</span>(<span class="fu">exp</span>(estimate), <span class="dv">3</span>), <span class="dv">3</span>),   <span class="co"># Limita os valores acima de 3 para 3</span></span>
+<span id="cb45-13"><a href="#cb45-13" aria-hidden="true" tabindex="-1"></a>    <span class="at">conf.low =</span> <span class="fu">round</span>(<span class="fu">pmax</span>(<span class="fu">exp</span>(conf.low), <span class="dv">0</span>), <span class="dv">3</span>),   <span class="co"># Garante que conf.low nunca seja menor que 0</span></span>
+<span id="cb45-14"><a href="#cb45-14" aria-hidden="true" tabindex="-1"></a>    <span class="at">conf.high =</span> <span class="fu">round</span>(<span class="fu">pmin</span>(<span class="fu">exp</span>(conf.high), <span class="dv">3</span>), <span class="dv">3</span>)  <span class="co"># Limita os valores acima de 3 para 3</span></span>
+<span id="cb45-15"><a href="#cb45-15" aria-hidden="true" tabindex="-1"></a>  )</span>
+<span id="cb45-16"><a href="#cb45-16" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb45-17"><a href="#cb45-17" aria-hidden="true" tabindex="-1"></a><span class="co"># Definindo os valores fixos do eixo X</span></span>
+<span id="cb45-18"><a href="#cb45-18" aria-hidden="true" tabindex="-1"></a>x_breaks <span class="ot">&lt;-</span> <span class="fu">c</span>(<span class="dv">0</span>, <span class="fl">0.1</span>, <span class="dv">1</span>, <span class="dv">2</span>, <span class="dv">3</span>)  <span class="co"># Apenas 1 casa decimal</span></span>
+<span id="cb45-19"><a href="#cb45-19" aria-hidden="true" tabindex="-1"></a>x_labels <span class="ot">&lt;-</span> <span class="fu">format</span>(<span class="fu">round</span>(x_breaks, <span class="dv">1</span>), <span class="at">nsmall =</span> <span class="dv">1</span>)  <span class="co"># Formata com 1 casa decimal</span></span>
+<span id="cb45-20"><a href="#cb45-20" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb45-21"><a href="#cb45-21" aria-hidden="true" tabindex="-1"></a><span class="co"># Criando o gráfico de forest plot</span></span>
+<span id="cb45-22"><a href="#cb45-22" aria-hidden="true" tabindex="-1"></a><span class="fu">ggplot</span>(tidy_model, <span class="fu">aes</span>(<span class="at">x =</span> estimate, <span class="at">y =</span> term)) <span class="sc">+</span></span>
+<span id="cb45-23"><a href="#cb45-23" aria-hidden="true" tabindex="-1"></a>  <span class="fu">geom_point</span>(<span class="at">color =</span> <span class="st">"darkgreen"</span>, <span class="at">size =</span> <span class="dv">3</span>) <span class="sc">+</span>  <span class="co"># Pontos dos ORs</span></span>
+<span id="cb45-24"><a href="#cb45-24" aria-hidden="true" tabindex="-1"></a>  <span class="fu">geom_errorbarh</span>(<span class="fu">aes</span>(<span class="at">xmin =</span> conf.low, <span class="at">xmax =</span> conf.high), <span class="at">height =</span> <span class="fl">0.2</span>, <span class="at">color =</span> <span class="st">"darkgreen"</span>) <span class="sc">+</span>  <span class="co"># Barras de erro</span></span>
+<span id="cb45-25"><a href="#cb45-25" aria-hidden="true" tabindex="-1"></a>  <span class="fu">geom_vline</span>(<span class="at">xintercept =</span> <span class="dv">1</span>, <span class="at">linetype =</span> <span class="st">"dashed"</span>, <span class="at">color =</span> <span class="st">"gray"</span>) <span class="sc">+</span>  <span class="co"># Linha vertical em OR = 1</span></span>
+<span id="cb45-26"><a href="#cb45-26" aria-hidden="true" tabindex="-1"></a>  <span class="fu">scale_x_continuous</span>(</span>
+<span id="cb45-27"><a href="#cb45-27" aria-hidden="true" tabindex="-1"></a>    <span class="at">breaks =</span> x_breaks,</span>
+<span id="cb45-28"><a href="#cb45-28" aria-hidden="true" tabindex="-1"></a>    <span class="at">labels =</span> x_labels,</span>
+<span id="cb45-29"><a href="#cb45-29" aria-hidden="true" tabindex="-1"></a>    <span class="at">limits =</span> <span class="fu">c</span>(<span class="dv">0</span>, <span class="dv">3</span>)  <span class="co"># Limita a escala até 3</span></span>
+<span id="cb45-30"><a href="#cb45-30" aria-hidden="true" tabindex="-1"></a>  ) <span class="sc">+</span></span>
+<span id="cb45-31"><a href="#cb45-31" aria-hidden="true" tabindex="-1"></a>  <span class="fu">labs</span>(<span class="at">x =</span> <span class="st">"Odds Ratio (OR)"</span>, <span class="at">y =</span> <span class="st">""</span>, <span class="at">title =</span> <span class="st">"Forest Plot - Modelo Binomial"</span>) <span class="sc">+</span></span>
+<span id="cb45-32"><a href="#cb45-32" aria-hidden="true" tabindex="-1"></a>  <span class="fu">theme_minimal</span>()</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 <div class="cell-output-display">
 <div>
 <figure class="figure">
