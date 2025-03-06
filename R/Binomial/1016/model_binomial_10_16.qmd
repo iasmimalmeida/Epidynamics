@@ -89,7 +89,7 @@ summary(det_10_16)
 
 Valores ausentes podem comprometer a análise, pois a regressão binomial não lida bem com dados incompletos. Se houver muitas ausências em uma variável, pode ser necessário removê-la ou imputar valores. Caso haja poucos valores faltantes, a remoção de linhas (`na.omit()`) pode ser suficiente. A ausência de `NA` indica que o banco está pronto para a modelagem.
 
-Interpretação: Foram retiradas 8 linhas ou seja 8 municípios, são eles: xxxxxxxx
+**Interpretação:** Foram removidas 7 linhas, correspondendo a 7 municípios. Destes, 4 foram excluídos por não serem considerados municípios em 2010 ou por terem sido emancipados posteriormente: Mojuí dos Campos (PA), Pescaria Brava (SC), Pinto Bandeira (RS) e Paraíso das Águas (MT). Além disso, outros 3 municípios foram removidos devido à ausência de dados climáticos no mesmo ano, sendo eles: Anapu (PA),Ipojuca (PE) e Maetinga (BA).
 
 ### **2. Análise de multicolinearidade com VIF**
 
@@ -105,9 +105,15 @@ Interpretação: Foram retiradas 12 linhas ou seja 12 municípios com 8 de categ
 
 ```{r}
 
-# 1. Verificação de valores ausentes
+# Filtrar apenas os muni_code onde há pelo menos um NA em outras colunas
+muni_com_na <- det_10_16[rowSums(is.na(det_10_16)) > 0, "muni_code"]
+
+# Exibir os muni_code afetados
+print(unique(muni_com_na))
+
+# Verificação de valores ausentes
 cat("Valores ausentes por variável:\n")
-#print(colSums(is.na(det_10_16)))
+print(colSums(is.na(det_10_16)))
 
 # Remover linhas com NA (se necessário)
 det_10_16 <- na.omit(det_10_16)
@@ -166,6 +172,7 @@ det_10_16 <- det_10_16%>%
 det_10_16$dengue_pattern_10_16 <- relevel(det_10_16$dengue_pattern_10_16, ref = "0") # variável dependente
 
 # Variáveis independentes
+det_10_16$region <- relevel(det_10_16$region, ref = "3")
 det_10_16$bioma <- relevel(det_10_16$bioma, ref = "Mata Atlantica")
 det_10_16$tipo_regiao <- relevel(det_10_16$tipo_regiao , ref = "nao metropolitana")
 det_10_16$koppen <- relevel(det_10_16$koppen, ref = "Aw")
@@ -218,9 +225,7 @@ print(summary(step_model))
 
 2.  Teste de Verossimilhança (Likelihood Ratio Test - LRT): Compara um modelo com e sem variáveis explicativas para ver se o modelo ajustado é significativamente melhor do que um modelo nulo. Se o p-valor for baixo (\< 0.05), rejeitamos o modelo nulo, indicando que as variáveis explicativas contribuem para a predição.
 
-3.  Teste de Hosmer-Lemeshow : Avalia se as probabilidades previstas pelo modelo são bem ajustadas aos dados observados. Interpretação: p-valor \> 0.05 → Indica bom ajuste p-valor \< 0.05 → Indica que o modelo pode não estar ajustando bem.
-
-4.  Curva ROC e AUC (Área Sob a Curva) : Mede a capacidade do modelo de discriminar entre as classes (0 e 1).
+3.  Curva ROC e AUC (Área Sob a Curva) : Mede a capacidade do modelo de discriminar entre as classes (0 e 1).
 
     -   AUC = 0.5 → Modelo sem discriminação
 
@@ -228,17 +233,16 @@ print(summary(step_model))
 
     -   AUC acima de 0.8 → Excelente modelo
 
-5.  Matriz de Confusão e Acurácia : Avalia o desempenho do modelo na predição correta das classes.
+4.  Matriz de Confusão e Acurácia : Avalia o desempenho do modelo na predição correta das classes.
 
     -   Acurácia = (TP + TN) / (TP + TN + FP + FN)
 
 Resumindo:
 
 | Método | Interpretação |
-|------------------------------|------------------------------------------|
+|------------------------------------|------------------------------------|
 | Pseudo R² (Nagelkerke, McFadden) | Mede a proporção da variância explicada. Quanto maior, melhor. |
 | LRT (Teste de Verossimilhança) | Verifica se o modelo ajustado é significativamente melhor que um modelo nulo. |
-| Hosmer-Lemeshow | Testa se as previsões do modelo correspondem às observações reais. |
 | Curva ROC e AUC | Mede a capacidade preditiva do modelo (valores \> 0.8 indicam ótimo desempenho). |
 | Matriz de Confusão | Avalia a acurácia da classificação do modelo. |
 
@@ -268,6 +272,7 @@ print(conf_matrix)
 ## 5. Gerando gráfico Odds Ratio
 
 ## Or, IC95%, p-valor
+
 ```{r, message=FALSE, warning=FALSE}
 
 # Salvar o modelo final

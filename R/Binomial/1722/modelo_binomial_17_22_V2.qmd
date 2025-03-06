@@ -1,5 +1,5 @@
 ---
-title: "Análise Regressão Logística Binomial A2 - 2017-2022"
+title: "Análise Regressão Logística Binomial A2 - 2017-2022 - com pesos"
 format: html
 editor: visual
 editor_options: 
@@ -8,7 +8,7 @@ editor_options:
 
 ## Bibliotecas
 
-```{r setup, include=FALSE}
+```{r setup, include = FALSE}
 library(tidyverse)
 library(nnet)
 library(caret)
@@ -63,7 +63,7 @@ remove(clima_org_model_17_22_season)
 
 # Análise 2017-2022
 
-Análise do período de 2017-2022, primeira parte de uma série temporal da classificação de padrões de transmissão de todos os municípios brasileiros para dengue.
+Análise do período de 2017-2022, segunda parte de uma série temporal da classificação de padrões de transmissão de todos os municípios brasileiros para dengue.
 
 ## 1. Arrumando variáveis
 
@@ -89,7 +89,7 @@ summary(det_17_22)
 
 Valores ausentes podem comprometer a análise, pois a regressão binomial não lida bem com dados incompletos. Se houver muitas ausências em uma variável, pode ser necessário removê-la ou imputar valores. Caso haja poucos valores faltantes, a remoção de linhas (`na.omit()`) pode ser suficiente. A ausência de `NA` indica que o banco está pronto para a modelagem.
 
-Interpretação: Foram retiradas 3 linhas ou seja 3 municípios, são eles: xxxxxxxx
+**Interpretação:** Foram removidas 3 linhas, correspondendo a 3 municípios. Destes, 3 foram devido à ausência de dados climáticos no mesmo ano, sendo eles: Fernando de Noronha (PE), Itaparica (BA) e Madre de Deus (BA).
 
 ### **2. Análise de multicolinearidade com VIF**
 
@@ -105,9 +105,15 @@ Interpretação: Foram retiradas 9 linhas ou seja 9 municípios com 4 de categor
 
 ```{r}
 
-# 1. Verificação de valores ausentes
+# Filtrar apenas os muni_code onde há pelo menos um NA em outras colunas
+muni_com_na <- det_17_22[rowSums(is.na(det_17_22)) > 0, "muni_code"]
+
+# Exibir os muni_code afetados
+print(unique(muni_com_na))
+
+# Verificação de valores ausentes
 cat("Valores ausentes por variável:\n")
-#print(colSums(is.na(det_17_22)))
+print(colSums(is.na(det_17_22)))
 
 # Remover linhas com NA (se necessário)
 det_17_22 <- na.omit(det_17_22)
@@ -173,14 +179,15 @@ ggplot(det_17_22  , aes(x = 1:nrow(det_17_22), y = residuos)) +
 
 ## 3. Modelo de regressão logística binomial
 
--   Interpretação:
+-   A variável dependente passou a ter pesos diferentes em suas categorias. A categoria 0 tinha aproximandamente 6 vezes o valor de municípios da categoria 1, então a categoria com menos observações foi otimizada de modo a aumentar a taxa de verdadeiros positivos nesta categoria, usanso peso 6 Ref: <https://www.sciencedirect.com/science/article/abs/pii/S0950705114000239>
 
-Para cada categoria (em relação à referência "0"), o modelo estima coeficientes (Coefficients) para cada variável preditora. Esses coeficientes representam o efeito de cada variável sobre a probabilidade de estar nas categorias 1, em comparação com 0.
+-   Para cada categoria (em relação à referência "0"), o modelo estima coeficientes (Coefficients) para cada variável preditora. Esses coeficientes representam o efeito de cada variável sobre a probabilidade de estar nas categorias 1, em comparação com 0.
 
 ```{r}
 # Remover colunas pelo nome
 det_17_22 <- det_17_22[, !names(det_17_22) %in% c("muni_code")]
 det_17_22$region <- as.factor(det_17_22$region)
+
 # removendo as linhas com Na
 det_17_22 <- det_17_22%>% 
   filter(!if_any(where(is.numeric), is.na))
@@ -189,16 +196,20 @@ det_17_22 <- det_17_22%>%
 det_17_22$dengue_pattern_17_22 <- relevel(det_17_22$dengue_pattern_17_22, ref = "0") # variável dependente
 
 # Variáveis independentes
+det_17_22$region <- relevel(det_17_22$region, ref = "3")
 det_17_22$bioma <- relevel(det_17_22$bioma, ref = "Mata Atlantica")
 det_17_22$tipo_regiao <- relevel(det_17_22$tipo_regiao , ref = "nao metropolitana")
 det_17_22$dengue_pattern_10_16 <- relevel(det_17_22$dengue_pattern_10_16, ref = "0")
 det_17_22$koppen <- relevel(det_17_22$koppen, ref = "Aw")
 
-# Modelo com tudo
-
 # excluindo os resídos
 det_17_22$residuos<- NULL
-binomial_model <- glm(dengue_pattern_17_22 ~ ., data = det_17_22, family = binomial)
+
+# dando peso as categorias da variável dependente
+weights_vector <- ifelse(det_17_22$dengue_pattern_17_22 == 1, 6, 1)
+
+# Criar modelo logístico binomial
+binomial_model <- glm(weights = weights_vector, dengue_pattern_17_22 ~ ., data = det_17_22, family = binomial)
 summary(binomial_model)
 
 ```
@@ -210,8 +221,7 @@ O stepwise é um método automatizado de seleção de variáveis em modelos esta
 ```{r, message=FALSE, warning=FALSE}
 
 # Criar o modelo inicial (nulo com region e pop22)
-null_model <- glm(dengue_pattern_17_22 ~ region + pop22, 
-                  data = det_17_22, 
+null_model <- glm(weights = weights_vector, dengue_pattern_17_22 ~ region +                   pop22, data = det_17_22, 
                   family = binomial)
 
 # Criar o modelo completo (com todas as variáveis preditoras adicionais)
