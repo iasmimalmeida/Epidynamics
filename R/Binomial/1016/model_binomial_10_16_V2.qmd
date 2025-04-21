@@ -1,10 +1,12 @@
 ---
-title: "Análise Regressão Logística Binomial A2  - 2010-2016 - com pesos"
+title: "Análise Regressão Logística Binomial A2  - 2010-2016 - com e sem pesos"
 format: html
 editor: visual
 editor_options: 
   chunk_output_type: console
 ---
+
+Análise binomial para Tese de doutorado, foi rodado com peso e sem peso nas variáveis no texto principal, será colocado sem pes, em anexo a com peso e as comparações.
 
 ## Bibliotecas
 
@@ -27,6 +29,7 @@ library(MASS)
 library(performance)
 library(knitr)
 library(kableExtra)
+library(ggcorrplot)
 
 ```
 
@@ -81,30 +84,29 @@ det_10_16$dengue_pattern_10_16 <- as.factor(det_10_16$dengue_pattern_10_16)
 # Visão geral dos dados
 summary(det_10_16)
 
+# Transformando a população em log base 10
+det_10_16$log_pop10 <- log10(det_10_16$pop10)
+
+# Removendo a coluna original pop10
+det_10_16$pop10 <- NULL
+
+# Verificando a transformação
+summary(det_10_16$log_pop10)
+
 ```
+
+## Pré- modelo geral
 
 ## 2. Verificação dos pressupostos
 
-### **1. Verificação de valores ausentes (NA)**
+### **Verificação de valores ausentes (NA)**
 
 Valores ausentes podem comprometer a análise, pois a regressão binomial não lida bem com dados incompletos. Se houver muitas ausências em uma variável, pode ser necessário removê-la ou imputar valores. Caso haja poucos valores faltantes, a remoção de linhas (`na.omit()`) pode ser suficiente. A ausência de `NA` indica que o banco está pronto para a modelagem.
 
-**Interpretação:** Foram removidas 7 linhas, correspondendo a 7 municípios. Destes, 4 foram excluídos por não serem considerados municípios em 2010 ou por terem sido emancipados posteriormente: Mojuí dos Campos (PA), Pescaria Brava (SC), Pinto Bandeira (RS) e Paraíso das Águas (MT). Além disso, outros 3 municípios foram removidos devido à ausência de dados climáticos no mesmo ano, sendo eles: Fernando de Noronha (PE), Itaparica(BA) e Madre de Deus (BA).
-
-**2. Análise de multicolinearidade com VIF**
-
-A multicolinearidade ocorre quando variáveis independentes estão altamente correlacionadas, dificultando a interpretação do modelo. O **VIF (Variance Inflation Factor)** mede essa relação: valores acima de 5 indicam uma correlação preocupante, e acima de 10 exigem ajustes, como exclusão ou transformação de variáveis.
-
-Interpretação: Nenhum está acima de 10 , então não precisa de ajuste, porém tem multicolinearidade moderada por que está de 5 a 10, mas isso o modelo pode dar conta no ajuste.
-
-### **3. Verificação de outliers nos resíduos padronizados**
-
-Outliers podem distorcer os coeficientes da regressão binomial e afetar a qualidade da predição. A análise dos resíduos padronizados permite identificar observações extremas, geralmente consideradas problemáticas quando estão fora do intervalo de -3 a 3. Se houver muitos outliers, pode ser necessário revisar a entrada de dados ou aplicar transformações.
-
-Interpretação: Foram retiradas 12 linhas ou seja 12 municípios com 8 de categoria 0 e 4 de categoria 1. Todos com intervalos acima de -3 e 3. Presentes na tabela outliers_binomial_model_10_16.csv.
+**Interpretação:** Foram removidas 7 linhas, correspondendo a 7 municípios. Destes, 3 foram devido à ausência de dados climáticos no mesmo ano, sendo eles: Fernando de Noronha (PE), Itaparica (BA) e Madre de Deus (BA). Outros 4 foi pela falta de dados da população do censo 2010, ou porque os muncípios ainda não existima ou porque não eram emancipados. São eles: Mojuí dos Campos (PA), Paraíso das Águas, Pinto bandeira e XXXX.
 
 ```{r}
-
+# Verificação de valores ausentes
 # Filtrar apenas os muni_code onde há pelo menos um NA em outras colunas
 muni_com_na <- det_10_16[rowSums(is.na(det_10_16)) > 0, "muni_code"]
 
@@ -117,19 +119,146 @@ print(colSums(is.na(det_10_16)))
 
 # Remover linhas com NA (se necessário)
 det_10_16 <- na.omit(det_10_16)
+```
+
+### **Análise de Correlação**
+
+A análise de correlação mede a relação entre duas ou mais variáveis, indicando a força e a direção da associação entre elas. Valores próximos de +1 ou -1 indicam correlações fortes positivas ou negativas, respectivamente, enquanto valores próximos de 0 sugerem ausência de relação significativa. Nesse caso o critério foi o padrão de \>0.80.
+
+Critério de exclusão da variável: - Se ela tiver correlação com mais de uma variável ela será retirada. - Aquelas que só tiverem correlação com mais uma variável, será testada no modelo para saber se é retirada.
+
+Interpretação: sairam 14 variáveis iniciais, depois mais 3 "thr_prec_Winter", "thr_umid_Winter", "thr_prec_Spring".
+
+```{r}
+
+# Definir colunas a serem excluídas
+colunas_excluir <- c(1:3,5,8,9)
+
+### FASE 1: Cálculo inicial da matriz de correlação e filtragem inicial
+
+# Calcular matriz de correlação excluindo colunas indesejadas
+matriz_correlacao_1 <- cor(det_10_16[, -colunas_excluir])
+
+# Criar e exibir gráfico de correlação
+grafico_correlacao_1 <- ggcorrplot(matriz_correlacao_1, method = "circle", type = "lower", 
+                                   hc.order = TRUE, lab = TRUE, lab_size = 3,
+                                   colors = c("#6D9EC1", "white", "#E46726"),
+                                   title = "Matriz de Correlação - Fase 1", 
+                                   ggtheme = theme_minimal())
+print(grafico_correlacao_1)
+
+# Salvar o gráfico
+ggsave("correlacao_fase1.png", grafico_correlacao_1, width = 40, height = 10, dpi = 300)
+
+# Filtrar correlações acima de 0.80
+correlacao_filtrada_1 <- ifelse(abs(matriz_correlacao_1) > 0.80, matriz_correlacao_1, NA)
+
+# Remover linhas e colunas vazias após a filtragem
+correlacao_filtrada_1 <- correlacao_filtrada_1[rowSums(!is.na(correlacao_filtrada_1)) > 0, 
+                                               colSums(!is.na(correlacao_filtrada_1)) > 0]
+
+# Salvar a matriz filtrada
+write.csv2(correlacao_filtrada_1, "matriz_correlacao_filtrada_fase1.csv", na = "")
+
+# Contar quantas correlações acima de 0.80 cada variável possui
+contagem_correlacoes_1 <- rowSums(!is.na(correlacao_filtrada_1))
+
+# Identificar variáveis com 3 ou mais correlações
+variaveis_remover_1 <- names(contagem_correlacoes_1[contagem_correlacoes_1 >= 3])
+
+# Criar novo conjunto de dados sem essas variáveis
+det_10_16_fase2 <- det_10_16[, !(names(det_10_16) %in% variaveis_remover_1)]
+
+# Verificar estrutura do novo banco após remoção
+str(det_10_16_fase2)
+
+
+### FASE 2: Nova correlação após remoção das variáveis altamente correlacionadas
+
+# Calcular matriz de correlação novamente
+matriz_correlacao_2 <- cor(det_10_16_fase2[, -colunas_excluir])
+
+# Criar e exibir gráfico de correlação
+grafico_correlacao_2 <- ggcorrplot(matriz_correlacao_2, method = "circle", type = "lower", 
+                                   hc.order = TRUE, lab = TRUE, lab_size = 3,
+                                   colors = c("#6D9EC1", "white", "#E46726"),
+                                   title = "Matriz de Correlação - Fase 2", 
+                                   ggtheme = theme_minimal())
+print(grafico_correlacao_2)
+
+# Salvar gráfico atualizado
+ggsave("correlacao_fase2.png", grafico_correlacao_2, width = 40, height = 10, dpi = 300)
+
+# Filtrar correlações acima de 0.80 novamente
+correlacao_filtrada_2 <- ifelse(abs(matriz_correlacao_2) > 0.80, matriz_correlacao_2, NA)
+
+# Remover linhas e colunas vazias após nova filtragem
+correlacao_filtrada_2 <- correlacao_filtrada_2[rowSums(!is.na(correlacao_filtrada_2)) > 0, 
+                                               colSums(!is.na(correlacao_filtrada_2)) > 0]
+
+# Salvar a matriz filtrada novamente
+write.csv2(correlacao_filtrada_2, "matriz_correlacao_filtrada_fase2.csv", na = "")
+
+# Contar quantas correlações acima de 0.80 cada variável possui
+contagem_correlacoes_2 <- rowSums(!is.na(correlacao_filtrada_2))
+
+## Aqui é feita uma análise mais manual para determinar quem sai quem fica, pode ser só descritiva ou usanso modelagem.
+
+
+# Excluindo variaveis manualmente
+variaveis_excluir_manualmente <- c("thr_prec_Winter", "thr_umid_Winter", "thr_prec_Spring") 
+
+# Criar novo conjunto de dados sem as variáveis escolhidas manualmente
+det_10_16_fase3 <- det_10_16_fase2[, !(names(det_10_16_fase2) %in% variaveis_excluir_manualmente)]
+
+
+### FASE 3: Última correlação após refinamento
+
+# Calcular matriz de correlação final
+matriz_correlacao_3 <- cor(det_10_16_fase3[, -colunas_excluir])
+
+# Criar e exibir gráfico de correlação final
+grafico_correlacao_3 <- ggcorrplot(matriz_correlacao_3, method = "circle", type = "lower", 
+                                   hc.order = TRUE, lab = TRUE, lab_size = 3,
+                                   colors = c("#6D9EC1", "white", "#E46726"),
+                                   title = "Matriz de Correlação - Fase 3", 
+                                   ggtheme = theme_minimal())
+print(grafico_correlacao_3)
+
+# Salvar gráfico final
+ggsave("correlacao_fase3.png", grafico_correlacao_3, width = 40, height = 10, dpi = 300)
+
+
+```
+
+## Pós- modelo geral
+
+**Análise de multicolinearidade com VIF**
+
+A multicolinearidade ocorre quando variáveis independentes estão altamente correlacionadas, dificultando a interpretação do modelo. O **VIF (Variance Inflation Factor)** mede essa relação: valores acima de 5 indicam uma correlação preocupante, e acima de 10 exigem ajustes, como exclusão ou transformação de variáveis.
+
+Interpretação: Nenhum está acima de 10 , então não precisa de ajuste, porém tem multicolinearidade moderada por que está de 5 a 10, mas isso o modelo pode dar conta no ajuste.
+
+### **Verificação de outliers nos resíduos padronizados**
+
+Outliers podem distorcer os coeficientes da regressão binomial e afetar a qualidade da predição. A análise dos resíduos padronizados permite identificar observações extremas, geralmente consideradas problemáticas quando estão fora do intervalo de -3 a 3. Se houver muitos outliers, pode ser necessário revisar a entrada de dados ou aplicar transformações.
+
+Interpretação: Foram retiradas 3 linhas ou seja 3 municípios todos da categoria 1 e não metropolitanos. Todos com intervalos acima de -3 e 3. Presentes na tabela outliers_binomial_model_10_16.csv. São eles: 1600501, 5108204 e 5221502 .
+
+```{r}
 
 # modelo geral sem categoria de referência
 binomial_model <- glm(dengue_pattern_10_16 ~ ., data = det_10_16 , family = binomial)
 summary(binomial_model)
 
-# 2. Verificação de Multicolinearidade (VIF) 
+# Verificação de Multicolinearidade (VIF) 
 # VIF só pode ser calculado em variáveis numéricas, então convertemos as categóricas para dummies
 vif_values <- vif(binomial_model)
 
 cat("\nValores de VIF:\n")
 print(vif_values)
 
-# 3. Verificação de Outliers com Resíduos Padronizados
+# Verificação de Outliers com Resíduos Padronizados
 
 # Criar uma coluna de resíduos padronizados
 det_10_16$residuos <- rstandard(binomial_model)
@@ -185,14 +314,17 @@ det_10_16$koppen <- relevel(det_10_16$koppen, ref = "Aw")
 
 # Remover resíduos 
 det_10_16$residuos <- NULL
-
 # dando peso as categorias da variável dependente
-weights_vector <- ifelse(det_10_16$dengue_pattern_10_16 == 1, 8, 1)
+#weights_vector <- ifelse(det_10_16$dengue_pattern_10_16 == 1, 8, 1)
 
 # Criar modelo logístico binomial
-binomial_model <- glm(weights = weights_vector,dengue_pattern_10_16 ~ ., data = det_10_16, family = binomial)
 
-# Resumo do modelo
+# Com peso
+#binomial_model <- glm(weights = weights_vector, dengue_pattern_10_16 ~ ., data = det_10_16, family = binomial)
+#summary(binomial_model)
+
+# Sem peso
+binomial_model <- glm(dengue_pattern_10_16 ~ ., data = det_10_16, family = binomial)
 summary(binomial_model)
 
 
@@ -205,13 +337,18 @@ O stepwise é um método automatizado de seleção de variáveis em modelos esta
 ```{r, message=FALSE, warning=FALSE}
 
 # Criar o modelo inicial (nulo com region e pop10)
-null_model <- glm(weights = weights_vector, dengue_pattern_10_16 ~ region + pop10, 
-                  data = det_10_16, 
-                  family = binomial)
+
+# Com peso
+#null_model <- glm(weights = weights_vector, dengue_pattern_10_16 ~ region +                   log_pop10, data = det_10_16, family = binomial)
+
+# Sem peso
+
+null_model <- glm(dengue_pattern_10_16 ~ region + log_pop10, data = det_10_16, 
+                 family = binomial)
 
 # Criar o modelo completo (com todas as variáveis preditoras adicionais)
-full_formula <- as.formula(paste("dengue_pattern_10_16 ~ region + pop10 +", 
-                                 paste(setdiff(names(det_10_16), c("dengue_pattern_10_16_10_16", "region", "pop10")), 
+full_formula <- as.formula(paste("dengue_pattern_10_16 ~ region + log_pop10 +", 
+                                 paste(setdiff(names(det_10_16), c("dengue_pattern_17_22_17_22", "region", "log_pop10")), 
                                        collapse = " + ")))
 
 full_model <- glm(full_formula, data = det_10_16, family = binomial)
@@ -224,7 +361,6 @@ step_model <- stepAIC(null_model,
 
 # Exibir apenas o resumo final do modelo
 print(summary(step_model))
-
 ```
 
 ## 5. Avaliação do ajuste do modelo
@@ -248,8 +384,7 @@ print(summary(step_model))
 4.  Matriz de Confusão e Acurácia : Avalia o desempenho do modelo na predição correta das classes.
 
     -   Acurácia = (TP + TN) / (TP + TN + FP + FN)
-    -   Interpretação: Com peso 8 na categoria 1 - 
-    verdadeiro positivo 0 = 0.91/ verdadeiro positivo 1 = 0.88 
+    -   Interpretação: Com peso 8 na categoria 1 - verdadeiro positivo 0 = 0.91/ verdadeiro positivo 1 = 0.88
 
 Resumindo:
 
@@ -308,8 +443,8 @@ odds_ratio_df <- odds_ratio_df %>%
 kable(odds_ratio_df, caption = "Odds Ratio, Intervalo de Confiança (95%) e p-valor") %>%
   kable_styling(full_width = FALSE, bootstrap_options = c("striped", "hover"))
 
-# Salvar como CSV sem notação científica e com 4 casas decimais
-#write.csv(odds_ratio_df, "odds_ratio_tabela_10_16.csv", row.names = FALSE, quote = FALSE)
+
+write.csv2(odds_ratio_df, "odds_ratio_tabela_17_22.csv", row.names = FALSE)
 
 ```
 
