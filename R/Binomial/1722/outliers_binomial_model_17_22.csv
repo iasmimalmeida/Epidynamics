@@ -1,3 +1,0 @@
-"muni_code","region","tipo_regiao","koppen","prop_residuo","prop_esgot","bioma","dengue_pattern_10_16","dengue_pattern_17_22","precip_tot_Autumn","umid_med_Spring","precip_tot_Spring","thr_temp_umid_Spring","precip_tot_Summer","precip_tot_Winter","thr_temp_umid_Winter","log_pop22","residuos"
-1303536,1,"metropolitana","Af",66.99,37.54,"Amazonia","0","1",4859.51681666667,84.534455238083,2434.37186666667,89.6666666666667,3463.31911666667,1361.08275,88.5,4.48801456782404,3.33676116163854
-2305357,2,"nao metropolitana","As",49.2,35.81,"Caatinga","0","1",2148.71201666667,71.9075814759901,165.841116666667,91,1995.75671666667,268.940466666667,89,4.33041377334919,3.40913993983661

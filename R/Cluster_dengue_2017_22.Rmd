@@ -1,0 +1,622 @@
+---
+title: "Análise de Cluster 2017 - 2022
+author: "Iasmim, Raquel e Cláudia"
+date: "11/12/2024"
+output:
+  html_document: default
+  pdf_document: default
+editor_options:
+  chunk_output_type: console
+---
+
+As análises de cluster apresentadas nesse script são referentes à sumarização dos descritores epidemiológicos calculados (no script *calculo_descritores.rmd*) para todos os municípios do estudo para cada ano. Dessa forma, obtivemos apenas uma medida por município por meio de média.
+
+-   Carregando os pacotes
+
+```{r, message = FALSE, warning = FALSE}
+library(magrittr)
+library(formattable)
+library(ggplot2)
+library(cluster)
+library(factoextra)
+library(FactoMineR)
+library(nnet)
+library(ClustOfVar)
+library(lazyeval)
+library(fpc)
+require(xlsx)
+require(RCurl)
+library(purrr)
+library(dplyr)
+library(tidyr)
+library(tidyverse)
+library(gridExtra)
+library(grid)
+library(corrplot)
+library(GGally)
+library(ggpubr)
+library(RColorBrewer)
+library(sf)
+library(clValid)
+library(viridis)
+library(RColorBrewer)
+library(tmap)
+library(ggmap)
+library(tibble)
+library(ggcorrplot)
+library(patchwork)
+
+```
+
+### Lendo o banco de dados
+
+\*desc_Br: banco completo
+
+```{r, message = FALSE}
+
+dados <- read_csv("Tabelas_dengue/2010-2022/desc_Br.csv")
+summary(dados)
+options(scipen = 17000) # para não gerar números com notação científica.
+
+```
+
+## Criando banco 2017-2022
+
+Por haver uma mudança drástica nos casos de dengue no Brasil de 2020 em diante decidimos analisar com 2 cortes de tempo: 2010-2022 e 2017-2022 (Outro script)
+
+```{r}
+
+# Filtrar para o período de 2017 a 2022
+dados_17_22 <- dados %>%
+  filter(ano_e >= 2017 & ano_e <= 2022)
+
+```
+
+## Correlação entre as variáveis
+
+```{r}
+# Calcular a matriz de correlação, excluindo as primeiras duas colunas
+correlacao <- cor(dados_17_22[,-c(1:2)])
+
+# Criar o gráfico de correlação
+p <- ggcorrplot(correlacao, method = "square", type = "lower", 
+           hc.order = TRUE, lab = TRUE, lab_size = 5,
+           colors = c("#6D9EC1", "white", "#E46726"),
+            title = "A", 
+           ggtheme = theme_minimal())
+
+# Salvar o gráfico
+ggsave("Figuras_dengue/2017-2022/grafico_correlacao_inicial.png", p, width = 17, height = 8, dpi = 300)
+
+```
+
+### Removendo variáveis com alta correlação (\> 0.8):
+
+Dsmed,Dcmed,P e Dc6 e Ds6 foram retiradas e novo corrplot foi feito.
+
+```{r}
+dados_17_22 <- dados_17_22 %>% 
+  select(-c(p,dc6,ds6,dcmed, dsmed))
+
+```
+
+### Corrplot 2
+
+```{r}
+# Calcular a matriz de correlação, excluindo as primeiras duas colunas
+correlacao <- cor(dados_17_22[,-c(1:2)])
+
+# Criar o gráfico de correlação
+p1 <- ggcorrplot(correlacao, method = "square", type = "lower", 
+           hc.order = TRUE, lab = TRUE, lab_size = 5,
+           colors = c("#6D9EC1", "white", "#E46726"), 
+           title = "B", 
+           ggtheme = theme_minimal())
+
+# Salvar o gráfico
+ggsave("Figuras_dengue/2017-2022/grafico_correlacao_final.png", p1, width = 10, height = 8, dpi = 300)
+
+
+
+## juntando as figuras A e B
+
+figura_combinada <- p + p1 + plot_layout(ncol = 2)
+
+# Salvar
+ggsave("Figuras_dengue/2017-2022/figura_A_e_B.png", figura_combinada, width = 16, height = 8, dpi = 300)
+
+```
+
+### Medidas resumo por município
+
+A análise de cluster foi feita após a extração das medidas resumo para todos os municípios do estudo. Para tal, utilizamos:
+
+-   Média (m)
+
+```{r}
+
+#2017 - 2022
+dadosmean <- dados_17_22 %>% 
+  group_by(municipio_geocodigo) %>% 
+  summarise(xpm = mean(xp),
+            tpm = mean(tp),
+            dc3m = mean(dc3),
+            #dc6m = mean(dc6),
+            #dcmedm = mean(dcmed),
+            dcmaxm = mean(dcmax),
+            dcim = mean(dci),
+            ds3m = mean(ds3),
+            #ds6m = mean(ds6),
+            #dsmedm = mean(dsmed),
+            dsmaxm = mean(dsmax),
+            stm = mean(st),
+            incm = mean(inc))
+
+summary(dadosmean)
+```
+
+## Exclusão dos municípios
+
+-   Perfil sem transmissão Todos aqueles com Xp = 0 para dengue, foram retirados e um novo banco chamado dados_sem_transmissao. Foram retirados 208 municípios.
+
+```{r}
+names(dadosmean)
+
+# Sem transmissão
+dados_sem_transmissao <- filter(dadosmean, xpm == 0) # banco com dos excluidos
+dadosmean <- filter(dadosmean, xpm != 0) # banco excluindo xp =0
+write.csv2(dados_sem_transmissao, "Tabelas_dengue/2017-2022/sem_transmissao_17_22.csv")
+```
+
+### Transformando a variável municípios em linhas
+
+Foi transformado a coluna municipios (Geocode) nos nomes das linhas.
+
+```{r, message = FALSE, warning = FALSE}
+d <- column_to_rownames(dadosmean, var = "municipio_geocodigo")
+
+dadosmean <- d
+```
+
+### Padronizando os dados da tabela dadosmean
+
+```{r}
+# Padronização dos dados e renomeação das colunas em uma única etapa
+dados_padr1 <- scale(dadosmean)
+colnames(dados_padr1) <- c("xpmp", "tpmp", "dc3mp", "dcmaxmp",
+                           "dcimp", "ds3mp", "dsmaxmp", "stmp", "incmp")
+
+# Conversão para data frame
+dados_padr1 <- as.data.frame(dados_padr1)
+
+# Combinação dos dados padronizados com os originais
+dadosmean <- cbind(dadosmean, dados_padr1)
+
+# Atribuição dos dados padronizados a uma nova variável, se necessário
+ hdados1 <- dados_padr1 
+
+
+
+```
+
+### Escolhendo o melhor algoritmo para a análise
+
+As medidas de estabilidade para a clusterização são usadas para avaliar quão consistentes são os clusters gerados por um método de clusterização quando aplicado a diferentes amostras de dados ou quando os parâmetros do algoritmo de clusterização são ligeiramente alterados.
+
+```{r, message = FALSE, warning = FALSE, cache = FALSE, prompt = FALSE}
+library(clValid)
+
+# Compute clValid
+clmethods <- c("kmeans", "pam")
+
+# Aumentando o valor de maxitems
+intern <- clValid(hdados1, nClust = 2:6,
+                  clMethods = clmethods,
+                  validation = "internal",
+                  maxitems = 5570) # Ajuste esse valor conforme necessário
+
+# Summary 
+summary(intern)
+```
+
+## ANÁLISE DE CLUSTER
+
+### Determinando clusters ideais
+
+#### 1. Elbow Method (cotovelo)
+
+O método cotovelo é usado para determinar o número de clusters ideal para um conjunto de dados.O método consiste em plotar a variação explicada em função do número de clusters e escolher o cotovelo da curva como o número de clusters a serem usados.
+
+```{r}
+
+#kmeans
+E <-fviz_nbclust(hdados1,kmeans,method = "wss")+ 
+  #geom_vline(xintercept = 3,linetype = 2)+ 
+  labs(subtitle="Elbow method") 
+ggsave("Figuras_dengue/2017-2022/Elbow.png", E, width = 17, height = 8, dpi = 300)
+
+```
+
+#### 2.  Silhouette method
+
+Em resumo, a abordagem de silhueta média mede a qualidade de um cluster. Ou seja, determina o quão bem cada objeto está dentro de seu cluster. Uma largura média alta da silhueta indica um bom agrupamento. O método calcula a silhueta média das observações para diferentes valores de k. O número ideal de clusters k é aquele que maximiza a silhueta média em um intervalo de valores possíveis. O código a seguir calcula essa abordagem para 1-15 clusters. Os resultados mostram que 2 clusters maximizam os valores médios da silhueta, com 3 clusters chegando como o segundo número ideal de clusters.
+
+```{r, warning = FALSE }
+
+#Kmeans
+fviz_nbclust(hdados1,kmeans,method="silhouette")
+
+```
+
+## Construindo os vetores de cluster
+Para K-means
+```{r, message = FALSE, warning= FALSE}
+
+#Kmeans
+k3.1 <- kmeans(hdados1,3,  nstart = T)
+k4.1<- kmeans(hdados1,4,  nstart = T)
+k5.1<- kmeans(hdados1, 5,  nstart = T)
+k6.1<- kmeans(hdados1, 6,  nstart = T)
+
+```
+
+#### Visualização do cluster
+
+-   fviz_cluster: esse gráfico fornece uma boa ilustração dos clusters. Se houver mais de duas dimensões fviz_cluster, a análise de componentes principais (PCA) executará e plotará os pontos de dados de acordo com os dois primeiros componentes principais que explicam a maioria da variação.
+
+```{r}
+#Kmeans
+
+fviz_cluster(k3.1, data = hdados1, ggtheme = theme_pubclean()) #dim1e2
+fviz_cluster(k4.1, data = hdados1, ggtheme = theme_pubclean()) #dim1e2
+fviz_cluster(k5.1, data = hdados1, ggtheme = theme_pubclean()) #dim1e2
+fviz_cluster(k6.1, data = hdados1, ggtheme = theme_pubclean()) #dim1e2
+
+
+```
+
+### Função silhuete
+
+Validação Interna
+
+```{r}
+
+# Cores
+cores1 <- c("brown4", "aquamarine4", "cornflowerblue", "chocolate1", "darkmagenta", "pink")
+#Kmeans
+
+# Primeiro, calcule as medidas de silhueta com base nos resultados do kmeans.
+sil3 <- silhouette(k3.1$cluster, dist(hdados1))
+sil4 <- silhouette(k4.1$cluster, dist(hdados1))
+sil5 <- silhouette(k5.1$cluster, dist(hdados1))
+sil6 <- silhouette(k6.1$cluster, dist(hdados1))
+
+# Agora você pode visualizar as medidas de silhueta.
+
+ajuste_texto <- theme(
+  plot.title = element_text(size = 16, face = "bold"),
+  axis.title = element_text(size = 14),
+  axis.text = element_text(size = 12),
+  legend.title = element_text(size = 14),
+  legend.text = element_text(size = 12)
+)
+
+s3 <- fviz_silhouette(sil3, ggtheme = theme_classic(), palette = cores1) + ajuste_texto
+s4 <- fviz_silhouette(sil4, ggtheme = theme_classic(), palette = cores1) + ajuste_texto
+s5 <- fviz_silhouette(sil5, ggtheme = theme_classic(), palette = cores1) + ajuste_texto
+s6 <- fviz_silhouette(sil6, ggtheme = theme_classic(), palette = cores1) + ajuste_texto
+
+
+S <- grid.arrange(s3, s4, s5,s6, nrow = 2)
+
+ggsave("Figuras_dengue/2017-2022/silhuette.png", S, width = 15, height = 9, dpi = 300)
+
+```
+
+#### Plots
+
+```{r}
+
+# Cores
+cores1 <- c("brown4", "aquamarine4", "cornflowerblue", "chocolate1", "darkmagenta", "pink")
+
+# Kmeans
+
+ajuste_texto_cluster <- theme(
+  plot.title = element_text(size = 16, face = "bold", hjust = 0.5),
+  axis.title = element_text(size = 14),
+  axis.text = element_text(size = 12),
+  legend.title = element_text(size = 14),
+  legend.text = element_text(size = 12)
+)
+
+p2 <- fviz_cluster(k3.1, geom = "point", data = hdados1, palette = cores1, ggtheme = theme_pubclean()) + 
+      ggtitle("k = 3") + ajuste_texto_cluster
+
+p3 <- fviz_cluster(k4.1, geom = "point", data = hdados1, palette = cores1, ggtheme = theme_pubclean()) + 
+      ggtitle("k = 4") + ajuste_texto_cluster
+
+p4 <- fviz_cluster(k5.1, geom = "point", data = hdados1, palette = cores1, ggtheme = theme_pubclean()) + 
+      ggtitle("k = 5") + ajuste_texto_cluster
+
+p5 <- fviz_cluster(k6.1, geom = "point", data = hdados1, palette = cores1, ggtheme = theme_pubclean()) + 
+      ggtitle("k = 6") + ajuste_texto_cluster
+
+
+C <- grid.arrange(p2, p3, p4,p5, nrow = 2)
+ggsave("Figuras_dengue/2017-2022/cluster.png", C, width = 15, height = 10, dpi = 300)
+
+
+
+```
+
+## Intrepretação dos dados segunda a média de 4 clusters
+
+```{r}
+
+dadosmean$cluster_4 <- k4.1$cluster
+
+# tomada de decisão dos nomes dos perfis
+descmean_4 <- dadosmean %>% 
+  group_by(cluster_4) %>% 
+  summarise(xpm = mean(xpm),
+            tpm = mean(tpm),
+            dc3m = mean(dc3m),
+            dcmaxm = mean(dcmaxm),
+            dcim = mean(dcim),
+            ds3m = mean(ds3m),
+            dsmaxm = mean(dsmaxm),
+            dTm = mean(stm),
+            incm = mean(incm))
+            
+
+# Mostrar a tabela resultante
+print(descmean_4)
+
+
+###maximo
+
+dadosmean$cluster_4 <- k4.1$cluster
+
+# tomada de decisão dos nomes dos perfis
+descmax_4 <- dadosmean %>% 
+  group_by(cluster_4) %>% 
+  summarise(xpm = max(xpm),
+            tpm = max(tpm),
+            dc3m = max(dc3m),
+            dcmaxm = max(dcmaxm),
+            dcim = max(dcim),
+            ds3m = max(ds3m),
+            dsmaxm = max(dsmaxm),
+            dTm = max(stm),
+            incm = max(incm))
+            
+
+# Mostrar a tabela resultante
+print(descmax_4)
+
+## Frequência absoluta
+cluster_4 <- table(dadosmean$cluster_4)
+cluster_4
+
+
+
+#novo 
+
+# Adicionar os clusters ao dataframe
+dadosmean$cluster_4 <- k4.1$cluster
+
+# Calcular as médias dos descritores por cluster
+descmean_4 <- dadosmean %>% 
+  group_by(cluster_4) %>% 
+  summarise(across(c(xpm, tpm, dc3m, dcmaxm, dcim, ds3m, dsmaxm, stm, incm), 
+                   ~ round(mean(.), 2), 
+                   .names = "mean_{col}"))
+
+# Calcular os máximos dos descritores por cluster
+descmax_4 <- dadosmean %>% 
+  group_by(cluster_4) %>% 
+  summarise(across(c(xpm, tpm, dc3m, dcmaxm, dcim, ds3m, dsmaxm, stm, incm), 
+                   ~ round(max(.), 2), 
+                   .names = "max_{col}"))
+
+# Calcular a frequência absoluta de municípios por cluster
+freq_abs <- as.data.frame(table(dadosmean$cluster_4))
+colnames(freq_abs) <- c("cluster", "freq_abs")
+freq_abs$cluster <- as.numeric(as.character(freq_abs$cluster))
+
+# Combinar as tabelas de frequência, médias e máximos
+result <- freq_abs %>%
+  left_join(descmean_4, by = c("cluster" = "cluster_4")) %>%
+  left_join(descmax_4, by = c("cluster" = "cluster_4"))
+
+# Reorganizar as colunas com as variáveis lado a lado (média e máximo juntos)
+result <- result %>%
+  select(cluster, freq_abs, 
+         mean_xpm, max_xpm, 
+         mean_tpm, max_tpm, 
+         mean_dc3m, max_dc3m, 
+         mean_dcmaxm, max_dcmaxm, 
+         mean_dcim, max_dcim, 
+         mean_ds3m, max_ds3m, 
+         mean_dsmaxm, max_dsmaxm, 
+         mean_stm, max_stm, 
+         mean_incm, max_incm)
+
+
+# Exibir a tabela resultante
+print(result)
+
+
+# Salvar a tabela em um arquivo CSV
+write.csv2(result, "Tabelas_dengue/2017-2022/tabela_clusters.csv", row.names = FALSE)
+
+
+#2017-2022
+dadosmean$class_cluster <- factor(dadosmean$cluster, levels = c(3,1,4,2), labels = c("Transmissão Persistente","Epidêmico","Episódico/Epidêmico","Episódico"))
+
+#
+write.csv2(dadosmean, file = "Tabelas_dengue/2017-2022/cluster_2017_22.csv")
+
+```
+
+#### Novo plot com a reoordenação e nomeação dos clusters
+
+```{r}
+
+# Definindo as cores específicas para cada label
+
+cores2 <- c("#FFD92F", "#FFEDA0", "#3288BD","#80CDC1")
+
+
+# Criando o gráfico de clusters com cores específicas para cada label
+
+
+D <- fviz_cluster(k4.1, geom = "point", data = hdados1) +
+  scale_colour_discrete(guide = FALSE) +
+  scale_shape_discrete(guide = FALSE) +
+  scale_fill_manual(name = "Padrões de Transmissão",
+                    values = c("3" = "gold2", 
+                               "1" = "gold3", 
+                               "4" = "#3288BD", 
+                               "2" = "#80CDC1"),
+                    breaks = c("3","1","4","2"),
+                    labels = c("Transmissão Persistente", 
+                               "Epidêmico", 
+                               "Episódico/Epidêmico", 
+                               "Episódico")) +
+                    scale_colour_manual(name = "Padrões de Transmissão",
+                    values = c("3" = "gold2", 
+                               "1" = "gold3", 
+                               "4" = "#3288BD", 
+                               "2" = "#80CDC1"),
+                    breaks = c("3","1","4","2"),
+                    labels = c("Transmissão Persistente", 
+                               "Epidêmico", 
+                               "Episódico/Epidêmico", 
+                               "Episódico")) 
+                    
+                
+
+
+
+# Exibindo o gráfico
+print(D)
+
+ggsave("Figuras_dengue/2017-2022/cluster_final.png", D, width = 17, height = 8, dpi = 300)
+
+```
+
+## Observando as variáveis dentro dos clusters
+
+-   Dsmaxm (558.61762) e Dsmaxmp (569.45084) são as variáveis mais importantes, indicando que elas são cruciais para determinar a classificação dos clusters. Essas variáveis contribuem significativamente para a redução da impureza nos nós do modelo, sugerindo que elas têm uma forte relação com a formação dos clusters.
+
+-   Variáveis como Dcim (33.52827), Incm (25.04825), e Incmp (25.42403) têm os menores valores de MeanDecreaseGini, sugerindo que têm uma contribuição menor para a precisão do modelo na classificação dos clusters. Isso não significa que são irrelevantes, mas que, em comparação com outras variáveis, elas têm menos peso na determinação da estrutura dos clusters.
+
+```{r}
+
+
+# Carregar pacotes
+library(readr)
+library(randomForest)
+library(dplyr)
+library(ggplot2)
+
+# Carregar os dados
+dadosmean <- read_csv2("Tabelas_dengue/2017-2022/cluster_2017_22.csv")
+
+# Selecionar e renomear variáveis
+padr <- dadosmean %>%
+  select(
+    xpm, tpm, dc3m, dcmaxm, dcim, ds3m, dsmaxm, stm, incm, cluster_4
+  ) %>%
+  rename(
+    xp = xpm,
+    tp = tpm,
+    dc3 = dc3m,
+    dcmax = dcmaxm,
+    dci = dcim,
+    ds3 = ds3m,
+    dsmax = dsmaxm,
+    st = stm,
+    inc = incm
+  )
+
+# Converter variável resposta para fator
+padr$cluster_4 <- as.factor(padr$cluster_4)
+
+# Treinar modelo Random Forest
+set.seed(123)
+rf_model <- randomForest(cluster_4 ~ ., data = padr)
+
+# Extrair importância das variáveis
+imp <- importance(rf_model)
+imp_df <- data.frame(Variavel = rownames(imp), Importancia = imp[, 1])
+
+# Reordenar variáveis pelo valor da importância
+imp_df$Variavel <- factor(imp_df$Variavel, levels = imp_df$Variavel[order(imp_df$Importancia)])
+
+# Criar gráfico com ggplot2
+grafico <- ggplot(imp_df, aes(x = Importancia, y = Variavel)) +
+  geom_point(color = "olivedrab", size = 6) +
+  theme_minimal(base_size = 18) +
+  theme(
+    axis.text = element_text(color = "black"),
+    axis.title = element_text(color = "black"),
+    plot.title = element_text(face = "bold", size = 20, hjust = 0.5)
+  ) +
+  labs(
+    title = "2017–2022",
+    x = "Importância",
+    y = "Variável"
+  )
+
+# Salvar gráfico com tamanho ajustado
+ggsave("Figuras_dengue/2017-2022/random_importancia_ggplot.png",
+       plot = grafico,
+       width = 12,
+       height = max(6, 0.6 * nrow(imp_df)),  # altura ajustável conforme número de variáveis
+       dpi = 300)
+
+
+
+```
+
+# 2017-2022
+
+##  Arrumando bancos 
+
+```{r}
+
+#Banco padrões
+dados <- read_csv2("Tabelas_dengue/2017-2022/cluster_2017_22.csv")
+names(dados)
+colnames(dados)[1] <- "muni_code"
+colnames(dados) <- sub("m$", "", colnames(dados))
+dados <- dados[, -11:-20]
+colnames(dados)[11] <- "dengue_pattern"
+
+# Banco sem transmissão
+no <- read_csv2("Tabelas_dengue/2017-2022/sem_transmissao_17_22.csv")
+names(no)
+colnames(no)[1] <- "muni_code"
+colnames(no) <- sub("m$", "", colnames(no))
+no$dengue_pattern <- "Sem transmissão"
+
+
+#Banco de municipios
+ muni <- read_csv2("Tabelas_dengue/BR_Municipios_2021.csv")
+
+ 
+# Combinar os bancos
+dados_combinados <- bind_rows(dados, no)
+
+# Fazer a junção com os dados dos municípios
+resultado_final <- left_join(muni, dados_combinados, by = "muni_code")
+
+# Salvar
+write_csv2(resultado_final, "Tabelas_dengue/2017-2022/dengue_pattern_17_22.csv")
+
+```
+
+

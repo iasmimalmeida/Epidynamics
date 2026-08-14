@@ -1,0 +1,344 @@
+---
+title: "Generation of Figures 1 and 2"
+format: html
+execute:
+  echo: true
+  warning: false
+  message: false
+editor_options: 
+  chunk_output_type: console
+---
+
+# Overview
+
+This document generates the two maps used in the manuscript:
+
+- **Figure 1 (Fig1):** Brazilian states classified by geographic region.
+- **Figure 2 (Fig2):** Municipal Köppen climate classification and predominant biome.
+
+All final figures are saved in the `figures/` directory in both PNG and TIFF formats.
+
+# Setup
+
+```{r}
+# Packages
+library(geobr)
+library(sf)
+library(dplyr)
+library(readr)
+library(ggplot2)
+library(ggspatial)
+library(patchwork)
+
+# Output directory
+dir.create("figures", recursive = TRUE, showWarnings = FALSE)
+
+# Clean state boundaries from geobr
+# These boundaries are reused in Figures 1 and 2.
+states_br <- read_state(year = 2020)
+
+# State label positions
+state_labels <- states_br |>
+  st_point_on_surface()
+```
+
+# Figure 1 — Brazilian geographic regions
+
+Figure 1 shows the five official Brazilian geographic regions. State abbreviations are displayed inside each state.
+
+```{r}
+# Add geographic region
+states_fig1 <- states_br |>
+  mutate(
+    region = case_when(
+      abbrev_state %in% c("AC", "AP", "AM", "PA", "RO", "RR", "TO") ~ "North",
+      abbrev_state %in% c("AL", "BA", "CE", "MA", "PB", "PE", "PI", "RN", "SE") ~ "Northeast",
+      abbrev_state %in% c("DF", "GO", "MT", "MS") ~ "Central-West",
+      abbrev_state %in% c("ES", "MG", "RJ", "SP") ~ "Southeast",
+      abbrev_state %in% c("PR", "RS", "SC") ~ "South"
+    )
+  )
+
+# Create Figure 1
+Fig1 <- ggplot(states_fig1) +
+  geom_sf(aes(fill = region), color = "white", linewidth = 0.4) +
+  geom_sf_text(
+    data = state_labels,
+    aes(label = abbrev_state),
+    size = 4.5,
+    fontface = "bold",
+    color = "black"
+  ) +
+  scale_fill_brewer(
+    palette = "Set2",
+    name = "Region"
+  ) +
+  annotation_north_arrow(
+    location = "bl",
+    which_north = "true",
+    style = north_arrow_fancy_orienteering
+  ) +
+  theme_void() +
+  theme(
+    legend.position = "right",
+    legend.title = element_text(size = 13, face = "bold"),
+    legend.text = element_text(size = 12)
+  )
+
+Fig1
+```
+
+## Save Figure 1
+
+```{r}
+ggsave(
+  "figures/Fig1.png",
+  Fig1,
+  width = 10,
+  height = 8,
+  units = "in",
+  dpi = 600,
+  bg = "transparent"
+)
+
+ggsave(
+  "figures/Fig1.tiff",
+  Fig1,
+  width = 10,
+  height = 8,
+  units = "in",
+  dpi = 600,
+  device = "tiff",
+  compression = "lzw",
+  bg = "transparent"
+)
+```
+
+# Figure 2 — Köppen climate classification and predominant biome
+
+Figure 2 combines two municipal-level thematic maps:
+
+- **Panel A:** Köppen climate classification.
+- **Panel B:** Predominant biome.
+
+Municipal polygons are dissolved by thematic class before plotting. This removes internal municipal border artifacts. Clean state boundaries from `geobr` are then overlaid in black.
+
+```{r}
+# Read determinant data and municipal geometry
+determinants <- read_csv2("data/banco_determinantes.csv")
+
+municipalities <- st_read(
+  "data/muni_br.gpkg",
+  quiet = TRUE
+) |>
+  st_as_sf(sf_column_name = "geom")
+
+# Standardize join variables
+determinants <- determinants |>
+  mutate(
+    muni_code = as.numeric(muni_code),
+    koppen = as.character(koppen),
+    bioma = as.character(bioma)
+  )
+
+municipalities <- municipalities |>
+  mutate(code_muni = as.numeric(code_muni))
+
+# Join determinants to municipal polygons
+municipal_map <- municipalities |>
+  left_join(
+    determinants,
+    by = c("code_muni" = "muni_code")
+  ) |>
+  st_make_valid() |>
+  mutate(
+    koppen_label = factor(
+      koppen,
+      levels = c("Af", "Am", "Aw", "As", "BSh", "Cfa", "Cfb", "Cwa", "Cwb"),
+      labels = c(
+        "Af - Tropical rainforest",
+        "Am - Tropical monsoon",
+        "Aw - Tropical savanna",
+        "As - Tropical dry summer",
+        "BSh - Hot semi-arid",
+        "Cfa - Humid subtropical",
+        "Cfb - Oceanic",
+        "Cwa - Dry-winter humid subtropical",
+        "Cwb - Subtropical highland"
+      )
+    ),
+    biome_label = case_when(
+      bioma %in% c("Amazon", "Amazônia", "Amazonia") ~ "Amazon",
+      bioma == "Caatinga" ~ "Caatinga",
+      bioma == "Cerrado" ~ "Cerrado",
+      bioma %in% c("Atlantic Forest", "Mata Atlântica", "Mata Atlantica") ~ "Atlantic Forest",
+      bioma == "Pampa" ~ "Pampa",
+      bioma == "Pantanal" ~ "Pantanal",
+      TRUE ~ bioma
+    ),
+    biome_label = factor(
+      biome_label,
+      levels = c(
+        "Amazon",
+        "Caatinga",
+        "Cerrado",
+        "Atlantic Forest",
+        "Pampa",
+        "Pantanal"
+      )
+    )
+  )
+
+# Dissolve municipalities by thematic class
+koppen_data <- municipal_map |>
+  filter(!is.na(koppen_label)) |>
+  group_by(koppen_label) |>
+  summarise(.groups = "drop")
+
+biome_data <- municipal_map |>
+  filter(!is.na(biome_label)) |>
+  group_by(biome_label) |>
+  summarise(.groups = "drop")
+```
+
+## Common map theme
+
+```{r}
+map_theme <- theme_void() +
+  theme(
+    plot.background = element_rect(
+      fill = "transparent",
+      color = NA
+    ),
+    panel.background = element_rect(
+      fill = "transparent",
+      color = NA
+    ),
+    legend.background = element_rect(
+      fill = "transparent",
+      color = NA
+    ),
+    legend.box.background = element_rect(
+      fill = "transparent",
+      color = NA
+    ),
+    plot.title = element_text(
+      size = 15,
+      face = "bold",
+      hjust = 0.5
+    ),
+    legend.title = element_text(
+      size = 10,
+      face = "bold"
+    ),
+    legend.text = element_text(
+      size = 8
+    ),
+    legend.position = "bottom"
+  )
+```
+
+## Panel A — Köppen climate type
+
+```{r}
+koppen_plot <- ggplot() +
+  geom_sf(
+    data = koppen_data,
+    aes(fill = koppen_label),
+    color = NA
+  ) +
+  geom_sf(
+    data = states_br,
+    fill = NA,
+    color = "black",
+    linewidth = 0.35
+  ) +
+  geom_sf_text(
+    data = state_labels,
+    aes(label = abbrev_state),
+    size = 2.8,
+    fontface = "bold"
+  ) +
+  scale_fill_brewer(
+    palette = "Paired",
+    name = "Köppen climate type"
+  ) +
+  guides(
+    fill = guide_legend(ncol = 2, byrow = TRUE)
+  ) +
+  annotation_north_arrow(
+    location = "tr",
+    which_north = "true",
+    style = north_arrow_fancy_orienteering
+  ) +
+  labs(title = "A - Köppen climate type") +
+  map_theme
+```
+
+## Panel B — Predominant biome
+
+```{r}
+biome_plot <- ggplot() +
+  geom_sf(
+    data = biome_data,
+    aes(fill = biome_label),
+    color = NA
+  ) +
+  geom_sf(
+    data = states_br,
+    fill = NA,
+    color = "black",
+    linewidth = 0.35
+  ) +
+  geom_sf_text(
+    data = state_labels,
+    aes(label = abbrev_state),
+    size = 2.8,
+    fontface = "bold"
+  ) +
+  scale_fill_brewer(
+    palette = "Set3",
+    name = "Predominant biome"
+  ) +
+  guides(
+    fill = guide_legend(ncol = 2, byrow = TRUE)
+  ) +
+  annotation_north_arrow(
+    location = "tr",
+    which_north = "true",
+    style = north_arrow_fancy_orienteering
+  ) +
+  labs(title = "B - Predominant biome") +
+  map_theme
+```
+
+## Combine and save Figure 2
+
+```{r}
+Fig2 <- koppen_plot + biome_plot +
+  plot_layout(ncol = 2)
+
+Fig2
+
+ggsave(
+  "figures/Fig2.png",
+  Fig2,
+  width = 16,
+  height = 8,
+  units = "in",
+  dpi = 600,
+  bg = "transparent"
+)
+
+ggsave(
+  "figures/Fig2.tiff",
+  Fig2,
+  width = 16,
+  height = 8,
+  units = "in",
+  dpi = 600,
+  device = "tiff",
+  compression = "lzw",
+  bg = "transparent"
+)
+```

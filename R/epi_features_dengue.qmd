@@ -1,0 +1,329 @@
+---
+title: "CáLculo dos epi_features de dengue"
+date: "22/01/2024"
+author: "Iasmim Almeida, Raquel Lana e Cláudia Codeço"
+editor_options: 
+  chunk_output_type: console
+---
+
+# Implementaçao e cálculo das Epi-features baseados no estudo de Almeida, Lana e Codeço (2022).
+
+How heterogeneous is the dengue transmission profile in Brazil? A study in six Brazilian states, PLOS Neglected Tropical Diseases 16(9): e0010746. [DOI: https://doi.org/10.1371/journal.pntd.0010746](https://doi.org/10.1371/journal.pntd.0010746).
+
+Os epi-features foram calculados usando casos de dengue notificados para todos os municípios brasileiros (5570) no período de 2010 a 2023.
+
+
+```{=html}
+IASMIM, vc tinha me dito que era muni de residencia, aqui está notificados. NO fim, qual realmente usamos? 
+
+R.: Quel, são os municípios que vém do ID_MUNICIP, então são os municípios de onde ocorreu a notificação e não o de residência. 
+
+Entao isso muda muito e precisa ficar bem claro. Eu tendo a pensar que o melhor seria usar por municipio de residencia, é algo pra conversarmos. Tenho realmente duvidas do melhor aqui, mas tendo a muni de residencia.
+
+Tá usando os suspeitos ou prováveis????
+
+R: usando suspeito.
+```
+
+### Harmonizaçao do conhecimento
+
+#### Informaçoes sobre os dados brutos utilizados
+
+Os dados de saúde utilizados aqui incluem colunas de geocódigo dos municípios de notificaçao e data de notificação de casos de dengue. Cada linha representa um caso individual notificado. Os dados foram anonimizados e extraídos do sistema InfoDengue.
+
+No Brasil, o geocódigo é um código numérico composto por 7 dígitos que identifica cada município de forma única. Os geocódigos que vem nos dados de saúde costumam apresentar 6 dígitos. Para harmonizar esse geocódigo, utilizamos diferentes estratégias, retirando o sétimo dígito ou acrescentando dependendo do que queremos adicionar aos dados.
+
+Nome e formato das colunas:\
+**Geocode** (nome no banco): Código numérico do município.\
+**Data de Notificação** (nome no banco): Formato YYYY-MM-DD.
+
+#### Agregação dos Casos por município e semana
+
+Para o cálculo dos descritores epidemiológicos, é preciso agregar os casos pela resoluçao espacial desejada, nesse caso, por municípios e semana. Nesse trabalho, utilizamos semana epidemiológica. As semanas e os anos sao extraídos da coluna data de notificaçao. Importante notar que nem todos os municípios tem notificaçoes em todas as semanas. Alguns municípios brasileiros podem nao ter notificado a doença em estudo. Para resolver esse problema, uma soluçao é apresentada abaixo.
+
+#### Ano epidemiológico
+
+As doenças nao seguem o ano calendário! Por isso, é interessante, dependendo da análise, utilizar o ano epidemiológico. Antes é importante avaliar o padrao anual das doenças e observar a sua sazonalidade para decidir como será a organizaçao do ano epidemiológico. Para dengue, o ano epidemiológico começa na semana epidemiológica 41 de um ano e termina na semana 40 do ano seguinte.
+
+### Bibliotecas e funçoes
+
+```{r}
+packages <- c("tidyverse", "lubridate")
+
+invisible(install.packages(setdiff(packages, rownames(installed.packages()))))
+invisible(lapply(packages, function(pkg) suppressMessages(require(pkg, character.only = TRUE))))
+
+# Funcoes
+source("Scripts_dengue/epiYear.R")
+#source("/home/rmartins/Documents/BSC/Fundings/BeatriuPinos/Development/Analysis/doutorado_iasmim/Artigo2/Dengue/Scripts_dengue/epiYear.R")
+```
+
+### Organizaçao dos dados para o cáculo das epi-features
+
+Importando data.frame de casos de dengue notificados.\
+O banco de dados possui 22.424.738 casos de dengue notificados no período de 2010-2023.\
+
+```{r}
+load("~/GitHub/doutorado_iasmim/Artigo2/Dengue/Dados_dengue/DENV_2010_2023.RData")
+#load("/home/rmartins/Documents/BSC/Fundings/BeatriuPinos/Development/Analysis/doutorado_iasmim/Artigo2/Dengue/Dados_dengue/DENV_2010_2023.RData")
+
+head(d)
+str(d)
+names(d)
+
+```
+
+#### Agregando os casos de dengue por municipio e semana
+
+Somando por semana por ano:
+```{r}
+d <- d %>%
+  group_by(municipio_geocodigo, ano_notif, se_notif) %>%
+  summarise(casos = n()) 
+
+head(d)
+names(d)
+
+save(d, file = "Dados_dengue/DENV_2010_2023_agreg.RData")
+#save(d, file = "/home/rmartins/Documents/BSC/Fundings/BeatriuPinos/Development/Analysis/doutorado_iasmim/Artigo2/Dengue/Dados_dengue/DENV_2010_2023_agreg.RData")
+
+```
+
+## Análise Exploratória - conferindo os dados
+
+-   Quantos municipios notificaram casos?\
+    5498 municípios dos 5570 oficiais do IBGE notificaram dengue no período de estudo.\
+-   Há registro em todos os anos do período de estudo?\
+-   Para cada município, há registro em todas as semanas?\
+
+```{r}
+# Quantidade de municipios distintos
+length(unique(d$municipio_geocodigo))
+
+# Quantidade de anos distintos
+length(unique(d$ano_notif))
+
+# Quantidade de semanas com notificacao para cada municipio por ano 
+se_muni_ano <- d %>%
+  group_by(municipio_geocodigo, ano_notif) %>%
+  summarise(num_semanas = n_distinct(se_notif)) %>%
+  ungroup()
+
+# Visualizando o municipio desejado
+se_muni_ano %>% filter(municipio_geocodigo == 3304557) # exemplo RJ
+
+```
+
+#### Inserindo municipios e semanas sem notificaçao de casos
+
+Depois de organizar o banco de dados da doença estudada, é preciso inserir todos municípios ou unidades espaciais do país ou unidade a ser estudada. Além disso, é necessário inserir todas as semanas do estudo, uma vez que nem sempre há notificaçao em todas as semanas de todas as unidades espaciais.
+
+##### Gerando data.frame com todos os municípios e todas as semanas e anos de estudo
+
+Um data.frame contendo todos os municípios brasileiros e todas as semanas do estudo será gerado para facilitar a inserçao dessa informaçao dentro dos dados de notificaçao de casos de dengue. Aos municípios e semanas sem notificaçao, serao atribuídos casos notificados como zero.
+
+A planilha *br_municipios_2021.csv* contém a lista de municípios brasileiros.
+
+```{r}
+load("~/GitHub/doutorado_iasmim/Artigo2/Dengue/Dados_dengue/DENV_2010_2023_agreg.RData")
+dados <- read_csv2("Dados_dengue/BR_Municipios_2021.csv")
+#dados <- read_csv2("/home/rmartins/Documents/BSC/Fundings/BeatriuPinos/Development/Analysis/doutorado_iasmim/Artigo2/Dengue/Dados_dengue/BR_Municipios_2021.csv")
+head(dados)
+
+# Dataframe com municipios brasileiros e 53 semanas para os 14 anos de estudo
+expandido <- expand.grid(
+  municipio_geocodigo = unique(dados$CODE_MUNI_7),
+  se_notif = 1:53,
+  ano_notif = 2010:2023
+)
+
+head(expandido)
+
+# Juntando os dataframes
+d1 <- expandido %>% 
+  left_join(d) %>% 
+  rename(ano = ano_notif,
+         se = se_notif)
+
+# Inserindo os casos = 0 para municipios e semanas sem notificacao
+d1$casos <- ifelse(is.na(d1$casos), 0, d1$casos)
+d1 %>% map(~mean(is.na(.)))
+names(d1)
+
+# Conferindo total de casos para um municipio
+d1 %>%
+  filter(municipio_geocodigo == 3304557) %>% #checando RJ
+  summarise(total_casos = sum(casos)) 
+
+# Conferindo o numero de municipios distintos
+d1 %>%
+  distinct(municipio_geocodigo) %>%
+  nrow() #5570
+
+```
+
+
+#### Cálculo do ano epidemiológico (ano_e)
+
+O ano epidemiológico é um período de 12 meses utilizado para monitorar doenças, começando em uma semana específica para melhor alinhamento com os ciclos sazonais. Para a dengue, neste estudo, o ano epidemiológico inicia na semana 41 e termina na semana 40 do ano seguinte, correspondendo ao mês de setembro no calendário anual.
+
+Para criar o ano epidemiológico, foi usada a funçao epiYear encontrada no arquivo *epiYear.R*. O arquivo foi carregado na sessao Bibliotecas e funçoes.
+
+##### Variável se_notific
+
+A funçao epiYear precisa de uma variável que tenha o ano e a semana nesse formato: 201302 (ano 2013 e semana 02).
+```{r}
+d1 <- d1 %>%
+  mutate(ano_se = paste0(ano, sprintf("%02d", se)))
+
+```
+
+Caso seja necessário adaptar o ano epidemiológico de acordo com a doença a ser estudada, é preciso alterar no arquivo epiYear.R.
+
+Se for adaptar algum descritor para outra doença e for necessária alterar parâmetros, deve-se fazer direito em epiYear.
+```{=html}
+Depois, acho importante tentarmos melhorar aqui, fazendo com que a funçao fique geral de forma que o parametro possa ser mudado nesse arquivo e nao tenhamos que alterar nada em epiYear. -->
+```
+
+##### Ano epidemiologico
+
+```{r}
+names(d1)
+class(d1$ano_se)
+
+d1 <- d1 %>%
+  mutate(ano_se = as.numeric(ano_se)) %>% 
+  mutate(ano_e = epiYear(ano_se)$eyear,
+         se_e = epiYear(ano_se)$week2,
+         casos = replace_na(casos, 0))
+
+#Excluindo ano epidemiologico acima de 2023 e abaixo de 2010 e semana epidemiologica 53
+names(d1)
+d1 <- d1 %>%
+  filter(se_e != 53, !(ano_e %in% c(2023, 2009)))
+
+summary(d1)
+
+save(d1, file = "Tabelas_dengue/todos_anos.RData")
+#save(d1, file = "/home/rmartins/Documents/BSC/Fundings/BeatriuPinos/Development/Analysis/doutorado_iasmim/Artigo2/Dengue/Tabelas_dengue/todos_anos.RData")
+```
+
+#### População
+
+Adicionando o tamanho populacional de cada município para calcular descritor incidência por 100 mil hab. Foi utilizada uma população projetada pelo Tribunal de Contas da Uniao (TCU) do Brasil do meio do periodo em estudo, o ano de 2017.
+```{r}
+pop <- read_csv2("Dados_dengue/pop2017.csv") %>% 
+  rename(municipio_geocodigo = CODE_MUNI_7)
+#pop <- read_csv2("/home/rmartins/Documents/BSC/Fundings/BeatriuPinos/Development/Analysis/doutorado_iasmim/Artigo2/Dengue/Dados_dengue/pop2017.csv") %>% 
+ # rename(municipio_geocodigo = CODE_MUNI_7)
+names(pop)
+
+d1 <- left_join(d1, pop)
+head(d1)
+
+# Banco para descritores
+save(d1, file = "Tabelas_dengue/pre_desc.RData")
+#save(d1, file = "/home/rmartins/Documents/BSC/Fundings/BeatriuPinos/Development/Analysis/doutorado_iasmim/Artigo2/Dengue/Tabelas_dengue/pre_desc.RData")
+
+```
+
+## EPI-FEATURES
+
+Após preparar os dados, executar o código abaixo para extrair os descritores epidemiológicos. Alguns parâmetros devem ser adequados para cada doença. Para dengue, utilizamos o *default* abaixo. A tabela 2 informa o que cada descritor fornece e os parâmetros necessários.
+
+```{=html}
+ADICIONAR AQUI A TABELA QUE TEM NA TESE, ADAPTANDO O QUE MUDOU:
+```
+
+```{r}
+load ("Tabelas_dengue/2010-2022/pre_desc.RData")
+d1 %>% map(~mean(is.na(.)))
+
+d2 <- d1 %>% 
+  group_by(municipio_geocodigo, ano_e) %>%
+  summarize(Xp = max(casos),
+            Tp = se_e[which(casos == max(casos))[1]],
+            Dc3 = sum (semanas_consec(casos, v = 5) >= 3),
+            Dc6 = sum(semanas_consec(casos, v = 5) >= 6),
+            Dcmax = max(0, max(semanas_consec(casos, v = 5))),
+            Dcmed = ifelse(Dcmax == 0, 0, median(semanas_consec(casos, v = 5))),
+            Dci = ifelse(Dcmax == 0, 0, sum(semanas_consec(casos, v = 5) == 1)), 
+            Ds3 = sum(semanas_consec0(casos) >= 3), 
+            Ds6 = sum(semanas_consec0(casos) >= 6), 
+            Dsmax = max(0, semanas_consec0(casos)),  
+            Dsmed = ifelse(Dsmax == 0, 0, median(semanas_consec0(casos))),
+            Inc = sum(casos) / mean(populacao) * 100000,
+            P = sum(casos >= 5)
+            ) 
+summary(d2)
+
+write.csv2 (d2, file = "Tabelas_dengue/2010-2022/desc_sem_ST.csv", row.names = F)
+#write.csv (d2, file = "/home/rmartins/Documents/BSC/Fundings/BeatriuPinos/Development/Analysis/doutorado_iasmim/Artigo2/Dengue/Tabelas_dengue/desc_sem_ST.csv", row.names = F)
+
+```
+
+### Inserindo Descritor ST
+
+#### Descritor de tendência e sazonalidade
+
+O descritor ST, que tem o objetivo de extrair medidas relacionadas á tendência e sazonalidade pode ser observado no script *decomposicao_st_dengue.Rmd*. Antes de executar as próximas linhas, é preciso executar esse script para calcular p descritor ST.
+
+##### Unindo as tabelas desc e ST para ter todos os descritores.
+
+A tabela *desc_br.csv* possui todos os descritores.
+```{r}
+st <- read.csv("Tabelas_dengue/2010-2022/desc_ST.csv") %>%
+  select(1, 2, 5)
+head(st)
+  
+# Importando descritores se nao rodar o codigo todo novamente.
+d2 <- read.csv2("Tabelas_dengue/2010-2022/desc_sem_ST.csv")
+
+# Unindo os descritores
+d2 <- d2 %>% 
+  left_join(st)
+
+# Arredondando as variC!veis Inc e ST para duas casas decimais
+d2$Inc <- round(d2$Inc, 2)
+d2$ST <- round(d2$ST, 2)
+
+#Verificando NA
+aNA <- d2 %>% map(~mean(is.na(.)))
+
+```
+
+#### Inserçao de nomes e siglas
+
+Inserindo nome dos municípios, geocódigo, nome e sigla dos estados e código das regioes.
+
+Variáveis da tabela **dados**:
+
+| Nome        | Significado                       |
+|-------------|-----------------------------------|
+| CODE_MUNI_7 | código do município com 7 dígitos |
+| CODE_MUNI   | código do município com 6 dígitos |
+| MUNI_NAME   | nome do município                 |
+| UF_CODE     | código do UF                      |
+| UF_ACR      | Sigla do UF                       |
+| UF_NAME     | Nome do UF                        |
+| REGION      | número da região                  |
+
+
+```{r}
+
+# Fazer o join dos dataframes com base nas colunas especificadas
+d2 <- d2 %>% 
+  left_join(dados, by = c("municipio_geocodigo" = "CODE_MUNI_7"))
+
+names(d2)
+
+# Padronizando os nomes das colunas e reordenando
+d2 <- d2 %>% 
+  rename_with(str_to_lower)
+
+# Gerando tabela dos descritores
+write.csv2(d2, file = "Tabelas_dengue/2010-2022/desc_Br.csv", row.names = F)
+#write.csv(d2, file = "/home/rmartins/Documents/BSC/Fundings/BeatriuPinos/Development/Analysis/doutorado_iasmim/Artigo2/Dengue/Tabelas_dengue/desc_Br.csv", row.names = F)
+
+```
+

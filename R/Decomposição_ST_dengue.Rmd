@@ -1,0 +1,71 @@
+---
+title: "Decomposição de série temporal e descritor ST"
+author: "Iasmim, Raquel e Cláudia"
+date: "22/01/2024"
+output: html_document
+editor_options: 
+  chunk_output_type: console
+---
+
+Script para construção da Epi-feature ST, referenciada em  Almeida, Lana e Codeço 2022.
+
+### Biblioteca e funçoes
+
+```{r, message = FALSE, warning = FALSE}
+package <- c("tidyverse", "lubridate", "seasonal", "tseries")
+
+invisible(install.packages(setdiff(packages, rownames(installed.packages()))))
+invisible(lapply(packages, function(pkg) suppressMessages(require(pkg, character.only = TRUE))))
+
+# Funções
+#source("Scripts_dengue/epiYear.R")
+source("/home/rmartins/Documents/BSC/Fundings/BeatriuPinos/Development/Analysis/doutorado_iasmim/Artigo2/Dengue/Scripts_dengue/epiYear.R")
+```
+
+#### Importando o banco de dados
+```{r, message = FALSE, warning = FALSE, results =  FALSE}
+#load("Tabelas_dengue/todos_anos.RData")
+load("/home/rmartins/Documents/BSC/Fundings/BeatriuPinos/Development/Analysis/doutorado_iasmim/Artigo2/Dengue/Tabelas_dengue/todos_anos.RData")
+head(d1)
+
+```
+
+### Decomposição de séries temporais  
+
+Decomposição das séries temporais de cada município e extração de medidas de tendência e sazonalidade.
+```{r}
+res <- data.frame()   #data.frame vazio
+mun <- unique(d1$municipio_geocodigo) # relacao de municipios
+nmun <- length(mun)  # numero de municipios
+
+for(m in mun){  # para cada municipio em mun
+  dd <- subset(d1, municipio_geocodigo == m) 
+  ts1 <- ts(dd$casos, start = c(2010, 1), freq = 52)
+  decomposicao.mult0 <- decompose(ts1, type = "multiplicative")
+  
+  # Extraindo as medidas de decompose 
+  dd$trend <- decomposicao.mult0$trend
+  dd$sas <- decomposicao.mult0$seasonal 
+  res <- bind_rows(res, dd)
+}
+head(res)
+
+```
+
+### Descritor ST
+
+```{r}
+amplitude <- res %>%
+  mutate(casos = replace_na(casos, 0)) %>%
+  group_by(municipio_geocodigo, ano_e) %>%
+  arrange(se_e) %>%
+    summarize(ampsas = max(sas, na.rm = TRUE) - min(sas, na.rm = TRUE),
+              amptrend = max(trend, na.rm = TRUE) - min(trend, na.rm = TRUE)) %>% 
+  mutate(ST = amptrend / ampsas )
+
+
+#write.csv2(amplitude, file = "Tabelas_dengue/desc_ST.csv", row.names = F)
+write.csv(amplitude, file = "/home/rmartins/Documents/BSC/Fundings/BeatriuPinos/Development/Analysis/doutorado_iasmim/Artigo2/Dengue/Tabelas_dengue/desc_ST.csv", row.names = F)
+
+```
+
