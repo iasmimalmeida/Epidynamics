@@ -1,0 +1,349 @@
+---
+title: "Figure 4. Dengue transmission patterns in Brazil"
+format:
+  html:
+    toc: true
+    toc-depth: 2
+    code-fold: false
+    theme: cosmo
+editor: visual
+execute:
+  warning: false
+  message: false
+editor_options:
+  chunk_output_type: console
+---
+
+## Objective
+
+This script creates a two-panel map of dengue transmission patterns in Brazil for two periods:
+
+- **A - 2010–2016**
+- **B - 2017–2022**
+
+This version was simplified to avoid geometry artifacts. It uses the **municipal mesh only for the colored areas** and overlays **clean state boundaries** from `geobr`. Municipal border lines are removed. The final figure uses **one shared horizontal legend**.
+
+## Packages
+
+```{r}
+# Install if needed:
+# install.packages(c("sf", "dplyr", "readr", "ggplot2", "patchwork", "stringr", "grid", "geobr"))
+
+library(sf)
+library(dplyr)
+library(readr)
+library(ggplot2)
+library(patchwork)
+library(stringr)
+library(grid)
+library(geobr)
+```
+
+## Helper function to find files
+
+```{r}
+find_file <- function(candidates) {
+  found <- candidates[file.exists(candidates)]
+  
+  if (length(found) == 0) {
+    stop(
+      "File not found. I tried these paths:\n",
+      paste(candidates, collapse = "\n")
+    )
+  }
+  
+  found[1]
+}
+
+file_10_16 <- find_file(c(
+  "table/2010-2016/dengue_pattern_10_16.csv",
+  "tables/2010-2016/dengue_pattern_10_16.csv",
+  "Tabelas_dengue/2010-2016/dengue_pattern_10_16.csv",
+  "../table/2010-2016/dengue_pattern_10_16.csv",
+  "../tables/2010-2016/dengue_pattern_10_16.csv",
+  "../Tabelas_dengue/2010-2016/dengue_pattern_10_16.csv"
+))
+
+file_17_22 <- find_file(c(
+  "table/2017-2022/dengue_pattern_17_22.csv",
+  "tables/2017-2022/dengue_pattern_17_22.csv",
+  "Tabelas_dengue/2017-2022/dengue_pattern_17_22.csv",
+  "../table/2017-2022/dengue_pattern_17_22.csv",
+  "../tables/2017-2022/dengue_pattern_17_22.csv",
+  "../Tabelas_dengue/2017-2022/dengue_pattern_17_22.csv"
+))
+
+file_10_16
+file_17_22
+```
+
+## Read municipal and state meshes
+
+`geobr` is used here to obtain clean geometries and avoid the visual artifacts that appeared before.
+
+```{r}
+municipalities <- read_municipality(code_muni = "all", year = 2020, simplified = TRUE)
+states_br <- read_state(code_state = "all", year = 2020, simplified = TRUE)
+
+municipalities <- municipalities %>%
+  mutate(code_muni = as.numeric(code_muni))
+```
+
+## Read dengue pattern tables
+
+```{r}
+padrao_10_16 <- read_csv2(file_10_16) %>%
+  mutate(
+    muni_code = as.numeric(muni_code),
+    dengue_pattern = as.character(dengue_pattern)
+  )
+
+padrao_17_22 <- read_csv2(file_17_22) %>%
+  mutate(
+    muni_code = as.numeric(muni_code),
+    dengue_pattern = as.character(dengue_pattern)
+  )
+```
+
+## Join pattern tables to municipalities
+
+```{r}
+mapa_10_16 <- municipalities %>%
+  left_join(padrao_10_16, by = c("code_muni" = "muni_code"))
+
+mapa_17_22 <- municipalities %>%
+  left_join(padrao_17_22, by = c("code_muni" = "muni_code"))
+```
+
+## Translate and order classes
+
+```{r}
+translate_pattern <- function(x) {
+  x <- str_trim(x)
+  
+  case_when(
+    x %in% c(
+      "Transmissão Persistente",
+      "Transmissao Persistente",
+      "transmissão persistente",
+      "transmissao persistente"
+    ) ~ "Persistent transmission",
+    
+    x %in% c(
+      "Epidêmico",
+      "Epidemico",
+      "epidêmico",
+      "epidemico"
+    ) ~ "Epidemic",
+    
+    x %in% c(
+      "Episódico/Epidêmico",
+      "Episodico/Epidemico",
+      "episódico/epidêmico",
+      "episodico/epidemico"
+    ) ~ "Episodic/Epidemic",
+    
+    x %in% c(
+      "Episódico",
+      "Episodico",
+      "episódico",
+      "episodico"
+    ) ~ "Episodic",
+    
+    x %in% c(
+      "Sem transmissão",
+      "Sem transmissao",
+      "sem transmissão",
+      "sem transmissao",
+      "Sem detecção de transmissão",
+      "Sem deteccao de transmissao",
+      "sem detecção de transmissão",
+      "sem deteccao de transmissao"
+    ) ~ "No transmission",
+    
+    TRUE ~ NA_character_
+  )
+}
+
+legend_order <- c(
+  "Persistent transmission",
+  "Epidemic",
+  "Episodic/Epidemic",
+  "Episodic",
+  "No transmission"
+)
+
+mapa_10_16 <- mapa_10_16 %>%
+  mutate(pattern_en = factor(translate_pattern(dengue_pattern), levels = legend_order))
+
+mapa_17_22 <- mapa_17_22 %>%
+  mutate(pattern_en = factor(translate_pattern(dengue_pattern), levels = legend_order))
+```
+
+## Colors
+
+```{r}
+pattern_colors <- c(
+  "Persistent transmission" = "#F4C430",
+  "Epidemic" = "#F6E58D",
+  "Episodic/Epidemic" = "#2E86C1",
+  "Episodic" = "#76D7C4",
+  "No transmission" = "#6E6E6E"
+)
+```
+
+## Common theme
+
+```{r}
+map_theme <- theme_void() +
+  theme(
+    plot.background = element_rect(fill = "transparent", color = NA),
+    panel.background = element_rect(fill = "transparent", color = NA),
+    legend.background = element_rect(fill = "transparent", color = NA),
+    legend.box.background = element_rect(fill = "transparent", color = NA),
+    plot.title = element_text(size = 15, face = "bold", hjust = 0.5),
+    legend.title = element_text(size = 10, face = "bold"),
+    legend.text = element_text(size = 8),
+    legend.position = "bottom"
+  )
+```
+
+## Manual north arrow
+
+```{r}
+make_north_arrow <- function(bbox) {
+  x <- bbox["xmax"] - 4.0
+  y <- bbox["ymax"] - 3.5
+  
+  list(
+    annotate(
+      "segment",
+      x = x, xend = x,
+      y = y - 1.0, yend = y + 0.4,
+      arrow = arrow(length = unit(0.22, "cm"), type = "closed"),
+      linewidth = 0.5,
+      color = "black"
+    ),
+    annotate(
+      "text",
+      x = x,
+      y = y + 0.8,
+      label = "N",
+      fontface = "bold",
+      size = 4
+    )
+  )
+}
+
+bbox_br <- st_bbox(states_br)
+north_arrow <- make_north_arrow(bbox_br)
+```
+
+## Shared fill scale
+
+Using the same scale object in both panels helps patchwork collect **one single legend**.
+
+```{r}
+fill_scale <- scale_fill_manual(
+  values = pattern_colors,
+  breaks = legend_order,
+  drop = FALSE,
+  na.value = "white",
+  name = "Transmission pattern"
+)
+```
+
+## Panel A
+
+```{r}
+map_10_16_plot <- ggplot() +
+  geom_sf(
+    data = mapa_10_16,
+    aes(fill = pattern_en),
+    color = NA,
+    linewidth = 0
+  ) +
+  geom_sf(
+    data = states_br,
+    fill = NA,
+    color = "black",
+    linewidth = 0.30
+  ) +
+  north_arrow +
+  fill_scale +
+  labs(title = "A - 2010–2016") +
+  guides(fill = guide_legend(nrow = 1, byrow = TRUE)) +
+  coord_sf(expand = FALSE) +
+  map_theme
+```
+
+## Panel B
+
+```{r}
+map_17_22_plot <- ggplot() +
+  geom_sf(
+    data = mapa_17_22,
+    aes(fill = pattern_en),
+    color = NA,
+    linewidth = 0
+  ) +
+  geom_sf(
+    data = states_br,
+    fill = NA,
+    color = "black",
+    linewidth = 0.30
+  ) +
+  north_arrow +
+  fill_scale +
+  labs(title = "B - 2017–2022") +
+  guides(fill = guide_legend(nrow = 1, byrow = TRUE)) +
+  coord_sf(expand = FALSE) +
+  map_theme
+```
+
+## Combine maps with one shared legend
+
+```{r, fig-width=16, fig-height=8}
+Fig4 <- map_10_16_plot + map_17_22_plot +
+  plot_layout(ncol = 2, guides = "collect") &
+  theme(
+    legend.position = "bottom",
+    legend.direction = "horizontal",
+    legend.title = element_text(size = 10, face = "bold"),
+    legend.text = element_text(size = 8)
+  )
+
+Fig4
+```
+
+## Save figure
+
+```{r}
+dir.create("figures", recursive = TRUE, showWarnings = FALSE)
+
+ggsave(
+  "figures/Fig4.png",
+  plot = Fig4,
+  width = 16,
+  height = 8,
+  units = "in",
+  dpi = 300,
+  bg = "white"
+)
+
+ggsave(
+  "figures/Fig4.tiff",
+  plot = Fig4,
+  width = 16,
+  height = 8,
+  units = "in",
+  dpi = 600,
+  device = "tiff",
+  compression = "lzw",
+  bg = "white"
+)
+```
+
+## Suggested caption
+
+**Fig. 4. Classification of Brazilian municipalities according to dengue transmission patterns.** A: 2010–2016. B: 2017–2022.
